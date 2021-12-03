@@ -94,8 +94,8 @@ module ActiveDryForm
       @params =
         if params_form
           params_form[self.class::NAMESPACE.param_key]
-            .each_value { |v| v.strip! if v.is_a?(String) }
             .to_h.symbolize_keys
+            .transform_values! { |v| v.is_a?(String) ? v.strip.presence : v  }
         elsif params_init
           params_init.to_h.symbolize_keys
         else
