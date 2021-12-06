@@ -19,9 +19,52 @@ module ActiveDryForm
       const_set :CURRENT_CONTRACT, Class.new(ContractBase, &block).new
       const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.info[:keys]
 
-      self::FIELDS_INFO.each_key do |key|
-        define_method key do
-          @params[key] || @record.try(key)
+      self::FIELDS_INFO.each do |key, value|
+        if value[:keys]
+          sub_klass = Class.new do
+            const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, key.to_s)
+            const_set :FIELDS_INFO, value[:keys]
+
+            def initialize(params, record, errors)
+              @params = params || {}
+              @record = record
+              @errors = errors || {}
+            end
+
+            self::FIELDS_INFO.each_key do |sub_key|
+              define_method sub_key do
+                @params[sub_key] || @record.try(sub_key)
+              end
+
+              def model_name
+                self.class::NAMESPACE
+              end
+
+              def info(sub_key)
+                self.class::FIELDS_INFO[sub_key]
+              end
+
+              # ActionView::Helpers::Tags::Translator#human_attribute_name
+              def to_model
+                self
+              end
+
+              def self.human_attribute_name(field)
+                I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
+              end
+
+              def errors
+                @errors
+              end
+            end
+          end
+          define_method key do
+            sub_klass.new(@params[key], @record.try(key), errors[key])
+          end
+        else
+          define_method key do
+            @params[key] || @record.try(key)
+          end
         end
       end
     end
@@ -94,8 +137,8 @@ module ActiveDryForm
       @params =
         if params_form
           params_form[self.class::NAMESPACE.param_key]
-            .to_h.symbolize_keys
-            .transform_values! { |v| v.is_a?(String) ? v.strip.presence : v  }
+            .to_h.deep_symbolize_keys
+            .deep_transform_values! { |v| v.is_a?(String) ? v.strip.presence : v  }
         elsif params_init
           params_init.to_h.symbolize_keys
         else
@@ -141,7 +184,7 @@ module ActiveDryForm
     end
 
     def errors
-      @errors ||= @validator&.errors&.to_h || {}
+      @errors ||= @validator ? @validator.errors.to_h : {}
     end
 
     def view_component

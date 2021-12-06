@@ -64,6 +64,10 @@ module ActiveDryForm
       options[:class] = [options[:class], 'button'].compact
       super(value, options, &block)
     end
+    
+    def fields_for(record_name, &block)
+      super(@object.send(record_name), &block)
+    end
 
   end
 end
