@@ -60,6 +60,10 @@ module ActiveDryForm
       end
     end
 
+    def show_error(method)
+      ActiveDryForm::Input.new(self, __method__, method, {}).error_text
+    end
+
     def button(value = nil, options = {}, &block) # rubocop:disable Gp/OptArgParameters
       options[:class] = [options[:class], 'button'].compact
       super(value, options, &block)

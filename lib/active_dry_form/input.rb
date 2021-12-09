@@ -56,7 +56,13 @@ module ActiveDryForm
     def error_text
       return unless error?(@method)
 
-      @builder.tag.div @builder.object.errors[@method].join('<br />'), class: 'form-error is-visible'
+      obj_error_text =
+        case e = @builder.object.errors[@method]
+        when Hash then e.values
+        else e
+        end
+
+      @builder.tag.div obj_error_text.join('<br />'), class: 'form-error is-visible'
     end
 
     def error?(method)
