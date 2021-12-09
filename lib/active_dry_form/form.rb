@@ -136,11 +136,9 @@ module ActiveDryForm
     def initialize(record: nil, params_form: nil, params_init: nil)
       @params =
         if params_form
-          params_form[self.class::NAMESPACE.param_key]
-            .to_h.deep_symbolize_keys
-            .deep_transform_values! { |v| v.is_a?(String) ? v.strip.presence : v  }
+          _deep_transform_values_in_params!(params_form[self.class::NAMESPACE.param_key].to_h.deep_transform_keys!(&:to_sym))
         elsif params_init
-          params_init.to_h.symbolize_keys
+          params_init.to_h.deep_transform_keys!(&:to_sym)
         else
           {}
         end
@@ -189,6 +187,22 @@ module ActiveDryForm
 
     def view_component
       self.class.module_parent::Component.new(self)
+    end
+
+    private def _deep_transform_values_in_params!(object)
+      case object
+      when String
+        object.strip!
+        object.presence
+      when Hash
+        object.transform_values! { |value| _deep_transform_values_in_params!(value) }
+      when Array
+        object.map! { |e| _deep_transform_values_in_params!(e) }
+        object.compact!
+        object
+      else
+        object
+      end
     end
 
   end
