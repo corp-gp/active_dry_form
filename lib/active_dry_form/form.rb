@@ -134,11 +134,14 @@ module ActiveDryForm
     attr_reader :base_errors, :record
 
     def initialize(record: nil, params_form: nil, params_init: nil)
+      raise 'in `params_form` use `request.parameters` instead of `params`' if params_form.is_a?(::ActionController::Parameters)
+      raise 'in `params_init` use `request.parameters` instead of `params`' if params_init.is_a?(::ActionController::Parameters)
+
       @params =
         if params_form
-          _deep_transform_values_in_params!(params_form[self.class::NAMESPACE.param_key].to_h.deep_transform_keys!(&:to_sym))
+          _deep_transform_values_in_params!(params_form[self.class::NAMESPACE.param_key].deep_transform_keys!(&:to_sym))
         elsif params_init
-          params_init.to_h.deep_transform_keys!(&:to_sym)
+          params_init.deep_transform_keys!(&:to_sym)
         else
           {}
         end
