@@ -195,8 +195,7 @@ module ActiveDryForm
     private def _deep_transform_values_in_params!(object)
       case object
       when String
-        object.strip!
-        object.presence
+        object.strip.presence
       when Hash
         object.transform_values! { |value| _deep_transform_values_in_params!(value) }
       when Array
