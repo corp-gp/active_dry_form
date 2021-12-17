@@ -68,9 +68,16 @@ module ActiveDryForm
       options[:class] = [options[:class], 'button'].compact
       super(value, options, &block)
     end
-    
-    def fields_for(record_name, &block)
-      super(@object.send(record_name), &block)
+
+    def nested_attributes_association?(association_name)
+      return unless @object.respond_to?(association_name)
+
+      nested_association = @object.public_send(association_name)
+      if nested_association.is_a?(Array)
+        nested_association[0].is_a?(ActiveDryForm::BaseForm)
+      else
+        nested_association.is_a?(ActiveDryForm::BaseForm)
+      end
     end
 
   end

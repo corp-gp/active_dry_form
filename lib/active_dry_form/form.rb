@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveDryForm
-  class Form
+  class Form < BaseForm
 
     include Dry::Monads[:result]
     Dry::Schema.load_extensions(:info)
@@ -19,54 +19,7 @@ module ActiveDryForm
       const_set :CURRENT_CONTRACT, Class.new(ContractBase, &block).new
       const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.info[:keys]
 
-      self::FIELDS_INFO.each do |key, value|
-        if value[:keys]
-          sub_klass = Class.new do
-            const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, key.to_s)
-            const_set :FIELDS_INFO, value[:keys]
-
-            def initialize(params, record, errors)
-              @params = params || {}
-              @record = record
-              @errors = errors || {}
-            end
-
-            self::FIELDS_INFO.each_key do |sub_key|
-              define_method sub_key do
-                @params[sub_key] || @record.try(sub_key)
-              end
-
-              def model_name
-                self.class::NAMESPACE
-              end
-
-              def info(sub_key)
-                self.class::FIELDS_INFO[sub_key]
-              end
-
-              # ActionView::Helpers::Tags::Translator#human_attribute_name
-              def to_model
-                self
-              end
-
-              def self.human_attribute_name(field)
-                I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
-              end
-
-              def errors
-                @errors
-              end
-            end
-          end
-          define_method key do
-            sub_klass.new(@params[key], @record.try(key), errors[key])
-          end
-        else
-          define_method key do
-            @params[key] || @record.try(key)
-          end
-        end
-      end
+      define_methods
     end
 
     def self.default(method)
@@ -131,7 +84,7 @@ module ActiveDryForm
       RUBY
     end
 
-    attr_reader :base_errors, :record
+    attr_reader :base_errors
 
     def initialize(record: nil, params_form: nil, params_init: nil)
       raise 'in `params_form` use `request.parameters` instead of `params`' if params_form.is_a?(::ActionController::Parameters)
@@ -139,7 +92,9 @@ module ActiveDryForm
 
       @params =
         if params_form
-          _deep_transform_values_in_params!(params_form[self.class::NAMESPACE.param_key].deep_transform_keys!(&:to_sym))
+          _deep_transform_values_in_params!(
+            params_form[self.class::NAMESPACE.param_key].deep_transform_keys! { _1.to_s.sub(/_attributes$/, '').to_sym }
+          )
         elsif params_init
           params_init.deep_transform_keys!(&:to_sym)
         else
@@ -147,37 +102,6 @@ module ActiveDryForm
         end
 
       @record = record if record
-    end
-
-    def info(key)
-      self.class::FIELDS_INFO[key]
-    end
-
-    def model_name
-      self.class::NAMESPACE
-    end
-
-    # ActionView::Helpers::Tags::Translator#human_attribute_name
-    def to_model
-      self
-    end
-
-    def self.human_attribute_name(field)
-      I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
-    end
-
-    def persisted?
-      @record&.persisted?
-    end
-
-    def to_key
-      key = @record&.id
-      [key] if key
-    end
-
-    # используется при генерации URL, когда record.persisted?
-    def to_param
-      @record.id.to_s
     end
 
     def validator
