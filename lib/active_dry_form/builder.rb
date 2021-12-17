@@ -74,9 +74,9 @@ module ActiveDryForm
 
       nested_association = @object.public_send(association_name)
       if nested_association.is_a?(Array)
-        nested_association[0].is_a?(ActiveDryForm::BaseForm)
+        nested_association[0].is_a?(BaseForm)
       else
-        nested_association.is_a?(ActiveDryForm::BaseForm)
+        nested_association.is_a?(BaseForm)
       end
     end
 
