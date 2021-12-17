@@ -69,14 +69,23 @@ module ActiveDryForm
       super(value, options, &block)
     end
 
-    def nested_attributes_association?(association_name)
-      return unless @object.respond_to?(association_name)
+    def fields_for(association_name, fields_options = {}, &block)
+      fields_options[:builder] ||= options[:builder]
+      fields_options[:namespace] = options[:namespace]
+      fields_options[:parent_builder] = self
 
-      nested_association = @object.public_send(association_name)
-      if nested_association.is_a?(Array)
-        nested_association[0].is_a?(BaseForm)
-      else
-        nested_association.is_a?(BaseForm)
+      association = @object.public_send(association_name)
+
+      if association.is_a?(BaseForm)
+        fields_for_nested_model("#{@object_name}[#{association_name}]", association, fields_options, block)
+      elsif association.respond_to?(:to_ary)
+        field_name_regexp = Regexp.new(Regexp.escape("#{@object_name}[#{association_name}][") << '\d+\]') # хак для замены хеша на массив
+        output = ActiveSupport::SafeBuffer.new
+        Array.wrap(association).each do |child|
+          output << fields_for_nested_model("#{@object_name}[#{association_name}][]", child, fields_options, block)
+            .gsub(field_name_regexp, "#{@object_name}[#{association_name}][]").html_safe
+        end
+        output
       end
     end
 

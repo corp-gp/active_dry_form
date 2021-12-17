@@ -92,9 +92,7 @@ module ActiveDryForm
 
       @params =
         if params_form
-          _deep_transform_values_in_params!(
-            params_form[self.class::NAMESPACE.param_key].deep_transform_keys! { _1.to_s.sub(/_attributes$/, '').to_sym }
-          )
+          _deep_transform_values_in_params!(params_form[self.class::NAMESPACE.param_key].deep_transform_keys!(&:to_sym))
         elsif params_init
           params_init.deep_transform_keys!(&:to_sym)
         else
