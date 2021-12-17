@@ -33,6 +33,11 @@ module ActiveDryForm
       [key] if key
     end
 
+    # hidden field for nested association
+    def id
+      record&.id
+    end
+
     # используется при генерации URL, когда record.persisted?
     def to_param
       record.id.to_s
