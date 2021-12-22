@@ -95,6 +95,7 @@ module ActiveDryForm
           params_form.deep_transform_keys!(&:to_sym)
           param_key = self.class::NAMESPACE.param_key.to_sym
           raise "missing param '#{param_key}' in `params_form`" unless params_form.key?(param_key)
+
           _deep_transform_values_in_params!(params_form[param_key])
         elsif params_init
           params_init.deep_transform_keys!(&:to_sym)
