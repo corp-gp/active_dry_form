@@ -12,7 +12,7 @@ PATH
   remote: .
   specs:
     active_dry_form (0.1.0)
-      actionview
+      actionpack
       activerecord
       dry-monads
       dry-validation
@@ -20,6 +20,13 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    actionpack (7.0.0)
+      actionview (= 7.0.0)
+      activesupport (= 7.0.0)
+      rack (~> 2.0, >= 2.2.0)
+      rack-test (>= 0.6.3)
+      rails-dom-testing (~> 2.0)
+      rails-html-sanitizer (~> 1.0, >= 1.2.0)
     actionview (7.0.0)
       activesupport (= 7.0.0)
       builder (~> 3.1)
@@ -90,6 +97,8 @@ GEM
       ast (~> 2.4.1)
     racc (1.6.0)
     rack (2.2.3)
+    rack-test (1.1.0)
+      rack (>= 1.0, < 3)
     rails-dom-testing (2.0.3)
       activesupport (>= 4.2.0)
       nokogiri (>= 1.6)

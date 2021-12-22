@@ -40,5 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "dry-validation"
   spec.add_dependency "dry-monads"
   spec.add_dependency "activerecord"
-  spec.add_dependency "actionview"
+  spec.add_dependency "actionpack"
 end
