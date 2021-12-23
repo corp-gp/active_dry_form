@@ -11,6 +11,10 @@ module ActiveDryForm
       @method = method
 
       info = builder.object.info(method)
+      if info.nil?
+        raise ArgumentError, "Field #{method} is not found. Check form definition"
+      end
+
       @input_type = info[:type]
       @required = info[:required]
 

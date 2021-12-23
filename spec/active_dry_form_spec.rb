@@ -3,6 +3,7 @@
 require_relative 'app/user'
 require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
+require_relative 'app/base_validation_form'
 require_relative 'app/default_create_form'
 
 RSpec.describe ActiveDryForm do
@@ -47,6 +48,14 @@ RSpec.describe ActiveDryForm do
       form = CustomValidationForm.new(record: user, params_form: { user: { name: 'Maria' } })
       form.update
       expect(form.errors).to eq(name: ['Иван не может стать Марией'])
+    end
+  end
+
+  context 'when base validation fails' do
+    it 'returns validation errors' do
+      form = BaseValidationForm.new(record: user, params_form: { user: { name: 'Maria' } })
+      form.update
+      expect(form.errors).to eq(nil => ['user is read only'])
     end
   end
 

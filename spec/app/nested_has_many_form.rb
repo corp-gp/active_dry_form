@@ -5,13 +5,14 @@ class NestedHasManyForm < ActiveDryForm::Form
   BOOKMARK =
     Dry::Schema.Params do
       required(:url).filled(:string)
+      optional(:id).maybe(:integer)
       optional(:name).maybe(:string)
     end
 
   fields(:user) do
     params do
       optional(:name).maybe(:string)
-      required(:bookmarks).maybe(Dry::Types['array'].of(BOOKMARK))
+      required(:bookmarks).filled(Dry::Types['array'].of(BOOKMARK))
     end
   end
 

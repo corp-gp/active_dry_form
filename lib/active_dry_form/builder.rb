@@ -3,6 +3,9 @@
 module ActiveDryForm
   class Builder < ActionView::Helpers::FormBuilder
 
+    include ActionView::Helpers::TagHelper
+    include ActionView::Context
+
     def input(method, options = {})
       dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
 
