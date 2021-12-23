@@ -3,6 +3,9 @@
 module ActiveDryForm
   class Builder < ActionView::Helpers::FormBuilder
 
+    include ActionView::Helpers::TagHelper
+    include ActionView::Context
+
     def input(method, options = {})
       dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
 
@@ -68,9 +71,25 @@ module ActiveDryForm
       options[:class] = [options[:class], 'button'].compact
       super(value, options, &block)
     end
-    
-    def fields_for(record_name, &block)
-      super(@object.send(record_name), &block)
+
+    def fields_for(association_name, fields_options = {}, &block)
+      fields_options[:builder] ||= options[:builder]
+      fields_options[:namespace] = options[:namespace]
+      fields_options[:parent_builder] = self
+
+      association = @object.public_send(association_name)
+
+      if association.is_a?(BaseForm)
+        fields_for_nested_model("#{@object_name}[#{association_name}]", association, fields_options, block)
+      elsif association.respond_to?(:to_ary)
+        field_name_regexp = Regexp.new(Regexp.escape("#{@object_name}[#{association_name}][") << '\d+\]') # хак для замены хеша на массив
+        output = ActiveSupport::SafeBuffer.new
+        Array.wrap(association).each do |child|
+          output << fields_for_nested_model("#{@object_name}[#{association_name}][]", child, fields_options, block)
+            .gsub(field_name_regexp, "#{@object_name}[#{association_name}][]").html_safe
+        end
+        output
+      end
     end
 
   end
