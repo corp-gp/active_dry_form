@@ -1,13 +1,31 @@
 # frozen_string_literal: true
 
-require_relative 'support/user_form'
-require_relative 'support/user'
+require_relative 'app/user'
+require_relative 'app/user_form'
+require_relative 'app/custom_validation_form'
+require_relative 'app/default_create_form'
 
 RSpec.describe ActiveDryForm do
   include Dry::Monads[:result]
 
+  let(:user) { User.create!(name: 'Ivan') }
+
+  context 'when params_init passed' do
+    it 'initializes form with passed params' do
+      form = UserForm.new(record: user, params_init: { name: 'Igor' })
+      expect(form.name).to eq 'Igor'
+    end
+  end
+
+  context 'when form has defaults' do
+    it 'initializes form with defaults' do
+      form = DefaultCreateForm.new
+      form.create_default
+      expect(form.name).to eq 'Vasya'
+    end
+  end
+
   context 'when where are validation errors' do
-    let(:user) { User.new(name: 'Ivan') }
     let(:form) { UserForm.new(record: user, params_form: { user: { name: '' } }) }
 
     it 'doesnt update record' do
@@ -26,18 +44,21 @@ RSpec.describe ActiveDryForm do
 
   context 'when custom validation fails' do
     it 'returns validation errors' do
-      user = User.new(name: 'Ivan')
-      form = UserForm.new(record: user, params_form: { user: { name: 'Maria' } })
+      form = CustomValidationForm.new(record: user, params_form: { user: { name: 'Maria' } })
       form.update
       expect(form.errors).to eq(name: ['Иван не может стать Марией'])
     end
   end
 
   context 'when where are no validation errors' do
-    let(:user) { User.new(name: 'Ivan') }
     let(:form) { UserForm.new(record: user, params_form: { user: { name: 'Igor' } }) }
 
-    it 'update record' do
+    it 'creates record' do
+      form = UserForm.new(params_form: { user: { name: 'Vasya' } })
+      expect { form.create }.to change(User, :count).by(1)
+    end
+
+    it 'updates record' do
       expect { form.update }.to change(user, :name).to('Igor')
     end
 
