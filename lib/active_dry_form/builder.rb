@@ -55,7 +55,7 @@ module ActiveDryForm
     def show_base_errors
       return unless @object.base_errors
 
-      tag.div class: 'callout alert' do
+      tag.div class: 'callout alert form-base-error' do
         tag.ul do
           # внутри ошибки может быть html
           @object.base_errors.map { tag.li _1.html_safe }.join.html_safe
