@@ -30,7 +30,7 @@ module ActiveDryForm
 
     def input_select(method, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
       dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag select(method, collection, dry_tag.input_opts, html_options)
+      dry_tag.wrap_tag select(method, collection, dry_tag.input_opts, html_options.merge('data-controller': 'select-tag'))
     end
 
     def input_checkbox_inline(method, options = {})
