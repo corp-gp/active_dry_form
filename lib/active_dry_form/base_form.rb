@@ -74,28 +74,21 @@ module ActiveDryForm
           sub_klass.define_methods
         end
 
-<<<<<<< HEAD
-        if value[:keys]
+        case value[:type]
+        when 'object'
           define_method "#{nested_namespace}=" do |nested_params|
             params[nested_namespace] = sub_klass.new(params: nested_params)
           end
-=======
-        if value[:type] == 'object'
->>>>>>> 34db616 (json schema)
           define_method nested_namespace do
             params[nested_namespace] ||= sub_klass.new
             params[nested_namespace].record = record.try(nested_namespace)
             params[nested_namespace].errors = errors[nested_namespace]
             params[nested_namespace]
           end
-<<<<<<< HEAD
-        elsif value[:member]
+        when 'array'
           define_method "#{nested_namespace}=" do |nested_params|
             params[nested_namespace] = nested_params.map { |item_params| sub_klass.new(params: item_params) }
           end
-=======
-        elsif value[:type] == 'array'
->>>>>>> 34db616 (json schema)
           define_method nested_namespace do
             params[nested_namespace] ||= []
             (record.try(nested_namespace) || []).map.with_index do |nested_record, idx|
