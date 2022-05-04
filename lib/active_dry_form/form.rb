@@ -17,20 +17,6 @@ module ActiveDryForm
       define_methods
     end
 
-    def self.default(method)
-      alias_method :"__#{method}", method
-
-      class_eval <<~RUBY, __FILE__, __LINE__ + 1
-        # def create_default(...)
-        #  @params.merge!(__create_default(...))
-        # end
-
-        def #{method}(...)
-          @params.merge!(__#{method}(...))
-        end
-      RUBY
-    end
-
     def self.action(method)
       alias_method :"__#{method}", method
 

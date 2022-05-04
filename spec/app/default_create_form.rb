@@ -8,8 +8,8 @@ class DefaultCreateForm < ActiveDryForm::Form
     end
   end
 
-  default def create_default
-    { name: 'Vasya' }
+  def create_default
+    self.name = 'Vasya'
   end
 
 end
