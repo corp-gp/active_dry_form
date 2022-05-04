@@ -13,7 +13,7 @@ RSpec.describe ActiveDryForm do
         { url: '', name: 'First' },
         { url: '', name: 'Second' },
       ]
-      form = NestedHasManyForm.new(record: user, params_form: { user: { bookmarks: bookmarks_attributes } })
+      form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
       form.update
       expect(form.errors).to eq({ bookmarks: { 0 => { url: ['должно быть заполнено'] }, 1 => { url: ['должно быть заполнено'] } } })
     end
@@ -26,7 +26,7 @@ RSpec.describe ActiveDryForm do
           { url: '/first' },
           { url: '/second' },
         ]
-      form = NestedHasManyForm.new(record: user, params_form: { user: { bookmarks: bookmarks_attributes } })
+      form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
       form.update
       expect(user.bookmarks.pluck(:url)).to eq(%w[/first /second])
     end
@@ -36,7 +36,7 @@ RSpec.describe ActiveDryForm do
       bookmarks_attributes = [
         { url: '/second', id: bookmark.id },
       ]
-      form = NestedHasManyForm.new(record: user, params_form: { user: { bookmarks: bookmarks_attributes } })
+      form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
       expect { form.update }.not_to change(Bookmark, :count)
       expect(bookmark.url).to eq('/second')
     end
