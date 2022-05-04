@@ -75,8 +75,8 @@ module ActiveDryForm
           define_method key do
             params[key] || record.try(key)
           end
-          define_method "#{key}=" do |value|
-            params[key] = value
+          define_method "#{key}=" do |v|
+            params[key] = v
           end
         end
       end
