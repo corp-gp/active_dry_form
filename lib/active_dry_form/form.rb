@@ -7,16 +7,11 @@ module ActiveDryForm
     Dry::Schema.load_extensions(:info)
     ResultError = Class.new(StandardError)
 
-    class ContractBase < Dry::Validation::Contract
-
-      config.messages.load_paths << 'config/locales/dry_validation.ru.yml'
-      config.messages.default_locale = :ru
-
-    end
+    cattr_accessor :contract_klass, instance_accessor: false, default: ::ActiveDryForm::BaseContract
 
     def self.fields(namespace, &block)
       const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, namespace.to_s)
-      const_set :CURRENT_CONTRACT, Class.new(ContractBase, &block).new
+      const_set :CURRENT_CONTRACT, Class.new(contract_klass, &block).new
       const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.info[:keys]
 
       define_methods

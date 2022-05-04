@@ -3,6 +3,7 @@
 require_relative 'app/user'
 require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
+require_relative 'app/custom_contract_form'
 require_relative 'app/base_validation_form'
 require_relative 'app/default_create_form'
 
@@ -48,6 +49,14 @@ RSpec.describe ActiveDryForm do
       form = CustomValidationForm.new(record: user, params_form: { user: { name: 'Maria' } })
       form.update
       expect(form.errors).to eq(name: ['Иван не может стать Марией'])
+    end
+  end
+
+  context 'when custom contact fails' do
+    it 'returns validation errors' do
+      form = CustomContractForm.new(params_form: { user: { name: 'Иван' } })
+      form.create
+      expect(form.errors).to eq(name: ['non-latin symbols detected'])
     end
   end
 
