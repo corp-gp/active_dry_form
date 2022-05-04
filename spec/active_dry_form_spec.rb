@@ -12,18 +12,17 @@ RSpec.describe ActiveDryForm do
 
   let(:user) { User.create!(name: 'Ivan') }
 
-  context 'when params_init passed' do
-    it 'initializes form with passed params' do
-      form = UserForm.new(record: user, params_init: { name: 'Igor' })
-      expect(form.name).to eq 'Igor'
-    end
-  end
-
   context 'when form has defaults' do
     it 'initializes form with defaults' do
       form = DefaultCreateForm.new
       form.create_default
       expect(form.name).to eq 'Vasya'
+    end
+  end
+
+  context 'when params_form is not valid' do
+    it 'raises error' do
+      expect { UserForm.new(record: user, params_form: { form: { name: 'Ivan' } }) }.to raise_error("missing param 'user' in `params_form`")
     end
   end
 

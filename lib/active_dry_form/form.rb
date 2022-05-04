@@ -81,9 +81,8 @@ module ActiveDryForm
 
     attr_reader :base_errors
 
-    def initialize(record: nil, params_form: nil, params_init: nil)
+    def initialize(record: nil, params_form: nil)
       raise 'in `params_form` use `request.parameters` instead of `params`' if params_form.is_a?(::ActionController::Parameters)
-      raise 'in `params_init` use `request.parameters` instead of `params`' if params_init.is_a?(::ActionController::Parameters)
 
       @params =
         if params_form
@@ -92,17 +91,15 @@ module ActiveDryForm
           raise "missing param '#{param_key}' in `params_form`" unless params_form.key?(param_key)
 
           _deep_transform_values_in_params!(params_form[param_key])
-        elsif params_init
-          params_init.deep_transform_keys!(&:to_sym)
         else
           {}
         end
 
-      @record = record if record
+      @record = record
     end
 
     def validator
-      @validator ||= self.class::CURRENT_CONTRACT.call(@params, { form: self })
+      @validator ||= self.class::CURRENT_CONTRACT.call(@params, { form: self, record: record })
     end
 
     def errors
