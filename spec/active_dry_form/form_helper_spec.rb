@@ -53,6 +53,16 @@ RSpec.describe ActiveDryForm::FormHelper do
 
       expect(html).to include('user is read only')
     end
+
+    it 'shows disabled field' do
+      form = UserForm.new(record: user)
+
+      html = context.active_dry_form_for(form) { |f| f.input :name, disabled: true }
+
+      expect(html).to include('type="hidden"')
+      expect(html).to include('value="Ivan"').twice
+      expect(html).to include('name="user[name]"').twice
+    end
   end
 
   context 'when single nested form rendered' do
