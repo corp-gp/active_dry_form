@@ -12,7 +12,7 @@ class NestedHasManyForm < ActiveDryForm::Form
   fields(:user) do
     params do
       optional(:name).maybe(:string)
-      required(:bookmarks).filled(Dry::Types['array'].of(BOOKMARK))
+      required(:bookmarks).array(BOOKMARK)
     end
   end
 
