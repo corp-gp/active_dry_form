@@ -41,7 +41,6 @@ module ActiveDryForm
         [
           label_last ? input : label,
           label_last ? label : input,
-          (@builder.input_hidden(@method) if input_opts[:disabled]),
           hint_text,
           error_text,
         ].compact.join.html_safe
