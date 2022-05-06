@@ -5,17 +5,22 @@ require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
 require_relative 'app/custom_contract_form'
 require_relative 'app/base_validation_form'
-require_relative 'app/default_create_form'
 
 RSpec.describe ActiveDryForm do
   include Dry::Monads[:result]
 
   let(:user) { User.create!(name: 'Ivan') }
 
-  context 'when form has defaults' do
-    it 'initializes form with defaults' do
-      form = DefaultCreateForm.new
-      form.create_default
+  context 'when set form attributes' do
+    it 'set signle attribute' do
+      form = UserForm.new
+      form.name = 'Vasya'
+      expect(form.name).to eq 'Vasya'
+    end
+
+    it 'set hash' do
+      form = UserForm.new
+      form.attributes = { name: 'Vasya' }
       expect(form.name).to eq 'Vasya'
     end
   end

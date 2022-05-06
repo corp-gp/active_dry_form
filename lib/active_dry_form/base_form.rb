@@ -43,6 +43,12 @@ module ActiveDryForm
       record.id.to_s
     end
 
+    def attributes=(hsh)
+      hsh.each do |attr, v|
+        public_send("#{attr}=", v)
+      end
+    end
+
     def self.human_attribute_name(field)
       I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
     end
