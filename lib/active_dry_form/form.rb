@@ -70,16 +70,14 @@ module ActiveDryForm
     def initialize(record: nil, params: nil)
       raise 'in `params` use `request.parameters` instead of `params`' if params.is_a?(::ActionController::Parameters)
 
-      @params =
-        if params
-          params.deep_transform_keys!(&:to_sym)
-          param_key = self.class::NAMESPACE.param_key.to_sym
-          raise "missing param '#{param_key}' in `params`" unless params.key?(param_key)
+      @params = {}
+      if params
+        param_key = self.class::NAMESPACE.param_key
+        attributes = params.fetch(param_key, params.fetch(param_key.to_sym, nil))
+        raise "missing key '#{param_key}' in `params`" if attributes.nil?
 
-          _deep_transform_values_in_params!(params[param_key])
-        else
-          {}
-        end
+        self.attributes = attributes
+      end
 
       @record = record
     end
@@ -94,21 +92,6 @@ module ActiveDryForm
 
     def view_component
       self.class.module_parent::Component.new(self)
-    end
-
-    private def _deep_transform_values_in_params!(object)
-      case object
-      when String
-        object.strip.presence
-      when Hash
-        object.transform_values! { |value| _deep_transform_values_in_params!(value) }
-      when Array
-        object.map! { |e| _deep_transform_values_in_params!(e) }
-        object.compact!
-        object
-      else
-        object
-      end
     end
 
   end

@@ -27,7 +27,7 @@ RSpec.describe ActiveDryForm do
 
   context 'when params is not valid' do
     it 'raises error' do
-      expect { UserForm.new(record: user, params: { form: { name: 'Ivan' } }) }.to raise_error("missing param 'user' in `params`")
+      expect { UserForm.new(record: user, params: { form: { name: 'Ivan' } }) }.to raise_error("missing key 'user' in `params`")
     end
   end
 
