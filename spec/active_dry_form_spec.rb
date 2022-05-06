@@ -53,7 +53,7 @@ RSpec.describe ActiveDryForm do
 
   context 'when custom contact fails' do
     it 'returns validation errors' do
-      form = CustomContractForm.new(params_form: { user: { name: 'Иван' } })
+      form = CustomContractForm.new(params: { user: { name: 'Иван' } })
       form.create
       expect(form.errors).to eq(name: ['non-latin symbols detected'])
     end
