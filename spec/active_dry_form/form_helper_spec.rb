@@ -37,7 +37,7 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
 
     it 'shows validation errors' do
-      form = UserForm.new(record: user, params_form: { user: { name: '' } })
+      form = UserForm.new(record: user, params: { user: { name: '' } })
       form.update
 
       html = context.active_dry_form_for(form) { |f| f.input :name }
@@ -46,7 +46,7 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
 
     it 'shows base validation errors' do
-      form = BaseValidationForm.new(record: user, params_form: { user: { name: 'Maria' } })
+      form = BaseValidationForm.new(record: user, params: { user: { name: 'Maria' } })
       form.update
 
       html = context.active_dry_form_for(form) { |f| f.input :name }
@@ -69,7 +69,7 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
 
     it 'shows nested errors' do
-      form = NestedHasOneForm.new(record: user, params_form: { user: { personal_info: { age: '' } } })
+      form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '' } } })
       form.update
       html =
         context.active_dry_form_for(form) do |f|
@@ -101,7 +101,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       bookmarks_attributes = [
         { url: '' },
       ]
-      form = NestedHasManyForm.new(record: user, params_form: { user: { bookmarks: bookmarks_attributes } })
+      form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
       form.update
       html =
         context.active_dry_form_for(form) do |f|

@@ -9,14 +9,14 @@ RSpec.describe ActiveDryForm do
 
   context 'when nested form is invalid' do
     it 'returns validation errors' do
-      form = NestedHasOneForm.new(record: user, params_form: { user: { personal_info: { age: '' } } })
+      form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '' } } })
       form.update
       expect(form.errors).to eq({ personal_info: { age: ['должно быть заполнено'] } })
     end
   end
 
   context 'when nested form is valid' do
-    let(:form) { NestedHasOneForm.new(record: user, params_form: { user: { personal_info: { age: '20' } } }) }
+    let(:form) { NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '20' } } }) }
 
     it 'creates nested model' do
       form.update
