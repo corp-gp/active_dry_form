@@ -42,6 +42,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activerecord'
   spec.add_dependency 'dry-monads'
   spec.add_dependency 'dry-validation'
+  spec.add_dependency 'dry-configurable'
   spec.metadata = {
     'rubygems_mfa_required' => 'true',
   }

@@ -45,6 +45,8 @@ module ActiveDryForm
 
     def attributes=(hsh)
       hsh.each do |attr, v|
+        next if !Configuration.config.strict_param_keys && !respond_to?("#{attr}=")
+
         public_send("#{attr}=", v)
       end
     end

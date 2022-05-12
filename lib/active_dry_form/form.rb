@@ -73,10 +73,7 @@ module ActiveDryForm
       @params = {}
       if params
         param_key = self.class::NAMESPACE.param_key
-        attributes = params.fetch(param_key, params.fetch(param_key.to_sym, nil))
-        raise "missing key '#{param_key}' in `params`" if attributes.nil?
-
-        self.attributes = attributes
+        self.attributes = params[param_key] || params[param_key.to_sym] || params
       end
 
       @record = record

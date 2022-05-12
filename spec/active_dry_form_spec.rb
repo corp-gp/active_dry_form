@@ -12,7 +12,7 @@ RSpec.describe ActiveDryForm do
   let(:user) { User.create!(name: 'Ivan') }
 
   context 'when set form attributes' do
-    it 'set signle attribute' do
+    it 'set single attribute' do
       form = UserForm.new
       form.name = 'Vasya'
       expect(form.name).to eq 'Vasya'
@@ -23,11 +23,25 @@ RSpec.describe ActiveDryForm do
       form.attributes = { name: 'Vasya' }
       expect(form.name).to eq 'Vasya'
     end
+
+    it 'set hash with unknown key' do
+      ActiveDryForm::Configuration.config.strict_param_keys = false
+
+      form = UserForm.new
+
+      expect {
+        form.attributes = { first_name: 'Vasya' }
+      }.not_to raise_error
+
+      ActiveDryForm::Configuration.reset_config
+    end
   end
 
-  context 'when params is not valid' do
+  context 'when param key is not valid' do
     it 'raises error' do
-      expect { UserForm.new(record: user, params: { form: { name: 'Ivan' } }) }.to raise_error("missing key 'user' in `params`")
+      expect {
+        UserForm.new(record: user, params: { form: { name: 'Ivan' } })
+      }.to raise_error(NoMethodError, /undefined method `form='/)
     end
   end
 
