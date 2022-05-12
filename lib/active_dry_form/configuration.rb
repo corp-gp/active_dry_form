@@ -1,22 +1,26 @@
 # frozen_string_literal: true
 
 module ActiveDryForm
+
+  extend Dry::Configurable
+
+  default_strict_param_keys =
+    if defined?(::Rails)
+      ::Rails.env.development? || ::Rails.env.test?
+    else
+      true
+    end
+
+  setting :strict_param_keys, default_strict_param_keys
+
   class Configuration
 
-    extend Dry::Configurable
-
-    default_strict_param_keys =
-      if defined?(::Rails)
-        ::Rails.env.development? || ::Rails.env.test?
-      else
-        true
-      end
-
-    setting :strict_param_keys, default_strict_param_keys
+    delegate :config, to: ActiveDryForm
 
   end
+
 end
 
 ActiveSupport::Reloader.to_prepare do
-  ActiveDryForm::Configuration.config.finalize!(freeze_values: true)
+  ActiveDryForm.config.finalize!(freeze_values: true)
 end

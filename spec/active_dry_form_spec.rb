@@ -25,7 +25,7 @@ RSpec.describe ActiveDryForm do
     end
 
     it 'set hash with unknown key' do
-      ActiveDryForm::Configuration.config.strict_param_keys = false
+      ::ActiveDryForm.config.strict_param_keys = false
 
       form = UserForm.new
 
@@ -33,7 +33,7 @@ RSpec.describe ActiveDryForm do
         form.attributes = { first_name: 'Vasya' }
       }.not_to raise_error
 
-      ActiveDryForm::Configuration.reset_config
+      ::ActiveDryForm.reset_config
     end
   end
 
