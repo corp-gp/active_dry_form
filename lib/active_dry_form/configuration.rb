@@ -11,13 +11,7 @@ module ActiveDryForm
       true
     end
 
-  setting :strict_param_keys, default_strict_param_keys
-
-  class Configuration
-
-    delegate :config, to: ActiveDryForm
-
-  end
+  setting :strict_param_keys, default: default_strict_param_keys
 
 end
 
