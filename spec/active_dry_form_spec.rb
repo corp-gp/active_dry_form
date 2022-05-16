@@ -5,24 +5,43 @@ require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
 require_relative 'app/custom_contract_form'
 require_relative 'app/base_validation_form'
-require_relative 'app/default_create_form'
 
 RSpec.describe ActiveDryForm do
   include Dry::Monads[:result]
 
   let(:user) { User.create!(name: 'Ivan') }
 
-  context 'when form has defaults' do
-    it 'initializes form with defaults' do
-      form = DefaultCreateForm.new
-      form.create_default
+  context 'when set form attributes' do
+    it 'set single attribute' do
+      form = UserForm.new
+      form.name = 'Vasya'
       expect(form.name).to eq 'Vasya'
+    end
+
+    it 'set hash' do
+      form = UserForm.new
+      form.attributes = { name: 'Vasya' }
+      expect(form.name).to eq 'Vasya'
+    end
+
+    it 'set hash with unknown key' do
+      ::ActiveDryForm.config.strict_param_keys = false
+
+      form = UserForm.new
+
+      expect {
+        form.attributes = { first_name: 'Vasya' }
+      }.not_to raise_error
+
+      ::ActiveDryForm.reset_config
     end
   end
 
-  context 'when params is not valid' do
+  context 'when param key is not valid' do
     it 'raises error' do
-      expect { UserForm.new(record: user, params: { form: { name: 'Ivan' } }) }.to raise_error("missing param 'user' in `params`")
+      expect {
+        UserForm.new(record: user, params: { form: { name: 'Ivan' } })
+      }.to raise_error(NoMethodError, /undefined method `form='/)
     end
   end
 

@@ -40,6 +40,7 @@ Gem::Specification.new do |spec|
   #
   spec.add_dependency 'actionpack'
   spec.add_dependency 'activerecord'
+  spec.add_dependency 'dry-configurable'
   spec.add_dependency 'dry-monads'
   spec.add_dependency 'dry-validation'
   spec.metadata = {

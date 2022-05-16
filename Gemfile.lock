@@ -14,6 +14,7 @@ PATH
     active_dry_form (0.1.0)
       actionpack
       activerecord
+      dry-configurable
       dry-monads
       dry-validation
 

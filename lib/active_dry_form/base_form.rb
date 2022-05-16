@@ -43,6 +43,14 @@ module ActiveDryForm
       record.id.to_s
     end
 
+    def attributes=(hsh)
+      hsh.each do |attr, v|
+        next if !ActiveDryForm.config.strict_param_keys && !respond_to?("#{attr}=")
+
+        public_send("#{attr}=", v)
+      end
+    end
+
     def self.human_attribute_name(field)
       I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
     end
@@ -59,6 +67,10 @@ module ActiveDryForm
           sub_klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, nested_namespace.to_s)
           sub_klass.const_set :FIELDS_INFO, value[:keys] || value[:member][:keys]
           sub_klass.define_methods
+
+          define_method "#{nested_namespace}=" do |v|
+            params[key] = v
+          end
         end
 
         if value[:keys]
@@ -75,7 +87,25 @@ module ActiveDryForm
           define_method key do
             params[key] || record.try(key)
           end
+          define_method "#{key}=" do |v|
+            params[key] = _deep_transform_values_in_params!(v)
+          end
         end
+      end
+    end
+
+    private def _deep_transform_values_in_params!(object)
+      case object
+      when String
+        object.strip.presence
+      when Hash
+        object.transform_values! { |value| _deep_transform_values_in_params!(value) }
+      when Array
+        object.map! { |e| _deep_transform_values_in_params!(e) }
+        object.compact!
+        object
+      else
+        object
       end
     end
 

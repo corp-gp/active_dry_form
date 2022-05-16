@@ -17,20 +17,6 @@ module ActiveDryForm
       define_methods
     end
 
-    def self.default(method)
-      alias_method :"__#{method}", method
-
-      class_eval <<~RUBY, __FILE__, __LINE__ + 1
-        # def create_default(...)
-        #  @params.merge!(__create_default(...))
-        # end
-
-        def #{method}(...)
-          @params.merge!(__#{method}(...))
-        end
-      RUBY
-    end
-
     def self.action(method)
       alias_method :"__#{method}", method
 
@@ -84,16 +70,11 @@ module ActiveDryForm
     def initialize(record: nil, params: nil)
       raise 'in `params` use `request.parameters` instead of `params`' if params.is_a?(::ActionController::Parameters)
 
-      @params =
-        if params
-          params.deep_transform_keys!(&:to_sym)
-          param_key = self.class::NAMESPACE.param_key.to_sym
-          raise "missing param '#{param_key}' in `params`" unless params.key?(param_key)
-
-          _deep_transform_values_in_params!(params[param_key])
-        else
-          {}
-        end
+      @params = {}
+      if params
+        param_key = self.class::NAMESPACE.param_key
+        self.attributes = params[param_key] || params[param_key.to_sym] || params
+      end
 
       @record = record
     end
@@ -108,21 +89,6 @@ module ActiveDryForm
 
     def view_component
       self.class.module_parent::Component.new(self)
-    end
-
-    private def _deep_transform_values_in_params!(object)
-      case object
-      when String
-        object.strip.presence
-      when Hash
-        object.transform_values! { |value| _deep_transform_values_in_params!(value) }
-      when Array
-        object.map! { |e| _deep_transform_values_in_params!(e) }
-        object.compact!
-        object
-      else
-        object
-      end
     end
 
   end
