@@ -10,6 +10,7 @@ RSpec.configure do |config|
     ActiveRecord::Schema.define do
       create_table(:users, force: true) do |t|
         t.string :name
+        t.string :second_name
       end
       create_table(:bookmarks, force: true) do |t|
         t.integer :user_id

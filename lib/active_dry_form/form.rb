@@ -71,20 +71,25 @@ module ActiveDryForm
       raise 'in `params` use `request.parameters` instead of `params`' if params.is_a?(::ActionController::Parameters)
 
       @params = {}
+      @record = record
+
       if params
         param_key = self.class::NAMESPACE.param_key
-        self.attributes = params[param_key] || params[param_key.to_sym] || params
-      end
+        form_params = params[param_key] || params[param_key.to_sym]
+        raise ArgumentError, "key '#{param_key}' not found in params" if form_params.nil?
 
-      @record = record
+        self.attributes = form_params
+      end
     end
 
     def validator
-      @validator ||= self.class::CURRENT_CONTRACT.call(@params, { form: self, record: record })
+      @validator ||= self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
     end
 
     def errors
-      @errors ||= @validator ? @validator.errors.to_h : {}
+      return {} unless @validator
+
+      @errors ||= @validator.errors.to_h
     end
 
     def view_component
