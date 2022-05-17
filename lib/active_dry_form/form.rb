@@ -70,9 +70,6 @@ module ActiveDryForm
     def initialize(record: nil, params: nil)
       raise 'in `params` use `request.parameters` instead of `params`' if params.is_a?(::ActionController::Parameters)
 
-      @params = {}
-      @record = record
-
       if params
         param_key = self.class::NAMESPACE.param_key
         form_params = params[param_key] || params[param_key.to_sym]
@@ -80,6 +77,8 @@ module ActiveDryForm
 
         self.attributes = form_params
       end
+
+      @record = record
     end
 
     def validator
