@@ -5,6 +5,7 @@ class UserForm < ActiveDryForm::Form
   fields(:user) do
     params do
       required(:name).filled(:string)
+      optional(:second_name).maybe(:string)
     end
   end
 

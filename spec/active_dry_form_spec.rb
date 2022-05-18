@@ -5,6 +5,7 @@ require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
 require_relative 'app/custom_contract_form'
 require_relative 'app/base_validation_form'
+require_relative 'app/filter_blank_form'
 
 RSpec.describe ActiveDryForm do
   include Dry::Monads[:result]
@@ -35,13 +36,26 @@ RSpec.describe ActiveDryForm do
 
       ::ActiveDryForm.reset_config
     end
+
+    it 'read attribute form record' do
+      form = UserForm.new(record: user)
+      expect(form.name).to eq 'Ivan'
+    end
+
+    it 'read attribute form params' do
+      user.update!(second_name: 'Sidorov')
+
+      form = UserForm.new(record: user, params: { user: { name: 'Ivan', second_name: '' } })
+
+      expect(form.second_name).to eq nil
+    end
   end
 
   context 'when param key is not valid' do
     it 'raises error' do
       expect {
         UserForm.new(record: user, params: { form: { name: 'Ivan' } })
-      }.to raise_error(NoMethodError, /undefined method `form='/)
+      }.to raise_error(ArgumentError, "key 'user' not found in params")
     end
   end
 
@@ -81,6 +95,8 @@ RSpec.describe ActiveDryForm do
   context 'when base validation fails' do
     it 'returns validation errors' do
       form = BaseValidationForm.new(record: user, params: { user: { name: 'Maria' } })
+      expect(form.errors).to eq({})
+
       form.update
       expect(form.errors).to eq(nil => ['user is read only'])
     end
@@ -100,6 +116,33 @@ RSpec.describe ActiveDryForm do
 
     it 'returns Success with record itself' do
       expect(form.update).to eq Success(user)
+    end
+  end
+
+  context 'when empty fields sent' do
+    it 'skips blank values' do
+      form = FilterBlankForm.new(params: { form: { name: '', ids: ['', '1'], nested_one: { ids: ['', '2'] }, nested_many: [{ ids: ['', '3'] }] } })
+
+      expect(form.attributes).to eq(
+        name:        nil,
+        ids:         ['1'],
+        nested_one:  { ids: ['2'] },
+        nested_many: [{ ids: ['3'] }],
+      )
+
+      form.attributes = {
+        name:        '',
+        ids:         ['', '3'],
+        nested_one:  { ids: ['', '4', '5'] },
+        nested_many: [{ ids: ['', '6'] }],
+      }
+
+      expect(form.attributes).to eq(
+        name:        nil,
+        ids:         ['3'],
+        nested_one:  { ids: %w[4 5] },
+        nested_many: [{ ids: ['6'] }],
+      )
     end
   end
 end
