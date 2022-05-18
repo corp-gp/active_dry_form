@@ -61,11 +61,9 @@ module ActiveDryForm
       I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
     end
 
-    NESTED_TYPES = %w[object array].freeze
-
     def self.define_methods
       self::FIELDS_INFO[:properties].each do |key, value|
-        nested_namespace = key if NESTED_TYPES.include?(value[:type])
+        nested_namespace = key if value[:type] == 'object' || value.dig(:items, :type) == 'object'
 
         if nested_namespace
           sub_klass = Class.new(BaseForm)
@@ -74,8 +72,7 @@ module ActiveDryForm
           sub_klass.define_methods
         end
 
-        case value[:type]
-        when 'object'
+        if nested_namespace && value[:type] == 'object'
           define_method "#{nested_namespace}=" do |nested_params|
             params[nested_namespace] = sub_klass.new(params: nested_params)
           end
@@ -85,7 +82,7 @@ module ActiveDryForm
             params[nested_namespace].errors = errors[nested_namespace]
             params[nested_namespace]
           end
-        when 'array'
+        elsif nested_namespace && value[:type] == 'array'
           define_method "#{nested_namespace}=" do |nested_params|
             params[nested_namespace] = nested_params.map { |item_params| sub_klass.new(params: item_params) }
           end
