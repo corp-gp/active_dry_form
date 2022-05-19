@@ -3,14 +3,14 @@
 module ActiveDryForm
   module FormHelper
 
-    def active_dry_form_for(name, options = {})
+    def active_dry_form_for(name, options = {}, &block)
       options[:builder] = ActiveDryForm::Builder
       options[:html] ||= {}
       options[:html][:class] = "active-dry-form #{options[:html][:class]}"
 
       form_for(name, options) do |f|
         concat f.show_base_errors
-        yield(f)
+        instance_exec(f, &block)
       end
     end
 
