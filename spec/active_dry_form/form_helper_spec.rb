@@ -4,6 +4,7 @@ require_relative '../app/user'
 require_relative '../app/personal_info'
 require_relative '../app/bookmark'
 require_relative '../app/user_form'
+require_relative '../app/field_variety_form'
 require_relative '../app/base_validation_form'
 require_relative '../app/nested_has_one_form'
 require_relative '../app/nested_has_many_form'
@@ -34,6 +35,30 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include('required')
       expect(html).to include('value="Ivan"')
       expect(html).to include('name="user[name]"')
+    end
+
+    it 'shows various input types' do
+      form = FieldVarietyForm.new
+      html =
+        context.active_dry_form_for(form) do |f|
+          concat f.input_hidden :id
+          concat f.input :age
+          concat f.input :is_retail
+          concat f.input :password
+          concat f.input :email
+          concat f.input :phone
+          concat f.input :url
+          concat f.input_text :about
+        end
+
+      expect(html).to include('type="hidden"')
+      expect(html).to include('type="number"')
+      expect(html).to include('type="checkbox"')
+      expect(html).to include('type="password"')
+      expect(html).to include('type="email"')
+      expect(html).to include('type="tel"')
+      expect(html).to include('type="url"')
+      expect(html).to include('textarea')
     end
 
     it 'shows validation errors' do
