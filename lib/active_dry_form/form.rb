@@ -12,7 +12,7 @@ module ActiveDryForm
     def self.fields(namespace, &block)
       const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, namespace.to_s)
       const_set :CURRENT_CONTRACT, Class.new(contract_klass, &block).new
-      const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.json_schema
+      const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.json_schema(loose: true)
 
       define_methods
     end

@@ -15,7 +15,7 @@ module ActiveDryForm
         raise ArgumentError, "Field #{method} is not found. Check form definition"
       end
 
-      @input_type = info[:type]
+      @input_type = (Array(info[:type]) - %w[null]).first
       @required = info[:required]
 
       @label_opts = options[:label]
