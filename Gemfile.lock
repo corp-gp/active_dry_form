@@ -8,6 +8,18 @@ GIT
       rubocop-rails
       rubocop-rspec
 
+GIT
+  remote: https://github.com/dry-rb/dry-schema.git
+  revision: f0b467917166af23293980f02fd21546f380353b
+  specs:
+    dry-schema (1.9.1)
+      concurrent-ruby (~> 1.0)
+      dry-configurable (~> 0.13, >= 0.13.0)
+      dry-core (~> 0.5, >= 0.5)
+      dry-initializer (~> 3.0)
+      dry-logic (~> 1.0)
+      dry-types (~> 1.5)
+
 PATH
   remote: .
   specs:
@@ -65,13 +77,6 @@ GEM
     dry-monads (1.4.0)
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.7)
-    dry-schema (1.9.1)
-      concurrent-ruby (~> 1.0)
-      dry-configurable (~> 0.13, >= 0.13.0)
-      dry-core (~> 0.5, >= 0.5)
-      dry-initializer (~> 3.0)
-      dry-logic (~> 1.0)
-      dry-types (~> 1.5)
     dry-types (1.5.1)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.3)
@@ -153,6 +158,7 @@ PLATFORMS
 
 DEPENDENCIES
   active_dry_form!
+  dry-schema!
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop-gp!

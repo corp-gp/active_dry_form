@@ -6,6 +6,7 @@ require_relative 'app/custom_validation_form'
 require_relative 'app/custom_contract_form'
 require_relative 'app/base_validation_form'
 require_relative 'app/filter_blank_form'
+require_relative 'app/loose_json_schema_form'
 
 RSpec.describe ActiveDryForm do
   include Dry::Monads[:result]
@@ -48,6 +49,19 @@ RSpec.describe ActiveDryForm do
       form = UserForm.new(record: user, params: { user: { name: 'Ivan', second_name: '' } })
 
       expect(form.second_name).to eq nil
+    end
+
+    it 'process invalid json schema' do
+      user_params = {
+        personal_info: { email: 'ivan@example.com' },
+        bookmarks: [ { url: 'http://example.com' } ],
+        settings: { timezone: 3, subscriptions: nil }
+      }
+      form = LooseJsonSchemaForm.new(params: { user: user_params })
+
+      expect(form.personal_info.info(:email)).to include(type: 'string')
+      expect(form.bookmarks[0].info(:url)).to include(type: 'string')
+      expect(form.info(:settings)).to include(type: 'object')
     end
   end
 
