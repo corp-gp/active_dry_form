@@ -49,6 +49,8 @@ RSpec.describe ActiveDryForm::FormHelper do
           concat f.input :phone
           concat f.input :url
           concat f.input_text :about
+          concat f.input :birthday
+          concat f.input :call_on
         end
 
       expect(html).to include('type="hidden"')
@@ -59,6 +61,8 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include('type="tel"')
       expect(html).to include('type="url"')
       expect(html).to include('textarea')
+      expect(html).to include('flatpickr')
+      expect(html).to include('data-flatpickr-enable-time')
     end
 
     it 'shows validation errors' do

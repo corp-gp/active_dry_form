@@ -12,6 +12,8 @@ class FieldVarietyForm < ActiveDryForm::Form
       optional(:phone).maybe(:string)
       optional(:url).maybe(:string)
       optional(:about).maybe(:string)
+      optional(:birthday).maybe(:date)
+      optional(:call_on).maybe(:date_time)
     end
   end
 
