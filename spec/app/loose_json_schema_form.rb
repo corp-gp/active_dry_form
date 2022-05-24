@@ -13,7 +13,7 @@ class LooseJsonSchemaForm < ActiveDryForm::Form
         required(:email).value(:string, format?: /@/)
       end
       required(:bookmarks).array(BOOKMARK)
-      required(:settings).value(Dry::Types['strict.hash'].constructor { |value| value.compact })
+      required(:settings).value(Dry::Types['strict.hash'].constructor(&:compact))
     end
   end
 

@@ -54,8 +54,8 @@ RSpec.describe ActiveDryForm do
     it 'process invalid json schema' do
       user_params = {
         personal_info: { email: 'ivan@example.com' },
-        bookmarks: [ { url: 'http://example.com' } ],
-        settings: { timezone: 3, subscriptions: nil }
+        bookmarks:     [{ url: 'http://example.com' }],
+        settings:      { timezone: 3, subscriptions: nil },
       }
       form = LooseJsonSchemaForm.new(params: { user: user_params })
 
