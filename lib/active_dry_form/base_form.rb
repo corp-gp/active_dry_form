@@ -19,7 +19,10 @@ module ActiveDryForm
     end
 
     def info(sub_key)
-      self.class::FIELDS_INFO[sub_key]
+      {
+        type:     self.class::FIELDS_INFO.dig(:properties, sub_key, :type),
+        required: self.class::FIELDS_INFO[:required].include?(sub_key.to_s),
+      }
     end
 
     # ActionView::Helpers::Tags::Translator#human_attribute_name
@@ -59,20 +62,17 @@ module ActiveDryForm
     end
 
     def self.define_methods
-      self::FIELDS_INFO.each do |key, value|
-        nested_namespace =
-          if value[:keys] || value[:member]
-            key
-          end
+      self::FIELDS_INFO[:properties].each do |key, value|
+        nested_namespace = key if value[:type] == 'object' || value.dig(:items, :type) == 'object'
 
         if nested_namespace
           sub_klass = Class.new(BaseForm)
           sub_klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, nested_namespace.to_s)
-          sub_klass.const_set :FIELDS_INFO, value[:keys] || value[:member][:keys]
+          sub_klass.const_set :FIELDS_INFO, value[:items] || value
           sub_klass.define_methods
         end
 
-        if value[:keys]
+        if nested_namespace && value[:type] == 'object'
           define_method "#{nested_namespace}=" do |nested_params|
             params[nested_namespace] = sub_klass.new(params: nested_params)
           end
@@ -82,7 +82,7 @@ module ActiveDryForm
             params[nested_namespace].errors = errors[nested_namespace]
             params[nested_namespace]
           end
-        elsif value[:member]
+        elsif nested_namespace && value[:type] == 'array'
           define_method "#{nested_namespace}=" do |nested_params|
             params[nested_namespace] = nested_params.map { |item_params| sub_klass.new(params: item_params) }
           end

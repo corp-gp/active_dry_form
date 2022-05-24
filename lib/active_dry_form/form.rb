@@ -4,7 +4,7 @@ module ActiveDryForm
   class Form < BaseForm
 
     include Dry::Monads[:result]
-    Dry::Schema.load_extensions(:info)
+    Dry::Schema.load_extensions(:json_schema)
     ResultError = Class.new(StandardError)
 
     cattr_accessor :contract_klass, instance_accessor: false, default: ::ActiveDryForm::BaseContract
@@ -12,7 +12,7 @@ module ActiveDryForm
     def self.fields(namespace, &block)
       const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, namespace.to_s)
       const_set :CURRENT_CONTRACT, Class.new(contract_klass, &block).new
-      const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.info[:keys]
+      const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.json_schema(loose: true)
 
       define_methods
     end
