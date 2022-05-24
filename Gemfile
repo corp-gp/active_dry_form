@@ -5,6 +5,8 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in active_dry_form.gemspec
 gemspec
 
+gem 'dry-schema', github: 'dry-rb/dry-schema'
+
 gem 'rake', '~> 13.0'
 gem 'rspec', '~> 3.0'
 

@@ -63,7 +63,7 @@ module ActiveDryForm
 
     def self.define_methods
       self::FIELDS_INFO[:properties].each do |key, value|
-        nested_namespace = key if value[:type] == 'object' || value.dig(:items, :type) == 'object'
+        nested_namespace = key if value[:properties] || value.dig(:items, :properties)
 
         if nested_namespace
           sub_klass = Class.new(BaseForm)
