@@ -20,7 +20,7 @@ module ActiveDryForm
 
     def info(sub_key)
       {
-        type:     self.class::FIELDS_INFO.dig(:properties, sub_key, :type),
+        type:     self.class::FIELDS_INFO.dig(:properties, sub_key, :format) || self.class::FIELDS_INFO.dig(:properties, sub_key, :type),
         required: self.class::FIELDS_INFO[:required].include?(sub_key.to_s),
       }
     end
