@@ -92,6 +92,42 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include('value="Ivan"')
       expect(html).to include('name="user[name]"')
     end
+
+    it 'does not show `required` attribute and class name of `input` if it is explicity set to `false`' do
+      form = UserForm.new(record: user)
+      html =
+        context.active_dry_form_for(form) do |f|
+          f.input :name, required: false
+        end
+
+      expect(html).not_to include('required')
+    end
+
+    it 'shows select with `required` attribute' do
+      form = UserForm.new(record: user)
+      html =
+        context.active_dry_form_for(form) do |f|
+          f.input_select :name, %w[Ivan Boris], { include_blank: 'A boy has no name' }
+        end
+
+      expect(html).to include('<select')
+      expect(html).to include('name="user[name]"')
+      expect(html).to include('required')
+      expect(html).to include('<option value="">A boy has no name</option>')
+      expect(html).to include('<option selected="selected" value="Ivan">Ivan</option>')
+      expect(html).to include('<option value="Boris">Boris</option>')
+    end
+
+    it 'does not show `required` attribute and class name of `select` if it is explicity set to `false`' do
+      form = UserForm.new(record: user)
+      html =
+        context.active_dry_form_for(form) do |f|
+          f.input_select :name, %w[Ivan], {}, { required: false }
+        end
+
+      expect(html).to include('<select')
+      expect(html).not_to include('required')
+    end
   end
 
   context 'when single nested form rendered' do

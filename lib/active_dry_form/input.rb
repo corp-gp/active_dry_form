@@ -16,13 +16,12 @@ module ActiveDryForm
       end
 
       @input_type = (Array(info[:type]) - %w[null]).first
-      @required = info[:required]
 
       @label_opts = options[:label]
       @label_text = options[:label_text]
       @hint_text = options[:hint]
       @input_opts = options.except(:label, :hint, :label_text)
-      @input_opts[:required] = true if @required
+      @input_opts[:required] = true if @input_opts[:required].nil? && info[:required]
     end
 
     def css_classes
@@ -31,7 +30,7 @@ module ActiveDryForm
         @method_type,
         @input_type,
         @method,
-        ('required' if @required),
+        ('required' if @input_opts[:required]),
         ('error' if error?(@method)),
       ].compact
     end
