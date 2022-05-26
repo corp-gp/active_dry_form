@@ -16,12 +16,13 @@ module ActiveDryForm
       end
 
       @input_type = (Array(info[:type]) - %w[null]).first
-      @required = info[:required]
 
       @label_opts = options[:label]
       @label_text = options[:label_text]
       @hint_text = options[:hint]
       @input_opts = options.except(:label, :hint, :label_text)
+
+      @required = info[:required] || @input_opts[:required]
       @input_opts[:required] = true if @required
     end
 
