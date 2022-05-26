@@ -8,6 +8,7 @@ require_relative '../app/field_variety_form'
 require_relative '../app/base_validation_form'
 require_relative '../app/nested_has_one_form'
 require_relative '../app/nested_has_many_form'
+I18n.load_path = ["#{__dir__}/../app/en.yml"]
 
 module StubUrlHelpers
 
@@ -19,6 +20,10 @@ module StubUrlHelpers
     '/'
   end
 
+end
+
+def clean_html(html)
+  html.delete("\n").gsub(/>\s+</, '><')
 end
 
 RSpec.describe ActiveDryForm::FormHelper do
@@ -93,40 +98,60 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include('name="user[name]"')
     end
 
-    it 'does not show `required` attribute and class name of `input` if it is explicity set to `false`' do
-      form = UserForm.new(record: user)
-      html =
-        context.active_dry_form_for(form) do |f|
-          f.input :name, required: false
-        end
-
-      expect(html).not_to include('required')
-    end
-
-    it 'shows select with `required` attribute' do
+    it 'renders select' do
       form = UserForm.new(record: user)
       html =
         context.active_dry_form_for(form) do |f|
           f.input_select :name, %w[Ivan Boris], { include_blank: 'A boy has no name' }
         end
 
-      expect(html).to include('<select')
-      expect(html).to include('name="user[name]"')
-      expect(html).to include('required')
-      expect(html).to include('<option value="">A boy has no name</option>')
-      expect(html).to include('<option selected="selected" value="Ivan">Ivan</option>')
-      expect(html).to include('<option value="Boris">Boris</option>')
+      expected_html = <<~HTML
+        <div class="input input_select string name required">
+          <label for="user_name">User Name</label>
+          <select required="required" data-controller="select-tag" name="user[name]" id="user_name">
+            <option value="">A boy has no name</option>
+            <option selected="selected" value="Ivan">Ivan</option>
+            <option value="Boris">Boris</option>
+          </select>
+        </div>
+      HTML
+
+      expect(clean_html(html)).to include(clean_html(expected_html))
     end
 
-    it 'does not show `required` attribute and class name of `select` if it is explicity set to `false`' do
-      form = UserForm.new(record: user)
-      html =
-        context.active_dry_form_for(form) do |f|
-          f.input_select :name, %w[Ivan], {}, { required: false }
-        end
+    context 'when required explicitly disabled' do
+      it 'renders select tag without required attribute and wrapper class' do
+        form = UserForm.new(record: user)
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.input_select :name, %w[Ivan], {}, { required: false }
+          end
 
-      expect(html).to include('<select')
-      expect(html).not_to include('required')
+        expected_html = <<~HTML
+          <div class="input input_select string name">
+            <label for="user_name">User Name</label>
+            <select data-controller="select-tag" name="user[name]" id="user_name">
+              <option selected="selected" value="Ivan">Ivan</option>
+            </select>
+          </div>
+        HTML
+
+        expect(clean_html(html)).to include(clean_html(expected_html))
+      end
+
+      it 'renders input tag without required attribute and wrapper class' do
+        form = UserForm.new(record: user)
+        html = context.active_dry_form_for(form) { |f| f.input :name, required: false }
+
+        expected_html = <<~HTML
+          <div class="input input string name">
+            <label for="user_name">User Name</label>
+            <input type="text" value="Ivan" name="user[name]" id="user_name" />
+          </div>
+        HTML
+
+        expect(clean_html(html)).to include(clean_html(expected_html))
+      end
     end
   end
 
