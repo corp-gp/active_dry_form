@@ -5,6 +5,7 @@ class FieldVarietyForm < ActiveDryForm::Form
   fields(:user) do
     params do
       optional(:id).maybe(:integer)
+      optional(:name).maybe(:string)
       optional(:age).maybe(:integer)
       optional(:is_retail).maybe(:bool)
       optional(:password).maybe(:string)

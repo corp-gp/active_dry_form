@@ -3,3 +3,17 @@ en:
     attributes:
       user:
         name: User Name
+        second_name: User Second Name
+        age: User Age
+        is_retail: User Is Retail
+        password: User Password
+        email: User Email
+        phone: User Phone
+        url: User Url
+        about: User About
+        birthday: User Birthday
+        call_on: User Call On
+      personal_info:
+        age: Perconal Info Age
+      bookmarks:
+        url: Bookmarks URL
