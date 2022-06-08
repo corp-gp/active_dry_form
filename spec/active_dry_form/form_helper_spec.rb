@@ -231,6 +231,26 @@ RSpec.describe ActiveDryForm::FormHelper do
 
         expect(html).to include_html(expected_html)
       end
+
+      it 'renders select with forced `include_blank = true` when `required = true`' do
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.input_select :name, %w[Ivan Boris], { include_blank: false }, { required: true }
+          end
+
+        expected_html = <<-HTML
+          <div class="input input_select string name required">
+            <label for="user_name">User Name</label>
+            <select required="required" data-controller="select-tag" name="user[name]" id="user_name">
+              <option value="" label=" "></option>
+              <option value="Ivan">Ivan</option>
+              <option value="Boris">Boris</option>
+            </select>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
     end
 
     context 'when required explicitly enabled for optional field' do

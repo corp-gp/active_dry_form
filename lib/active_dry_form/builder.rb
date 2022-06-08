@@ -30,7 +30,15 @@ module ActiveDryForm
 
     def input_select(method, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
       dry_tag = ActiveDryForm::Input.new(self, __method__, method, html_options)
-      dry_tag.wrap_tag select(method, collection, options, dry_tag.input_opts.merge('data-controller': 'select-tag'))
+
+      html_options = dry_tag.input_opts.merge('data-controller': 'select-tag')
+      # Add blank `option` element instead of raising an error
+      # https://github.com/rails/rails/blob/v7.0.3/actionview/lib/action_view/helpers/tags/base.rb#L128
+      if placeholder_required?(html_options) && !options[:prompt]
+        options[:include_blank] ||= true
+      end
+
+      dry_tag.wrap_tag select(method, collection, options, html_options)
     end
 
     def input_checkbox_inline(method, options = {})
@@ -90,6 +98,11 @@ module ActiveDryForm
         end
         output
       end
+    end
+
+    # From https://github.com/rails/rails/blob/v7.0.3/actionview/lib/action_view/helpers/tags/base.rb#L142
+    private def placeholder_required?(html_options)
+      html_options[:required] && !html_options[:multiple] && html_options.fetch(:size, 1).to_i == 1
     end
 
   end
