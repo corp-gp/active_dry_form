@@ -11,6 +11,8 @@ RSpec.configure do |config|
       create_table(:users, force: true) do |t|
         t.string :name
         t.string :second_name
+        t.string :favorites
+        t.string :dimensions
       end
       create_table(:bookmarks, force: true) do |t|
         t.integer :user_id
