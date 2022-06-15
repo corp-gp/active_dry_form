@@ -91,9 +91,5 @@ module ActiveDryForm
       @errors ||= @validator.errors.to_h
     end
 
-    def view_component
-      self.class.module_parent::Component.new(self)
-    end
-
   end
 end
