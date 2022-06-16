@@ -272,6 +272,8 @@ RSpec.describe ActiveDryForm::FormHelper do
 
   context 'when single nested form rendered' do
     context 'when nested record is an association' do
+      before(:each) { user.build_personal_info(age: 18) }
+
       it 'renders input' do
         form = NestedHasOneForm.new(record: user)
         html =
@@ -282,7 +284,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expected_html = <<-HTML
           <div class="input input integer age required">
             <label for="user_personal_info_age">Perconal Info Age</label>
-            <input required="required" type="number" name="user[personal_info][age]" id="user_personal_info_age" />
+            <input required="required" type="number" value="18" name="user[personal_info][age]" id="user_personal_info_age" />
           </div>
         HTML
 
@@ -310,6 +312,8 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
 
     context 'when nested record is a hash' do
+      before(:each) { user.dimensions = { height: 180 } }
+
       it 'renders input' do
         form = NestedHasOneForm.new(record: user)
         html =
@@ -320,7 +324,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expected_html = <<-HTML
           <div class="input input integer height required">
             <label for="user_dimensions_height">Dimensions Height</label>
-            <input required="required" type="number" name="user[dimensions][height]" id="user_dimensions_height" />
+            <input required="required" type="number" value="180" name="user[dimensions][height]" id="user_dimensions_height" />
           </div>
         HTML
 
@@ -350,7 +354,7 @@ RSpec.describe ActiveDryForm::FormHelper do
 
   context 'when multiple nested form rendered' do
     context 'when nested record is an association' do
-      before(:each) { user.bookmarks.build }
+      before(:each) { user.bookmarks.build(url: 'https://example.com') }
 
       it 'renders input' do
         form = NestedHasManyForm.new(record: user)
@@ -362,7 +366,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expected_html = <<-HTML
           <div class="input input string url required">
             <label for="user_bookmarks__url">Bookmarks URL</label>
-            <input required="required" type="url" name="user[bookmarks][][url]" id="user_bookmarks__url" />
+            <input required="required" type="url" value="https://example.com" name="user[bookmarks][][url]" id="user_bookmarks__url" />
           </div>
         HTML
 
@@ -393,7 +397,7 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
 
     context 'when nested record is a hash' do
-      before(:each) { user.favorites = [{ kind: nil }] }
+      before(:each) { user.favorites = [{ kind: 'book' }] }
 
       it 'renders input' do
         form = NestedHasManyForm.new(record: user)
@@ -407,7 +411,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expected_html = <<-HTML
           <div class="input input string kind required">
             <label for="user_favorites__kind">Favorites Kind</label>
-            <input required="required" type="text" name="user[favorites][][kind]" id="user_favorites__kind" />
+            <input required="required" type="text" value="book" name="user[favorites][][kind]" id="user_favorites__kind" />
           </div>
         HTML
 

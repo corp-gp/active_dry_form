@@ -3,7 +3,7 @@
 module ActiveDryForm
   class BaseForm
 
-    attr_accessor :record
+    attr_reader :record
     attr_writer :errors
 
     def initialize(params: nil)
@@ -11,7 +11,7 @@ module ActiveDryForm
     end
 
     def persisted?
-      record.try(:persisted?)
+      record&.persisted?
     end
 
     def model_name
@@ -37,12 +37,24 @@ module ActiveDryForm
 
     # hidden field for nested association
     def id
-      record.try(:id)
+      record&.id
     end
 
     # используется при генерации URL, когда record.persisted?
     def to_param
       id.to_s
+    end
+
+    def record=(value)
+      @record =
+        if value.is_a?(Hash)
+          hr = HashRecord.new
+          hr.replace(value)
+          hr.define_methods
+          hr
+        else
+          value
+        end
     end
 
     def attributes=(hsh)
@@ -154,6 +166,24 @@ module ActiveDryForm
 
       def [](idx)
         super || public_send(:[]=, idx, form_class.new) # default form object
+      end
+
+    end
+
+    class HashRecord < Hash
+
+      def persisted?
+        false
+      end
+
+      def id
+        self[:id] || self['id']
+      end
+
+      def define_methods
+        keys.each do |key|
+          define_singleton_method(key) { fetch(key) }
+        end
       end
 
     end
