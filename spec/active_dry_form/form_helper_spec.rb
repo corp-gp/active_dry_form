@@ -271,87 +271,174 @@ RSpec.describe ActiveDryForm::FormHelper do
   end
 
   context 'when single nested form rendered' do
-    it 'renders input' do
-      form = NestedHasOneForm.new(record: user)
-      html =
-        context.active_dry_form_for(form) do |f|
-          f.fields_for(:personal_info) { |sf| sf.input(:age) }
-        end
+    context 'when nested record is an association' do
+      before(:each) { user.build_personal_info(age: 18) }
 
-      expected_html = <<-HTML
-        <div class="input input integer age required">
-          <label for="user_personal_info_age">Perconal Info Age</label>
-          <input required="required" type="number" name="user[personal_info][age]" id="user_personal_info_age" />
-        </div>
-      HTML
+      it 'renders input' do
+        form = NestedHasOneForm.new(record: user)
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:personal_info) { |sf| sf.input(:age) }
+          end
 
-      expect(html).to include_html(expected_html)
+        expected_html = <<-HTML
+          <div class="input input integer age required">
+            <label for="user_personal_info_age">Perconal Info Age</label>
+            <input required="required" type="number" value="18" name="user[personal_info][age]" id="user_personal_info_age" />
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders input with errors' do
+        form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '' } } })
+        form.update
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:personal_info) { |sf| sf.input(:age) }
+          end
+
+        expected_html = <<-HTML
+          <div class="input input integer age required error">
+            <label for="user_personal_info_age">Perconal Info Age</label>
+            <input required="required" type="number" name="user[personal_info][age]" id="user_personal_info_age" />
+            <div class="form-error is-visible">должно быть заполнено</div>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
     end
 
-    it 'renders input with errors' do
-      form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '' } } })
-      form.update
-      html =
-        context.active_dry_form_for(form) do |f|
-          f.fields_for(:personal_info) { |sf| sf.input(:age) }
-        end
+    context 'when nested record is a hash' do
+      before(:each) { user.dimensions = { height: 180 } }
 
-      expected_html = <<-HTML
-        <div class="input input integer age required error">
-          <label for="user_personal_info_age">Perconal Info Age</label>
-          <input required="required" type="number" name="user[personal_info][age]" id="user_personal_info_age" />
-          <div class="form-error is-visible">должно быть заполнено</div>
-        </div>
-      HTML
+      it 'renders input' do
+        form = NestedHasOneForm.new(record: user)
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:dimensions) { |sf| sf.input(:height) }
+          end
 
-      expect(html).to include_html(expected_html)
+        expected_html = <<-HTML
+          <div class="input input integer height required">
+            <label for="user_dimensions_height">Dimensions Height</label>
+            <input required="required" type="number" value="180" name="user[dimensions][height]" id="user_dimensions_height" />
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders input with errors' do
+        form = NestedHasOneForm.new(record: user, params: { user: { dimensions: { height: '' } } })
+        form.update
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:dimensions) { |sf| sf.input(:height) }
+          end
+
+        expected_html = <<-HTML
+          <div class="input input integer height required error">
+            <label for="user_dimensions_height">Dimensions Height</label>
+            <input required="required" type="number" name="user[dimensions][height]" id="user_dimensions_height" />
+            <div class="form-error is-visible">должно быть заполнено</div>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
     end
   end
 
   context 'when multiple nested form rendered' do
-    before(:each) { user.bookmarks.build }
+    context 'when nested record is an association' do
+      before(:each) { user.bookmarks.build(url: 'https://example.com') }
 
-    it 'renders input' do
-      form = NestedHasManyForm.new(record: user)
-      html =
-        context.active_dry_form_for(form) do |f|
-          f.fields_for(:bookmarks) do |sf|
-            sf.input(:url)
+      it 'renders input' do
+        form = NestedHasManyForm.new(record: user)
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:bookmarks) { |sf| sf.input(:url) }
           end
-        end
 
-      expected_html = <<-HTML
-        <div class="input input string url required">
-          <label for="user_bookmarks__url">Bookmarks URL</label>
-          <input required="required" type="url" name="user[bookmarks][][url]" id="user_bookmarks__url" />
-        </div>
-      HTML
+        expected_html = <<-HTML
+          <div class="input input string url required">
+            <label for="user_bookmarks__url">Bookmarks URL</label>
+            <input required="required" type="url" value="https://example.com" name="user[bookmarks][][url]" id="user_bookmarks__url" />
+          </div>
+        HTML
 
-      expect(html).to include_html(expected_html)
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders input with errors' do
+        bookmarks_attributes = [
+          { url: '' },
+        ]
+        form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
+        form.update
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:bookmarks) { |sf| sf.input(:url) }
+          end
+
+        expected_html = <<-HTML
+          <div class="input input string url required error">
+            <label for="user_bookmarks__url">Bookmarks URL</label>
+            <input required="required" type="url" name="user[bookmarks][][url]" id="user_bookmarks__url" />
+            <div class="form-error is-visible">должно быть заполнено</div>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
     end
 
-    it 'renders input with errors' do
-      bookmarks_attributes = [
-        { url: '' },
-      ]
-      form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
-      form.update
-      html =
-        context.active_dry_form_for(form) do |f|
-          f.fields_for(:bookmarks) do |sf|
-            sf.input(:url)
+    context 'when nested record is a hash' do
+      before(:each) { user.favorites = [{ kind: 'book' }] }
+
+      it 'renders input' do
+        form = NestedHasManyForm.new(record: user)
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:favorites) do |sf|
+              sf.input :kind
+            end
           end
-        end
 
-      expected_html = <<-HTML
-        <div class="input input string url required error">
-          <label for="user_bookmarks__url">Bookmarks URL</label>
-          <input required="required" type="url" name="user[bookmarks][][url]" id="user_bookmarks__url" />
-          <div class="form-error is-visible">должно быть заполнено</div>
-        </div>
-      HTML
+        expected_html = <<-HTML
+          <div class="input input string kind required">
+            <label for="user_favorites__kind">Favorites Kind</label>
+            <input required="required" type="text" value="book" name="user[favorites][][kind]" id="user_favorites__kind" />
+          </div>
+        HTML
 
-      expect(html).to include_html(expected_html)
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders input with errors' do
+        favorites_attributes = [
+          { kind: '' },
+        ]
+        form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
+        form.update
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.fields_for(:favorites) { |sf| sf.input(:kind) }
+          end
+
+        expected_html = <<-HTML
+          <div class="input input string kind required error">
+            <label for="user_favorites__kind">Favorites Kind</label>
+            <input required="required" type="text" name="user[favorites][][kind]" id="user_favorites__kind" />
+            <div class="form-error is-visible">должно быть заполнено</div>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
     end
   end
 end

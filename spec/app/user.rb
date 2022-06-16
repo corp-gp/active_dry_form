@@ -10,4 +10,7 @@ class User < ApplicationRecord
   has_many :bookmarks
   accepts_nested_attributes_for :bookmarks
 
+  serialize :favorites, JSON
+  serialize :dimensions, JSON
+
 end

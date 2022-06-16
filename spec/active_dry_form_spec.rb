@@ -3,6 +3,8 @@
 require_relative 'app/user'
 require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
+require_relative 'app/nested_has_one_form'
+require_relative 'app/nested_has_many_form'
 require_relative 'app/custom_contract_form'
 require_relative 'app/base_validation_form'
 require_relative 'app/filter_blank_form'
@@ -62,6 +64,54 @@ RSpec.describe ActiveDryForm do
       expect(form.personal_info.info(:email)).to include(type: 'string')
       expect(form.bookmarks[0].info(:url)).to include(type: 'string')
       expect(form.info(:settings)).to include(type: 'object')
+    end
+
+    context 'when nested form' do
+      it 'set single attribute' do
+        form = NestedHasOneForm.new
+        form.personal_info.age = 18
+        form.dimensions.height = 180
+
+        expect(form.personal_info.age).to eq 18
+        expect(form.dimensions.height).to eq 180
+
+        form = NestedHasManyForm.new
+        form.bookmarks[0].url = 'https://example.com'
+        form.favorites[0].kind = 'book'
+
+        expect(form.bookmarks[0].url).to eq 'https://example.com'
+        expect(form.favorites[0].kind).to eq 'book'
+      end
+
+      it 'set hash' do
+        form = NestedHasOneForm.new
+        form.personal_info.attributes = { age: 18 }
+        form.dimensions.attributes = { height: 180 }
+
+        expect(form.personal_info.age).to eq 18
+        expect(form.dimensions.height).to eq 180
+
+        form = NestedHasManyForm.new
+        form.bookmarks[0].url = 'https://example.com'
+        form.favorites[0].kind = 'book'
+
+        expect(form.bookmarks[0].url).to eq 'https://example.com'
+        expect(form.favorites[0].kind).to eq 'book'
+      end
+
+      it 'set nested hash' do
+        form = NestedHasOneForm.new
+        form.attributes = { personal_info: { age: 18 }, dimensions: { height: 180 } }
+
+        expect(form.personal_info.age).to eq 18
+        expect(form.dimensions.height).to eq 180
+
+        form = NestedHasManyForm.new
+        form.attributes = { bookmarks: [{ url: 'https://example.com' }], favorites: [{ kind: 'book' }] }
+
+        expect(form.bookmarks[0].url).to eq 'https://example.com'
+        expect(form.favorites[0].kind).to eq 'book'
+      end
     end
   end
 

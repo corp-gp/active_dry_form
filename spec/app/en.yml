@@ -17,3 +17,8 @@ en:
         age: Perconal Info Age
       bookmarks:
         url: Bookmarks URL
+      favorites:
+        kind: Favorites Kind
+      dimensions:
+        height: Dimensions Height
+

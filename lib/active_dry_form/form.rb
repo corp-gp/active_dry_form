@@ -78,7 +78,7 @@ module ActiveDryForm
         self.attributes = form_params
       end
 
-      @record = record
+      self.record = record
     end
 
     def validator

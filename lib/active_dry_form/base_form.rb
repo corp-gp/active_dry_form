@@ -3,7 +3,7 @@
 module ActiveDryForm
   class BaseForm
 
-    attr_accessor :record
+    attr_reader :record
     attr_writer :errors
 
     def initialize(params: nil)
@@ -31,7 +31,7 @@ module ActiveDryForm
     end
 
     def to_key
-      key = record&.id
+      key = id
       [key] if key
     end
 
@@ -42,7 +42,19 @@ module ActiveDryForm
 
     # используется при генерации URL, когда record.persisted?
     def to_param
-      record.id.to_s
+      id.to_s
+    end
+
+    def record=(value)
+      @record =
+        if value.is_a?(Hash)
+          hr = HashRecord.new
+          hr.replace(value)
+          hr.define_methods
+          hr
+        else
+          value
+        end
     end
 
     def attributes=(hsh)
@@ -84,12 +96,14 @@ module ActiveDryForm
           end
         elsif nested_namespace && value[:type] == 'array'
           define_method "#{nested_namespace}=" do |nested_params|
-            params[nested_namespace] = nested_params.map { |item_params| sub_klass.new(params: item_params) }
+            params[nested_namespace] = NestedFormList.new(nested_params.map { |item_params| sub_klass.new(params: item_params) })
+            params[nested_namespace].form_class = sub_klass
+            params[nested_namespace]
           end
           define_method nested_namespace do
-            params[nested_namespace] ||= []
+            params[nested_namespace] ||= NestedFormList.new
+            params[nested_namespace].form_class = sub_klass
             (record.try(nested_namespace) || []).map.with_index do |nested_record, idx|
-              params[nested_namespace][idx] ||= sub_klass.new
               params[nested_namespace][idx].record = nested_record
               params[nested_namespace][idx].errors = errors.dig(nested_namespace, idx)
             end
@@ -144,6 +158,34 @@ module ActiveDryForm
       else
         object
       end
+    end
+
+    class NestedFormList < Array
+
+      attr_accessor :form_class
+
+      def [](idx)
+        super || public_send(:[]=, idx, form_class.new) # default form object
+      end
+
+    end
+
+    class HashRecord < Hash
+
+      def persisted?
+        false
+      end
+
+      def id
+        self[:id] || self['id']
+      end
+
+      def define_methods
+        keys.each do |key|
+          define_singleton_method(key) { fetch(key) }
+        end
+      end
+
     end
 
   end
