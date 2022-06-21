@@ -200,16 +200,22 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders date_time input' do
+      it 'renders time input' do
         html = context.active_dry_form_for(form) { |f| f.input :call_on }
         expected_html = <<-HTML
-        <div class="input input date-time call_on">
+        <div class="input input time call_on">
           <label for="user_call_on">User Call On</label>
             <input data-controller="flatpickr" data-flatpickr-enable-time="true" type="text" name="user[call_on]" id="user_call_on" />
         </div>
         HTML
 
         expect(html).to include_html(expected_html)
+      end
+
+      it 'raise exception for date_time input' do
+        expect {
+          context.active_dry_form_for(form) { |f| f.input :run_at }
+        }.to raise_error(/use :time instead :date_time/)
       end
 
       it 'renders select' do
