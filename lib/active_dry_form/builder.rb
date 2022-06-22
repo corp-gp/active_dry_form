@@ -12,7 +12,8 @@ module ActiveDryForm
       input_tag =
         case dry_tag.input_type
         when 'date'      then text_field(method, dry_tag.input_opts.merge('data-controller': 'flatpickr'))
-        when 'date-time' then text_field(method, dry_tag.input_opts.merge('data-controller': 'flatpickr', 'data-flatpickr-enable-time': 'true'))
+        when 'time'      then text_field(method, dry_tag.input_opts.merge('data-controller': 'flatpickr', 'data-flatpickr-enable-time': 'true'))
+        when 'date-time' then raise 'use :time instead :date_time (does not apply time zone) in params block'
         when 'integer'   then number_field(method, dry_tag.input_opts)
         when 'boolean'   then check_box(method, dry_tag.input_opts)
         else
