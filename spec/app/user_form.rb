@@ -10,12 +10,12 @@ class UserForm < ActiveDryForm::Form
   end
 
   action def create
-    record = User.create!(validator.to_h)
+    record = User.create!(data)
     Success(record)
   end
 
   action def update
-    record.update!(validator.to_h)
+    record.update!(data)
     Success(record)
   end
 

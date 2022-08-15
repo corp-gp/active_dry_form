@@ -24,7 +24,7 @@ class NestedHasManyForm < ActiveDryForm::Form
   end
 
   action def update
-    record.attributes = validator.to_h.except(:bookmarks)
+    record.attributes = data.except(:bookmarks)
     record.bookmarks_attributes = validator[:bookmarks] if validator[:bookmarks]
     record.save!
     Success(record)

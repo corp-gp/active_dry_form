@@ -85,6 +85,10 @@ module ActiveDryForm
       @validator ||= self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
     end
 
+    def data
+      validator.values.data
+    end
+
     def errors
       return {} unless @validator
 

@@ -19,7 +19,7 @@ class NestedHasOneForm < ActiveDryForm::Form
   end
 
   action def update
-    record.attributes = validator.to_h.except(:personal_info)
+    record.attributes = data.except(:personal_info)
     record.personal_info_attributes = validator[:personal_info] if validator[:personal_info]
     record.save!
     Success(record)
