@@ -86,7 +86,7 @@ module ActiveDryForm
     end
 
     def data
-      validator.values.data
+      @data ||= validator.values.data
     end
 
     def errors
