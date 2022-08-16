@@ -13,7 +13,7 @@ class CustomContractForm < ApplicationForm
   end
 
   action def create
-    record = User.create!(validator.to_h)
+    record = User.create!(data)
     Success(record)
   end
 
