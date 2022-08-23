@@ -17,34 +17,19 @@ module ActiveDryForm
       define_methods
     end
 
+    attr_reader :validator, :data, :errors, :base_errors
+
     def self.action(method)
       alias_method :"__#{method}", method
 
-      class_eval <<~RUBY, __FILE__, __LINE__ + 1
-        # def create(...)
-        #   if validator.failure?
-        #     @base_errors = validator.errors.filter(:base?).map(&:to_s).presence
-        #     return Failure(:validate_invalid)
-        #   end
-        #
-        #   result = __create(...)
-        #
-        #   unless result.is_a?(::Dry::Monads::Result)
-        #     raise ResultError, 'method `create` should be returning `monad`'
-        #   end
-        #
-        #   case result
-        #   in Failure[:failure_service, base_errors]
-        #     @base_errors = base_errors
-        #   else
-        #   end
-        #
-        #   result
-        # end
-
+      class_eval <<~RUBY, __FILE__, __LINE__ + 1 # rubocop:disable Style/DocumentDynamicEvalDefinition
         def #{method}(...)
-          if validator.failure?
-            @base_errors = validator.errors.filter(:base?).map(&:to_s).presence
+          @validator = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
+          @data      = @validator.values.data
+          @errors    = @validator.errors.to_h
+
+          if @validator.failure?
+            @base_errors = @validator.errors.filter(:base?).map(&:to_s).presence
             return Failure(:validate_invalid)
           end
 
@@ -65,8 +50,6 @@ module ActiveDryForm
       RUBY
     end
 
-    attr_reader :base_errors
-
     def initialize(record: nil, params: nil)
       raise 'in `params` use `request.parameters` instead of `params`' if params.is_a?(::ActionController::Parameters)
 
@@ -78,21 +61,8 @@ module ActiveDryForm
         self.attributes = form_params
       end
 
-      self.record = record
-    end
-
-    def validator
-      @validator ||= self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
-    end
-
-    def data
-      @data ||= validator.values.data
-    end
-
-    def errors
-      return {} unless @validator
-
-      @errors ||= @validator.errors.to_h
+      @errors = {}
+      @record = record
     end
 
   end
