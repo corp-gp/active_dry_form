@@ -138,6 +138,26 @@ RSpec.describe ActiveDryForm do
       form.update
       expect(form.errors).to eq(name: ['должно быть заполнено'])
     end
+
+    context 'when form validating' do
+      it 'returns validation errors' do
+        form.validate
+        expect(form.valid?).to eq false
+        expect(form.errors).to eq(name: ['должно быть заполнено'])
+      end
+
+      it 'return validation errors after change field' do
+        form.validate
+        expect(form.valid?).to eq false
+
+        form.name = 'Ivan'
+        expect(form.valid?).to eq false
+
+        form.validate
+        expect(form.valid?).to eq true
+        expect(form.errors).to eq({})
+      end
+    end
   end
 
   context 'when custom validation fails' do

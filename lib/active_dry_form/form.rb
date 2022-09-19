@@ -24,14 +24,8 @@ module ActiveDryForm
 
       class_eval <<~RUBY, __FILE__, __LINE__ + 1 # rubocop:disable Style/DocumentDynamicEvalDefinition
         def #{method}(...)
-          @validator = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
-          @data      = @validator.values.data
-          @errors    = @validator.errors.to_h
-
-          if @validator.failure?
-            @base_errors = @validator.errors.filter(:base?).map(&:to_s).presence
-            return Failure(:validate_invalid)
-          end
+          validate
+          return Failure(:validate_invalid) unless valid?
 
           result = __#{method}(...)
 
@@ -63,6 +57,21 @@ module ActiveDryForm
 
       @errors = {}
       @record = record
+    end
+
+    def validate
+      @validator = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
+      @data      = @validator.values.data
+      @errors    = @validator.errors.to_h
+      @is_valid  = @validator.success?
+
+      if @validator.failure?
+        @base_errors = @validator.errors.filter(:base?).map(&:to_s).presence
+      end
+    end
+
+    def valid?
+      @is_valid
     end
 
   end
