@@ -77,6 +77,19 @@ module ActiveDryForm
             Class.new(BaseForm) do
               attr_writer :errors
 
+              def self.wrap(object)
+                case object
+                when BaseForm
+                  object
+                when Hash
+                  form = new
+                  form.attributes = object
+                  form
+                else
+                  new
+                end
+              end
+
               def errors
                 @errors ||= {}
               end
@@ -122,19 +135,6 @@ module ActiveDryForm
             fetch(key, record.try(key))
           end
         end
-      end
-    end
-
-    def self.wrap(object)
-      case object
-      when BaseForm
-        object
-      when Hash
-        form = new
-        form.attributes = object
-        form
-      else
-        new
       end
     end
 
