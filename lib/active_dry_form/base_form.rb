@@ -77,16 +77,16 @@ module ActiveDryForm
             Class.new(BaseForm) do
               attr_writer :errors
 
-              def self.wrap(object)
+              def self.new(object = nil)
                 case object
                 when BaseForm
                   object
                 when Hash
-                  form = new
+                  form = allocate
                   form.attributes = object
                   form
                 else
-                  new
+                  allocate
                 end
               end
 
@@ -105,7 +105,7 @@ module ActiveDryForm
 
         if nested_namespace && value[:type] == 'object'
           define_method nested_namespace do
-            self[nested_namespace] = sub_klass.wrap(self[nested_namespace])
+            self[nested_namespace] = sub_klass.new(self[nested_namespace])
             self[nested_namespace].record = record.try(nested_namespace)
             self[nested_namespace].errors = errors[nested_namespace]
             self[nested_namespace]
@@ -115,7 +115,7 @@ module ActiveDryForm
             nested_records = record.try(nested_namespace) || []
             if key?(nested_namespace)
               self[nested_namespace].each_with_index do |nested_params, idx|
-                self[nested_namespace][idx] = sub_klass.wrap(nested_params)
+                self[nested_namespace][idx] = sub_klass.new(nested_params)
                 self[nested_namespace][idx].record = nested_records[idx]
                 self[nested_namespace][idx].errors = errors.dig(nested_namespace, idx)
                 self[nested_namespace][idx]
