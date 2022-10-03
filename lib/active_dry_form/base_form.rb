@@ -130,7 +130,9 @@ module ActiveDryForm
       when BaseForm
         object
       when Hash
-        self[object]
+        form = new
+        form.attributes = object
+        form
       else
         new
       end

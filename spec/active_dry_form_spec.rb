@@ -88,7 +88,7 @@ RSpec.describe ActiveDryForm do
 
       it 'set hash' do
         form = NestedHasOneForm.new
-        form.personal_info = { age: 18 }
+        form.personal_info = { 'age' => 18 }
         form.dimensions = { height: 180 }
 
         expect(form.personal_info.age).to eq 18
@@ -96,19 +96,21 @@ RSpec.describe ActiveDryForm do
 
         form = NestedHasManyForm.new
         form.bookmarks = [{ url: 'https://example.com' }]
+        form.favorites = [{ 'kind' => 'book' }]
 
         expect(form.bookmarks[0].url).to eq 'https://example.com'
+        expect(form.favorites[0].kind).to eq 'book'
       end
 
       it 'set nested hash' do
         form = NestedHasOneForm.new
-        form.attributes = { personal_info: { age: 18 }, dimensions: { height: 180 } }
+        form.attributes = { 'personal_info' => { 'age' => 18 }, dimensions: { height: 180 } }
 
         expect(form.personal_info.age).to eq 18
         expect(form.dimensions.height).to eq 180
 
         form = NestedHasManyForm.new
-        form.attributes = { bookmarks: [{ url: 'https://example.com' }], favorites: [{ kind: 'book' }] }
+        form.attributes = { 'bookmarks' => [{ 'url' => 'https://example.com' }], favorites: [{ kind: 'book' }] }
 
         expect(form.bookmarks[0].url).to eq 'https://example.com'
         expect(form.favorites[0].kind).to eq 'book'
