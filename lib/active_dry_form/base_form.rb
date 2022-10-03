@@ -77,15 +77,12 @@ module ActiveDryForm
             Class.new(BaseForm) do
               attr_writer :errors
 
-              def self.wrap(object = nil)
-                case object
-                when BaseForm
-                  object
-                else
-                  form = new
-                  form.attributes = object if object
-                  form
-                end
+              def self.wrap(object)
+                return object if object.is_a?(BaseForm)
+
+                form = new
+                form.attributes = object if object
+                form
               end
 
               def errors
@@ -137,9 +134,9 @@ module ActiveDryForm
     end
 
     private def _deep_transform_values_in_params!(object)
+      return object if object.is_a?(BaseForm)
+
       case object
-      when BaseForm
-        object
       when String
         object.strip.presence
       when Hash
