@@ -76,6 +76,9 @@ RSpec.describe ActiveDryForm do
         expect(form.dimensions.height).to eq 180
 
         form = NestedHasManyForm.new
+        form.bookmarks = [{ url: nil }]
+        form.favorites = [{ kind: nil }]
+
         form.bookmarks[0].url = 'https://example.com'
         form.favorites[0].kind = 'book'
 
@@ -85,15 +88,15 @@ RSpec.describe ActiveDryForm do
 
       it 'set hash' do
         form = NestedHasOneForm.new
-        form.personal_info.attributes = { age: 18 }
-        form.dimensions.attributes = { height: 180 }
+        form.personal_info = { 'age' => 18 }
+        form.dimensions = { height: 180 }
 
         expect(form.personal_info.age).to eq 18
         expect(form.dimensions.height).to eq 180
 
         form = NestedHasManyForm.new
-        form.bookmarks[0].url = 'https://example.com'
-        form.favorites[0].kind = 'book'
+        form.bookmarks = [{ url: 'https://example.com' }]
+        form.favorites = [{ 'kind' => 'book' }]
 
         expect(form.bookmarks[0].url).to eq 'https://example.com'
         expect(form.favorites[0].kind).to eq 'book'
@@ -101,15 +104,28 @@ RSpec.describe ActiveDryForm do
 
       it 'set nested hash' do
         form = NestedHasOneForm.new
-        form.attributes = { personal_info: { age: 18 }, dimensions: { height: 180 } }
+        form.attributes = { 'personal_info' => { 'age' => 18 }, dimensions: { height: 180 } }
 
         expect(form.personal_info.age).to eq 18
         expect(form.dimensions.height).to eq 180
 
         form = NestedHasManyForm.new
-        form.attributes = { bookmarks: [{ url: 'https://example.com' }], favorites: [{ kind: 'book' }] }
+        form.attributes = { 'bookmarks' => [{ 'url' => 'https://example.com' }], favorites: [{ kind: 'book' }] }
 
         expect(form.bookmarks[0].url).to eq 'https://example.com'
+        expect(form.favorites[0].kind).to eq 'book'
+      end
+
+      it 'merge nested hash' do
+        form = NestedHasOneForm.new
+        form.dimensions[:height] = 190
+
+        expect(form.dimensions.height).to eq 190
+
+        form = NestedHasManyForm.new
+        form.favorites = []
+        form.favorites << { kind: 'book' }
+
         expect(form.favorites[0].kind).to eq 'book'
       end
     end
