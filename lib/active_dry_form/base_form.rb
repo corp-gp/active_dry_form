@@ -92,20 +92,20 @@ module ActiveDryForm
 
         if nested_namespace && value[:type] == 'object'
           define_method nested_namespace do
-            nested_form = sub_klass.wrap(self[nested_namespace])
-            nested_form.record = record.try(nested_namespace)
-            nested_form.errors = errors[nested_namespace]
-            self[nested_namespace] = nested_form
+            self[nested_namespace] = sub_klass.wrap(self[nested_namespace])
+            self[nested_namespace].record = record.try(nested_namespace)
+            self[nested_namespace].errors = errors[nested_namespace]
+            self[nested_namespace]
           end
         elsif nested_namespace && value[:type] == 'array'
           define_method nested_namespace do
             nested_records = record.try(nested_namespace) || []
             if key?(nested_namespace)
-              self[nested_namespace].each_index do |idx|
-                nested_form = sub_klass.wrap(self[nested_namespace][idx])
-                nested_form.record = nested_records[idx]
-                nested_form.errors = errors.dig(nested_namespace, idx)
-                self[nested_namespace][idx] = nested_form
+              self[nested_namespace].each_with_index do |nested_params, idx|
+                self[nested_namespace][idx] = sub_klass.wrap(nested_params)
+                self[nested_namespace][idx].record = nested_records[idx]
+                self[nested_namespace][idx].errors = errors.dig(nested_namespace, idx)
+                self[nested_namespace][idx]
               end
             else
               self[nested_namespace] =
@@ -140,6 +140,8 @@ module ActiveDryForm
 
     private def _deep_transform_values_in_params!(object)
       case object
+      when BaseForm
+        object
       when String
         object.strip.presence
       when Hash
