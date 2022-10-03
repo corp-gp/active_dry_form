@@ -130,9 +130,7 @@ module ActiveDryForm
       when BaseForm
         object
       when Hash
-        form = new
-        form.replace(object)
-        form
+        self[object]
       else
         new
       end
