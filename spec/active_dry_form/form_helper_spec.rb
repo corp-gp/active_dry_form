@@ -177,9 +177,9 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
 
       it 'renders textarea' do
-        html = context.active_dry_form_for(form) { |f| f.input_text :about }
+        html = context.active_dry_form_for(form) { |f| f.input_text_area :about }
         expected_html = <<-HTML
-        <div class="input input_text string about">
+        <div class="input input_text_area string about">
           <label for="user_about">User About</label>
           <textarea name="user[about]" id="user_about"></textarea>
         </div>

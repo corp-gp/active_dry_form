@@ -41,6 +41,11 @@ module ActiveDryForm
 
     def input_text(method, options = {})
       dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
+      dry_tag.wrap_tag text_field(method, dry_tag.input_opts)
+    end
+
+    def input_text_area(method, options = {})
+      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
       dry_tag.wrap_tag text_area(method, dry_tag.input_opts)
     end
 
