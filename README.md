@@ -23,10 +23,60 @@ Or install it yourself as:
 ## Usage
 
 ### General use case
-#### View
-##### app/components/admin/users/component.[slim, erb etc.]
+
+#### Form class
+##### app/forms/users/create/form.rb
 ```
-active_dry_form_for [:user, form], url: component_path(form.persisted? ? :update : :create, id: form.record&.id),
+module Users
+  module Create
+    class Form < ActiveDryForm::ApplicationForm
+
+      fields :user do
+        params do
+          required(:first_name).filled(:string, min_size?: 2, max_size?: 100)
+          required(:last_name).filled(:string, min_size?: 2, max_size?: 100)
+          required(:gender).filled(included_in?: ::User::GENDERS)
+          required(:phone).filled(Types::ValidPhone)
+
+          optional(:email).maybe(Types::ValidEmail)
+          optional(:patronymic).maybe(:string, min_size?: 2, max_size?: 100)
+          optional(:birthday).maybe(:date, gt?: Date.new(1940, 1, 1), lt?: Time.zone.today - 10.years)
+        end
+
+        rule(:phone) do
+          next unless value
+
+          if ::User.where.not(confirmed_phone_at: nil).exists?(phone: value.normalized)
+            key.failure(:duplicate)
+          end
+        end
+      end
+
+      action def create
+        # Your user create code
+        # do_something
+
+        Success(user)
+      end
+
+      action def update
+        record.update!(data)
+        Success(record)
+      end
+
+      private def do_something
+        # Do something code
+      end
+
+    end
+  end
+end
+```
+
+#### View
+##### app/views/users/create.[slim, erb etc.]
+```
+active_dry_form_for [:user, form], url: (form.persisted? ? users_update_path : users_create_path), id: form.record&.id),
 html: { 'data-controller': 'users--create turbo-form', 'data-action': 'turbo-form#submit' } do |f|
   f.input :first_name
   f.input :last_name
@@ -41,56 +91,7 @@ if form.persisted?
   link_to t('delete'), admin_users_path(form.record), method: :delete
 ```
 
-#### Form class
-##### app/components/admin/users/form.rb
-```
-module Admin
-  module Users
-    module Create
-      class Form < ActiveDryForm::ApplicationForm
-
-        fields :user do
-          params do
-            required(:first_name).filled(:string, min_size?: 2, max_size?: 100)
-            required(:last_name).filled(:string, min_size?: 2, max_size?: 100)
-            required(:gender).filled(included_in?: ::User::GENDERS)
-            required(:phone).filled(Types::ValidPhone)
-
-            optional(:email).maybe(Types::ValidEmail)
-            optional(:patronymic).maybe(:string, min_size?: 2, max_size?: 100)
-            optional(:birthday).maybe(:date, gt?: Date.new(1940, 1, 1), lt?: Time.zone.today - 10.years)
-          end
-
-          rule(:phone) do
-            next unless value
-
-            if ::User.where.not(confirmed_phone_at: nil).exists?(phone: value.normalized)
-              key.failure(:duplicate)
-            end
-          end
-        end
-
-        action def create
-          # Your user create code
-          # do_something
-
-          Success(user)
-        end
-
-        action def update
-          record.update!(data)
-          Success(record)
-        end
-
-        private def do_something
-          # Do something code
-        end
-
-      end
-    end
-  end
-end
-```
+### An example of use with a gem View Component
 
 #### Component controller
 ##### app/components/admin/users/controller.rb
