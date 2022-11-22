@@ -22,13 +22,13 @@ Or install it yourself as:
 
 ## Base Usage
 
-Let's create a dry mold first. Let's imagine that we have a Product model with the
+Let's create a active dry form first. Let's imagine that we have a Product model with the
 fields price (integer), upload_attachments (array) , title (string), status (string).
 Since under the hood active_dry_form are installed
 dry-validation https://dry-rb.org/gems/dry-validation/1.8/
 and dry-monads https://dry-rb.org/gems/dry-monads/1.3/.
-You do not have to worry about validations, error handling,
-writing and complex business logic in models
+You do not have to worry about validations, error handling, and
+writing complex business logic in models
 
 ```ruby
 class ProductForm < Form
@@ -95,7 +95,7 @@ in your view (slim for example)
 - active_dry_form_for @form do |f|
   = f.input :title
   = f.input :price
-  = f.input_select :status, Product::STATUSES
+  = f.input_select :status, Product::STATUSES.values
   = f.input_file :upload_attachments, multiple: true, label: false
 end
 ```
