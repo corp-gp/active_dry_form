@@ -22,13 +22,85 @@ Or install it yourself as:
 
 ## Base Usage
 
-Let's create a active dry form first. Let's imagine that we have a Product model with the
-fields price (integer), upload_attachments (array) , title (string), status (string).
+
 Since under the hood active_dry_form are installed
 dry-validation https://dry-rb.org/gems/dry-validation/1.8/
-and dry-monads https://dry-rb.org/gems/dry-monads/1.3/.
+and dry-monads https://dry-rb.org/gems/dry-monads/1.3/,
+action view, active model and action controller.
 You do not have to worry about validations, error handling, and
-writing complex business logic in models
+writing complex business logic in models.
+
+### Let's create a base active dry form without monads!
+
+In your form
+
+```ruby
+# forms/product_form.rb
+
+class ProductForm < Form
+  fields :product do
+    params do
+      required(:title).filled(:string, min_size?: 2)
+      required(:price).filled(:integer)
+      optional(:upload_attachments).maybe(:array)
+    end
+
+    # you can add any rules to validate your fields
+  end
+end
+```
+In your controller
+
+```ruby
+def new
+  @form = ProductForm.new
+end
+
+def create
+  @form = ProductForm.new(params: request.params)
+  @form.validate
+
+  if @form.valid?
+    Product.create!(@form)
+
+    redirect_to products_path
+  else
+    render :new
+  end
+end
+
+def edit
+  @form = ProductForm.new(record: Product.find(params[:id]))
+end
+
+def update
+  product = Product.find(params[:id])
+
+  @form = ProductForm.new(record: product, params: request.params)
+  @form.validate
+
+  if @form.valid?
+    product.update!(@form)
+
+    redirect_to products_path
+  else
+    render :edit
+  end
+end
+```
+
+in your view (slim for example)
+
+```slim
+- active_dry_form_for @form do |f|
+  = f.input :title
+  = f.input :price
+  = f.input_select :status, Product::STATUSES.values
+  = f.input_file :upload_attachments, multiple: true, label: false
+  = f.button 'Сохранить'
+```
+
+### If you want to use monads try this...
 
 ```ruby
 class ProductForm < Form
@@ -43,11 +115,15 @@ class ProductForm < Form
   end
 
   action def create
-    product = Product.create!(data.merge(administrator_id: current_admin.id))
+    # Here you can implement any business logic
+
+    product = Product.create!(data)
     Success(product)
   end
 
   action def update
+    # Here you can implement any business logic
+
     record.update!(data)
     Success(record)
   end
@@ -89,17 +165,33 @@ def update
 end
 ```
 
-in your view (slim for example)
+Your view will remain the same
+
+## like it, shall we continue?))
+
+### Okay, now let's look at all the inputs we have.
 
 ```slim
 - active_dry_form_for @form do |f|
+  / input suitable for 'date', 'time', 'date-time', 'integer',
+  /'string', 'boolean'
   = f.input :title
   = f.input :price
-  = f.input_select :status, Product::STATUSES.values
+  = f.input_select :category_id, Category.pluck(:name, :id)
+  = f.input_checkbox_inline :is_sale
+  = f.input_text :shipper_name
+  = f.input_text_area :description
+  = f.input_hidden :admin_id
   = f.input_file :upload_attachments, multiple: true, label: false
-end
+  = f.button 'Сохранить'
+
 ```
-like it, shall we continue?
+
+## Advance Usage
+  to do
+
+## Best practic
+  to do
 
 ## Development
 
