@@ -67,7 +67,7 @@ module ActiveDryForm
         else e
         end
 
-      @builder.tag.div obj_error_text.join('<br />').html_safe, class: 'form-error is-visible'
+      @builder.tag.div obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.error_class
     end
 
     def error?(method)

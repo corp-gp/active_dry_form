@@ -6,7 +6,7 @@ module ActiveDryForm
     def active_dry_form_for(name, options = {}, &block)
       options[:builder] = ActiveDryForm::Builder
       options[:html] ||= {}
-      options[:html][:class] = "active-dry-form #{options[:html][:class]}"
+      options[:html][:class] = "#{ActiveDryForm.config.form_class} #{options[:html][:class]}"
 
       # Array.wrap because Hash === name, it breaks polymorphic_path
       # TODO: refactor to options[:url]
