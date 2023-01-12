@@ -29,7 +29,7 @@ RSpec.describe ActiveDryForm do
     end
 
     it 'set hash with unknown key' do
-      ::ActiveDryForm.config.strict_param_keys = false
+      described_class.config.strict_param_keys = false
 
       form = UserForm.new
 
@@ -37,7 +37,7 @@ RSpec.describe ActiveDryForm do
         form.attributes = { first_name: 'Vasya' }
       }.not_to raise_error
 
-      ::ActiveDryForm.reset_config
+      described_class.reset_config
     end
 
     it 'read attribute form record' do
@@ -50,7 +50,7 @@ RSpec.describe ActiveDryForm do
 
       form = UserForm.new(record: user, params: { user: { name: 'Ivan', second_name: '' } })
 
-      expect(form.second_name).to eq nil
+      expect(form.second_name).to be_nil
     end
 
     it 'process invalid json schema' do
@@ -158,19 +158,19 @@ RSpec.describe ActiveDryForm do
     context 'when form validating' do
       it 'returns validation errors' do
         form.validate
-        expect(form.valid?).to eq false
+        expect(form.valid?).to be false
         expect(form.errors).to eq(name: ['должно быть заполнено'])
       end
 
       it 'return validation errors after change field' do
         form.validate
-        expect(form.valid?).to eq false
+        expect(form.valid?).to be false
 
         form.name = 'Ivan'
-        expect(form.valid?).to eq false
+        expect(form.valid?).to be false
 
         form.validate
-        expect(form.valid?).to eq true
+        expect(form.valid?).to be true
         expect(form.errors).to eq({})
       end
     end

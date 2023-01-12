@@ -3,15 +3,36 @@
 module ActiveDryForm
 
   extend Dry::Configurable
+  include Dry::Core::Constants
 
-  default_strict_param_keys =
-    if defined?(::Rails)
-      ::Rails.env.development? || ::Rails.env.test?
-    else
-      true
-    end
+  setting :strict_param_keys, default: defined?(::Rails) ? (::Rails.env.development? || ::Rails.env.test?) : true
 
-  setting :strict_param_keys, default: default_strict_param_keys
+  setting :css_classes do
+    setting :error,          default: 'form-error'
+    setting :base_error,     default: 'form-base-error'
+    setting :hint,           default: 'form-hint'
+    setting :input,          default: 'form-input'
+    setting :input_required, default: 'form-input-required'
+    setting :input_error,    default: 'form-input-error'
+  end
+
+  setting :html_options do
+    setting :input_check_box,        default: EMPTY_HASH
+    setting :input_check_box_inline, default: EMPTY_HASH
+    setting :input_date,             default: EMPTY_HASH
+    setting :input_datetime,         default: EMPTY_HASH
+    setting :input_email,            default: EMPTY_HASH
+    setting :input_file,             default: EMPTY_HASH
+    setting :input_number,           default: EMPTY_HASH
+    setting :input_password,         default: EMPTY_HASH
+    setting :input_select,           default: EMPTY_HASH
+    setting :input_telephone,        default: EMPTY_HASH
+    setting :input_text_area,        default: EMPTY_HASH
+    setting :input_text,             default: EMPTY_HASH
+    setting :input_url,              default: EMPTY_HASH
+
+    setting :form,                   default: { class: ['active-dry-form'] }
+  end
 
 end
 

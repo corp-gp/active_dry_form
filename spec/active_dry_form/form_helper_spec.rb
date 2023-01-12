@@ -28,13 +28,22 @@ RSpec.describe ActiveDryForm::FormHelper do
 
   let(:user) { User.create!(name: 'Ivan') }
 
+  describe '#active_dry_form_for' do
+    it 'renders html options' do
+      form = UserForm.new
+      html = context.active_dry_form_for(form, html: { class: 'my-form', 'data-test': true }) { |f| f.input :name }
+
+      expect(html).to include_html('<form class="active-dry-form my-form" id="new_user" data-test="true"')
+    end
+  end
+
   context 'when plain form rendered' do
     it 'renders input with additional attributes' do
       form = UserForm.new(record: user)
       html = context.active_dry_form_for(form) { |f| f.input :name, readonly: true }
 
       expected_html = <<-HTML
-        <div class="input input string name required">
+        <div class="form-input input_text form-input-required">
           <label for="user_name">User Name</label>
           <input readonly="readonly" required="required" type="text" value="Ivan" name="user[name]" id="user_name" />
         </div>
@@ -50,10 +59,10 @@ RSpec.describe ActiveDryForm::FormHelper do
       html = context.active_dry_form_for(form) { |f| f.input :name }
 
       expected_html = <<-HTML
-        <div class="input input string name required error">
+        <div class="form-input input_text form-input-required form-input-error">
           <label for="user_name">User Name</label>
           <input required="required" type="text" name="user[name]" id="user_name" />
-          <div class="form-error is-visible">должно быть заполнено</div>
+          <div class="form-error">должно быть заполнено</div>
         </div>
       HTML
 
@@ -67,10 +76,10 @@ RSpec.describe ActiveDryForm::FormHelper do
       html = context.active_dry_form_for(form) { |f| concat f.input :name }
 
       expected_html = <<-HTML
-        <div class="callout alert form-base-error">
+        <div class="form-base-error">
           <ul><li>user is read only</li></ul>
         </div>
-        <div class="input input string name">
+        <div class="form-input input_text">
           <label for="user_name">User Name</label>
           <input type="text" value="Maria" name="user[name]" id="user_name" />
         </div>
@@ -85,7 +94,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders text input' do
         html = context.active_dry_form_for(form) { |f| f.input :name }
         expected_html = <<-HTML
-          <div class="input input string name">
+          <div class="form-input input_text">
             <label for="user_name">User Name</label>
             <input type="text" name="user[name]" id="user_name" />
           </div>
@@ -106,7 +115,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders integer input' do
         html = context.active_dry_form_for(form) { |f| f.input :age }
         expected_html = <<-HTML
-        <div class="input input integer age">
+        <div class="form-input input_number">
           <label for="user_age">User Age</label>
           <input type="number" name="user[age]" id="user_age" />
         </div>
@@ -118,7 +127,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders boolean checkbox' do
         html = context.active_dry_form_for(form) { |f| f.input :is_retail }
         expected_html = <<-HTML
-        <div class="input input boolean is_retail">
+        <div class="form-input input_check_box">
           <label for="user_is_retail">User Is Retail</label>
           <input name="user[is_retail]" type="hidden" value="0" autocomplete="off" />
           <input type="checkbox" value="1" name="user[is_retail]" id="user_is_retail" />
@@ -131,7 +140,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders password input' do
         html = context.active_dry_form_for(form) { |f| f.input :password }
         expected_html = <<-HTML
-        <div class="input input string password">
+        <div class="form-input input_password">
           <label for="user_password">User Password</label>
           <input type="password" name="user[password]" id="user_password" />
         </div>
@@ -143,7 +152,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders email input' do
         html = context.active_dry_form_for(form) { |f| f.input :email }
         expected_html = <<-HTML
-        <div class="input input string email">
+        <div class="form-input input_email">
           <label for="user_email">User Email</label>
           <input type="email" name="user[email]" id="user_email" />
         </div>
@@ -155,7 +164,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders tel input' do
         html = context.active_dry_form_for(form) { |f| f.input :phone }
         expected_html = <<-HTML
-        <div class="input input string phone">
+        <div class="form-input input_telephone">
           <label for="user_phone">User Phone</label>
           <input type="tel" name="user[phone]" id="user_phone" />
         </div>
@@ -167,7 +176,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders url input' do
         html = context.active_dry_form_for(form) { |f| f.input :url }
         expected_html = <<-HTML
-        <div class="input input string url">
+        <div class="form-input input_url">
           <label for="user_url">User Url</label>
           <input type="url" name="user[url]" id="user_url" />
         </div>
@@ -179,7 +188,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders textarea' do
         html = context.active_dry_form_for(form) { |f| f.input_text_area :about }
         expected_html = <<-HTML
-        <div class="input input_text_area string about">
+        <div class="form-input input_text_area">
           <label for="user_about">User About</label>
           <textarea name="user[about]" id="user_about"></textarea>
         </div>
@@ -191,9 +200,9 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders date input' do
         html = context.active_dry_form_for(form) { |f| f.input :birthday }
         expected_html = <<-HTML
-        <div class="input input date birthday">
+        <div class="form-input input_date">
           <label for="user_birthday">User Birthday</label>
-            <input data-controller="flatpickr" type="text" name="user[birthday]" id="user_birthday" />
+            <input type="date" name="user[birthday]" id="user_birthday" />
         </div>
         HTML
 
@@ -203,9 +212,9 @@ RSpec.describe ActiveDryForm::FormHelper do
       it 'renders time input' do
         html = context.active_dry_form_for(form) { |f| f.input :call_on }
         expected_html = <<-HTML
-        <div class="input input time call_on">
+        <div class="form-input input_datetime">
           <label for="user_call_on">User Call On</label>
-            <input data-controller="flatpickr" data-flatpickr-enable-time="true" type="text" name="user[call_on]" id="user_call_on" />
+            <input type="datetime-local" name="user[call_on]" id="user_call_on" />
         </div>
         HTML
 
@@ -225,9 +234,9 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input_select string name">
+          <div class="form-input input_select">
             <label for="user_name">User Name</label>
-            <select data-controller="select-tag" name="user[name]" id="user_name">
+            <select name="user[name]" id="user_name">
               <option value="">A boy has no name</option>
               <option value="Ivan">Ivan</option>
               <option value="Boris">Boris</option>
@@ -248,9 +257,9 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input_select string second_name required">
+          <div class="form-input input_select form-input-required">
             <label for="user_second_name">User Second Name</label>
-            <select required="required" data-controller="select-tag" name="user[second_name]" id="user_second_name"><option value="" label=" "></option>
+            <select required="required" name="user[second_name]" id="user_second_name"><option value="" label=" "></option>
               <option value="Ivan">Ivan</option>
             </select>
           </div>
@@ -264,10 +273,27 @@ RSpec.describe ActiveDryForm::FormHelper do
         html = context.active_dry_form_for(form) { |f| f.input :second_name, required: true }
 
         expected_html = <<-HTML
-          <div class="input input string second_name required">
+          <div class="form-input input_text form-input-required">
             <label for="user_second_name">User Second Name</label>
 
             <input required="required" type="text" name="user[second_name]" id="user_second_name" />
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+    end
+
+    context 'when html input options set in config' do
+      it 'renders text input with additional attributes' do
+        form = UserForm.new(record: user)
+        ActiveDryForm.config.html_options.input_text = { class: 'class-1', 'data-test': true }
+        html = context.active_dry_form_for(form) { |f| f.input :name, class: 'class-2' }
+
+        expected_html = <<-HTML
+          <div class="form-input input_text form-input-required">
+            <label for="user_name">User Name</label>
+            <input class="class-1 class-2" data-test="true" required="required" type="text" value="Ivan" name="user[name]" id="user_name" />
           </div>
         HTML
 
@@ -288,7 +314,7 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input integer age required">
+          <div class="form-input input_number form-input-required">
             <label for="user_personal_info_age">Perconal Info Age</label>
             <input required="required" type="number" value="18" name="user[personal_info][age]" id="user_personal_info_age" />
           </div>
@@ -306,10 +332,10 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input integer age required error">
+          <div class="form-input input_number form-input-required form-input-error">
             <label for="user_personal_info_age">Perconal Info Age</label>
             <input required="required" type="number" name="user[personal_info][age]" id="user_personal_info_age" />
-            <div class="form-error is-visible">должно быть заполнено</div>
+            <div class="form-error">должно быть заполнено</div>
           </div>
         HTML
 
@@ -328,7 +354,7 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input integer height required">
+          <div class="form-input input_number form-input-required">
             <label for="user_dimensions_height">Dimensions Height</label>
             <input required="required" type="number" value="180" name="user[dimensions][height]" id="user_dimensions_height" />
           </div>
@@ -346,10 +372,10 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input integer height required error">
+          <div class="form-input input_number form-input-required form-input-error">
             <label for="user_dimensions_height">Dimensions Height</label>
             <input required="required" type="number" name="user[dimensions][height]" id="user_dimensions_height" />
-            <div class="form-error is-visible">должно быть заполнено</div>
+            <div class="form-error">должно быть заполнено</div>
           </div>
         HTML
 
@@ -370,7 +396,7 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input string url required">
+          <div class="form-input input_url form-input-required">
             <label for="user_bookmarks__url">Bookmarks URL</label>
             <input required="required" type="url" value="https://example.com" name="user[bookmarks][][url]" id="user_bookmarks__url" />
           </div>
@@ -391,10 +417,10 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input string url required error">
+          <div class="form-input input_url form-input-required form-input-error">
             <label for="user_bookmarks__url">Bookmarks URL</label>
             <input required="required" type="url" name="user[bookmarks][][url]" id="user_bookmarks__url" />
-            <div class="form-error is-visible">должно быть заполнено</div>
+            <div class="form-error">должно быть заполнено</div>
           </div>
         HTML
 
@@ -415,7 +441,7 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input string kind required">
+          <div class="form-input input_text form-input-required">
             <label for="user_favorites__kind">Favorites Kind</label>
             <input required="required" type="text" value="book" name="user[favorites][][kind]" id="user_favorites__kind" />
           </div>
@@ -436,10 +462,10 @@ RSpec.describe ActiveDryForm::FormHelper do
           end
 
         expected_html = <<-HTML
-          <div class="input input string kind required error">
+          <div class="form-input input_text form-input-required form-input-error">
             <label for="user_favorites__kind">Favorites Kind</label>
             <input required="required" type="text" name="user[favorites][][kind]" id="user_favorites__kind" />
-            <div class="form-error is-visible">должно быть заполнено</div>
+            <div class="form-error">должно быть заполнено</div>
           </div>
         HTML
 

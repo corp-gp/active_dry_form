@@ -6,62 +6,54 @@ module ActiveDryForm
     include ActionView::Helpers::TagHelper
     include ActionView::Context
 
-    def input(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-
-      input_tag =
-        case dry_tag.input_type
-        when 'date'      then text_field(method, dry_tag.input_opts.merge('data-controller': 'flatpickr'))
-        when 'time'      then text_field(method, dry_tag.input_opts.merge('data-controller': 'flatpickr', 'data-flatpickr-enable-time': 'true'))
-        when 'date-time' then raise 'use :time instead :date_time (does not apply time zone) in params block'
-        when 'integer'   then number_field(method, dry_tag.input_opts)
-        when 'boolean'   then check_box(method, dry_tag.input_opts)
-        else
-          case method.to_s
-          when /password/ then password_field(method, dry_tag.input_opts)
-          when /email/    then email_field(method, dry_tag.input_opts)
-          when /phone/    then telephone_field(method, dry_tag.input_opts)
-          when /url/      then url_field(method, dry_tag.input_opts)
-          else text_field(method, dry_tag.input_opts)
-          end
+    def input(field, options = {})
+      case input_type(field)
+      when 'date'              then input_date(field, options)
+      when 'time'              then input_datetime(field, options)
+      when 'date-time'         then raise 'use :time instead :date_time (does not apply time zone) in params block'
+      when 'integer', 'number' then input_number(field, options)
+      when 'boolean'           then input_check_box(field, options)
+      else
+        case field.to_s
+        when /password/ then input_password(field, options)
+        when /email/    then input_email(field, options)
+        when /phone/    then input_telephone(field, options)
+        when /url/      then input_url(field, options)
+        else input_text(field, options)
         end
-
-      dry_tag.wrap_tag input_tag
+      end
     end
 
-    def input_select(method, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, html_options)
-      dry_tag.wrap_tag select(method, collection, options, dry_tag.input_opts.merge('data-controller': 'select-tag'))
+    def input_date(field, options = {});      wrap_input(__method__, field, options) { |opts| date_field(field, opts) } end
+    def input_datetime(field, options = {});  wrap_input(__method__, field, options) { |opts| datetime_field(field, opts) } end
+    def input_number(field, options = {});    wrap_input(__method__, field, options) { |opts| number_field(field, opts) } end
+    def input_password(field, options = {});  wrap_input(__method__, field, options) { |opts| password_field(field, opts) } end
+    def input_email(field, options = {});     wrap_input(__method__, field, options) { |opts| email_field(field, opts) } end
+    def input_url(field, options = {});       wrap_input(__method__, field, options) { |opts| url_field(field, opts) } end
+    def input_text(field, options = {});      wrap_input(__method__, field, options) { |opts| text_field(field, opts) } end
+    def input_file(field, options = {});      wrap_input(__method__, field, options) { |opts| file_field(field, opts) } end
+    def input_telephone(field, options = {}); wrap_input(__method__, field, options) { |opts| telephone_field(field, opts) } end
+    def input_text_area(field, options = {}); wrap_input(__method__, field, options) { |opts| text_area(field, opts) } end
+    def input_check_box(field, options = {}); wrap_input(__method__, field, options) { |opts| check_box(field, opts) } end
+
+    def input_hidden(field, options = {}); hidden_field(field, options) end
+
+    def input_check_box_inline(field, options = {})
+      wrap_input(__method__, field, options, label_last: true) do |opts|
+        check_box(field, opts)
+      end
     end
 
-    def input_checkbox_inline(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag check_box(method, dry_tag.input_opts), label_last: true
-    end
-
-    def input_text(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag text_field(method, dry_tag.input_opts)
-    end
-
-    def input_text_area(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag text_area(method, dry_tag.input_opts)
-    end
-
-    def input_file(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag file_field(method, dry_tag.input_opts)
-    end
-
-    def input_hidden(method, options = {})
-      hidden_field(method, options)
+    def input_select(field, collection, options = {}, html_options = {})
+      wrap_input(__method__, field, html_options) do |opts|
+        select(field, collection, options, opts)
+      end
     end
 
     def show_base_errors
       return unless @object.base_errors
 
-      tag.div class: 'callout alert form-base-error' do
+      tag.div class: ActiveDryForm.config.css_classes.base_error do
         tag.ul do
           # внутри ошибки может быть html
           @object.base_errors.map { tag.li _1.html_safe }.join.html_safe
@@ -69,11 +61,11 @@ module ActiveDryForm
       end
     end
 
-    def show_error(method)
-      ActiveDryForm::Input.new(self, __method__, method, {}).error_text
+    def show_error(field)
+      ActiveDryForm::Input.new(self, __method__, field, {}).error_text
     end
 
-    def button(value = nil, options = {}, &block) # rubocop:disable Gp/OptArgParameters
+    def button(value = nil, options = {}, &block)
       options[:class] = [options[:class], 'button'].compact
       super(value, options, &block)
     end
@@ -96,6 +88,23 @@ module ActiveDryForm
         end
         output
       end
+    end
+
+    ARRAY_NULL = %w[null].freeze
+    private def input_type(field)
+      (Array.wrap(object.info(field)[:type]) - ARRAY_NULL).first
+    end
+
+    private def wrap_input(method_type, field, options, wrapper_options = {})
+      options =
+        options.merge(ActiveDryForm.config.html_options[method_type]) do |_key, oldval, newval|
+          Array.wrap(newval) + Array.wrap(oldval)
+        end
+      options[:required] = object.info(field)[:required] unless options.key?(:required)
+
+      Input
+        .new(self, method_type, field, options)
+        .wrap_tag(yield(options), **wrapper_options)
     end
 
   end

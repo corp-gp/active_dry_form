@@ -3,37 +3,24 @@
 module ActiveDryForm
   class Input
 
-    attr_reader :input_opts, :input_type
-
-    def initialize(builder, method_type, method, options)
+    def initialize(builder, builder_method, field, options)
       @builder = builder
-      @method_type = method_type
-      @method = method
-
-      info = builder.object.info(method)
-      if info.nil?
-        raise ArgumentError, "Field #{method} is not found. Check form definition"
-      end
-
-      @input_type = (Array(info[:type]) - %w[null]).first
+      @builder_method = builder_method
+      @field = field
 
       @label_opts = options[:label]
       @label_text = options[:label_text]
       @hint_text = options[:hint]
-      @input_opts = options.except(:label, :hint, :label_text)
-
-      @required = info[:required] || @input_opts[:required]
-      @input_opts[:required] = true if @required
+      @required = options[:required]
+      @input_user_options = options.except(:label, :hint, :label_text)
     end
 
     def css_classes
       [
-        'input',
-        @method_type,
-        @input_type,
-        @method,
-        ('required' if @required),
-        ('error' if error?(@method)),
+        ActiveDryForm.config.css_classes.input,
+        @builder_method,
+        (ActiveDryForm.config.css_classes.input_required if @required),
+        (ActiveDryForm.config.css_classes.input_error if error?(@field)),
       ].compact
     end
 
@@ -49,29 +36,29 @@ module ActiveDryForm
     end
 
     def label
-      @builder.label(@method, @label_text) unless @label_opts == false
+      @builder.label(@field, @label_text) unless @label_opts == false
     end
 
     def hint_text
       return unless @hint_text
 
-      @builder.tag.small @hint_text, class: 'help-text'
+      @builder.tag.small @hint_text, class: ActiveDryForm.config.css_classes.hint
     end
 
     def error_text
-      return unless error?(@method)
+      return unless error?(@field)
 
       obj_error_text =
-        case e = @builder.object.errors[@method]
+        case e = @builder.object.errors[@field]
         when Hash then e.values
         else e
         end
 
-      @builder.tag.div obj_error_text.join('<br />').html_safe, class: 'form-error is-visible'
+      @builder.tag.div obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.css_classes.error
     end
 
-    def error?(method)
-      @builder.object.errors.key?(method)
+    def error?(field)
+      @builder.object.errors.key?(field)
     end
 
   end
