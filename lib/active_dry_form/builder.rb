@@ -6,13 +6,16 @@ module ActiveDryForm
     include ActionView::Helpers::TagHelper
     include ActionView::Context
 
-    def input(method, options = {})
-      wrap_input(__method__, method, options) do |input_options, input_type|
-        case input_type
-        when :boolean then check_box(method, input_options)
-        else public_send("#{input_type}_field", method, input_options)
+    %w[date datetime number password email url text file check_box text_area].each do |t|
+      m = %w[check_box text_area].include?(t) ? "#{t}_field" : t
+
+      instance_eval <<~RUBY
+        def input_#{t} do |method, options = {}|
+          wrap_input(__method__, method, options) do |input_options|
+            #{m}(method, input_options)
+          end
         end
-      end
+      RUBY
     end
 
     def input_select(method, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
@@ -24,24 +27,6 @@ module ActiveDryForm
     def input_checkbox_inline(method, options = {})
       wrap_input(__method__, method, options, label_last: true) do |input_options|
         check_box(method, input_options)
-      end
-    end
-
-    def input_text(method, options = {})
-      wrap_input(__method__, method, options) do |input_options|
-        text_field(method, input_options)
-      end
-    end
-
-    def input_text_area(method, options = {})
-      wrap_input(__method__, method, options) do |input_options|
-        text_area(method, input_options)
-      end
-    end
-
-    def input_file(method, options = {})
-      wrap_input(__method__, method, options) do |input_options|
-        file_field(method, input_options)
       end
     end
 
