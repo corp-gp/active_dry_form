@@ -106,8 +106,9 @@ module ActiveDryForm
         options[key] = Array.wrap(value) + Array.wrap(options[key])
       end
 
-      ActiveDryForm::Input.new(self, method_type, field, options)
-                          .wrap_tag(yield(options), **wrapper_options)
+      Input
+        .new(self, method_type, field, options)
+        .wrap_tag(yield(options), **wrapper_options)
     end
 
   end

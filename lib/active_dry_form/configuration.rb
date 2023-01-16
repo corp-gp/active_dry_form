@@ -3,8 +3,7 @@
 module ActiveDryForm
 
   extend Dry::Configurable
-
-  EMPTY_HASH = ::Dry::Core::Constants::EMPTY_HASH
+  include Dry::Core::Constants
 
   setting :strict_param_keys, default: defined?(::Rails) ? (::Rails.env.development? || ::Rails.env.test?) : true
 
@@ -27,6 +26,7 @@ module ActiveDryForm
     setting :input_text,             default: EMPTY_HASH
     setting :input_url,              default: EMPTY_HASH
   end
+
 end
 
 ActiveSupport::Reloader.to_prepare do
