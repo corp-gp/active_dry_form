@@ -7,51 +7,42 @@ module ActiveDryForm
     include ActionView::Context
 
     def input(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-
-      input_tag =
-        case dry_tag.input_type
-        when 'date'      then date_field(method, input_options(dry_tag, defaults.input.date))
-        when 'time'      then datetime_field(method, input_options(dry_tag, defaults.input.time))
-        when 'date-time' then raise 'use :time instead :date_time (does not apply time zone) in params block'
-        when 'integer'   then number_field(method, input_options(dry_tag, defaults.input.integer))
-        when 'boolean'   then check_box(method, input_options(dry_tag, defaults.input.boolean))
-        else
-          case method.to_s
-          when /password/ then password_field(method, input_options(dry_tag, defaults.input.password))
-          when /email/    then email_field(method, input_options(dry_tag, defaults.input.email))
-          when /phone/    then telephone_field(method, input_options(dry_tag, defaults.input.telephone))
-          when /url/      then url_field(method, input_options(dry_tag, defaults.input.url))
-          else text_field(method, input_options(dry_tag, defaults.input.text))
-          end
+      wrap_input(__method__, method, options) do |input_options, input_type|
+        case input_type
+        when :boolean then check_box(method, input_options)
+        else public_send("#{input_type}_field", method, input_options)
         end
-
-      dry_tag.wrap_tag input_tag
+      end
     end
 
     def input_select(method, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, html_options)
-      dry_tag.wrap_tag select(method, collection, options, input_options(dry_tag, defaults.input_select))
+      wrap_input(__method__, method, html_options) do |input_options|
+        select(method, collection, options, input_options)
+      end
     end
 
     def input_checkbox_inline(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag check_box(method, input_options(dry_tag, defaults.input_checkbox_inline)), label_last: true
+      wrap_input(__method__, method, options, label_last: true) do |input_options|
+        check_box(method, input_options)
+      end
     end
 
     def input_text(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag text_field(method, input_options(dry_tag, defaults.input_text))
+      wrap_input(__method__, method, options) do |input_options|
+        text_field(method, input_options)
+      end
     end
 
     def input_text_area(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag text_area(method, input_options(dry_tag, defaults.input_text_area))
+      wrap_input(__method__, method, options) do |input_options|
+        text_area(method, input_options)
+      end
     end
 
     def input_file(method, options = {})
-      dry_tag = ActiveDryForm::Input.new(self, __method__, method, options)
-      dry_tag.wrap_tag file_field(method, input_options(dry_tag, defaults.input_file))
+      wrap_input(__method__, method, options) do |input_options|
+        file_field(method, input_options)
+      end
     end
 
     def input_hidden(method, options = {})
@@ -98,14 +89,9 @@ module ActiveDryForm
       end
     end
 
-    private def defaults
-      @defaults ||= ActiveDryForm.config.default_html_options
-    end
-
-    private def input_options(dry_tag, default_options)
-      default_options.merge(dry_tag.input_opts) do |_key, oldval, newval|
-        Array.wrap(oldval) + Array.wrap(newval)
-      end
+    private def wrap_input(method_type, method, options, wrapper_options = {})
+      dry_tag = ActiveDryForm::Input.new(self, method_type, method, options)
+      dry_tag.wrap_tag yield(dry_tag.input_options, dry_tag.input_type), **wrapper_options
     end
 
   end

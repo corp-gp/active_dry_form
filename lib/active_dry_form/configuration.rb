@@ -13,14 +13,14 @@ module ActiveDryForm
   setting :default_html_options do
     setting :input do
       setting :date, default: {}
-      setting :time, default: {}
-      setting :integer, default: {}
-      setting :boolean, default: {}
+      setting :datetime, default: {}
+      setting :number, default: {}
       setting :password, default: {}
       setting :email, default: {}
       setting :telephone, default: {}
       setting :url, default: {}
       setting :text, default: {}
+      setting :boolean, default: {}
     end
     setting :input_select, default: {}
     setting :input_checkbox_inline, default: {}

@@ -3,8 +3,6 @@
 module ActiveDryForm
   class Input
 
-    attr_reader :input_opts, :input_type
-
     def initialize(builder, method_type, method, options)
       @builder = builder
       @method_type = method_type
@@ -15,22 +13,22 @@ module ActiveDryForm
         raise ArgumentError, "Field #{method} is not found. Check form definition"
       end
 
-      @input_type = (Array(info[:type]) - %w[null]).first
+      @dry_type = (Array(info[:type]) - %w[null]).first
 
       @label_opts = options[:label]
       @label_text = options[:label_text]
       @hint_text = options[:hint]
-      @input_opts = options.except(:label, :hint, :label_text)
+      @input_user_options = options.except(:label, :hint, :label_text)
 
-      @required = info[:required] || @input_opts[:required]
-      @input_opts[:required] = true if @required
+      @required = info[:required] || @input_user_options[:required]
+      @input_user_options[:required] = true if @required
     end
 
     def css_classes
       [
         'input',
         @method_type,
-        @input_type,
+        @dry_type,
         @method,
         ('required' if @required),
         ('error' if error?(@method)),
@@ -72,6 +70,35 @@ module ActiveDryForm
 
     def error?(method)
       @builder.object.errors.key?(method)
+    end
+
+    def input_type
+      @input_type ||=
+        case @dry_type
+        when 'date', 'boolean' then @dry_type.to_sym
+        when 'time' then :datetime
+        when 'date-time' then raise 'use :time instead :date_time (does not apply time zone) in params block'
+        when 'integer', 'number' then :number
+        else
+          case @method.to_s
+          when /password/ then :password
+          when /email/    then :email
+          when /phone/    then :telephone
+          when /url/      then :url
+          else :text
+          end
+        end
+    end
+
+    def input_options
+      @input_options ||=
+        begin
+          defaults = ActiveDryForm.config.default_html_options[@method_type]
+          defaults = defaults[input_type] if @method_type == :input
+          defaults.merge(@input_user_options) do |_key, oldval, newval|
+            Array.wrap(oldval) + Array.wrap(newval)
+          end
+        end
     end
 
   end
