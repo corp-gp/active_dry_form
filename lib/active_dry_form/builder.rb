@@ -99,17 +99,15 @@ module ActiveDryForm
     end
 
     private def wrap_input(method_type, method, options, wrapper_options = {})
-      options = {
-        required: object.info(method)[:required],
-      }.merge(options)
+      options = options.dup
+      options[:required] = object.info(method)[:required] unless options.key?(:required)
 
-      input_options =
-        ActiveDryForm.config.default_html_options[method_type].merge(options) do |_key, oldval, newval|
-          Array.wrap(oldval) + Array.wrap(newval)
-        end
+      ActiveDryForm.config.html_options[method_type].each do |key, value|
+        options[key] = Array.wrap(value) + Array.wrap(options[key])
+      end
 
       ActiveDryForm::Input.new(self, method_type, method, options)
-        .wrap_tag(yield(input_options), **wrapper_options)
+                          .wrap_tag(yield(options), **wrapper_options)
     end
 
   end

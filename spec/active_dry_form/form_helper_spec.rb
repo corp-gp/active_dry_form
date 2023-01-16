@@ -36,7 +36,7 @@ RSpec.describe ActiveDryForm::FormHelper do
       expected_html = <<-HTML
         <div class="input input_text required">
           <label for="user_name">User Name</label>
-          <input required="required" readonly="readonly" type="text" value="Ivan" name="user[name]" id="user_name" />
+          <input readonly="readonly" required="required" type="text" value="Ivan" name="user[name]" id="user_name" />
         </div>
       HTML
 
@@ -278,13 +278,13 @@ RSpec.describe ActiveDryForm::FormHelper do
     context 'when html input options set in config' do
       it 'renders text input with additional attributes' do
         form = UserForm.new(record: user)
-        ActiveDryForm.config.default_html_options.input_text = { class: 'class-1', 'data-test': true }
+        ActiveDryForm.config.html_options.input_text = { class: 'class-1', 'data-test': true }
         html = context.active_dry_form_for(form) { |f| f.input :name, class: 'class-2' }
 
         expected_html = <<-HTML
           <div class="input input_text required">
             <label for="user_name">User Name</label>
-            <input class="class-1 class-2" data-test="true" required="required" type="text" value="Ivan" name="user[name]" id="user_name" />
+            <input class="class-1 class-2" required="required" data-test="true" type="text" value="Ivan" name="user[name]" id="user_name" />
           </div>
         HTML
 
