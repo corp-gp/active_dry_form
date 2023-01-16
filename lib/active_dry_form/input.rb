@@ -3,35 +3,24 @@
 module ActiveDryForm
   class Input
 
-    def initialize(builder, method_type, method, options)
+    def initialize(builder, builder_method, field, options)
       @builder = builder
-      @method_type = method_type
-      @method = method
-
-      info = builder.object.info(method)
-      if info.nil?
-        raise ArgumentError, "Field #{method} is not found. Check form definition"
-      end
-
-      @dry_type = (Array(info[:type]) - %w[null]).first
+      @builder_method = builder_method
+      @field = field
 
       @label_opts = options[:label]
       @label_text = options[:label_text]
       @hint_text = options[:hint]
+      @required = options[:required]
       @input_user_options = options.except(:label, :hint, :label_text)
-
-      @required = info[:required] || @input_user_options[:required]
-      @input_user_options[:required] = true if @required
     end
 
     def css_classes
       [
         'input',
-        @method_type,
-        @dry_type,
-        @method,
+        @builder_method,
         ('required' if @required),
-        ('error' if error?(@method)),
+        ('error' if error?(@field)),
       ].compact
     end
 
@@ -47,7 +36,7 @@ module ActiveDryForm
     end
 
     def label
-      @builder.label(@method, @label_text) unless @label_opts == false
+      @builder.label(@field, @label_text) unless @label_opts == false
     end
 
     def hint_text
@@ -57,10 +46,10 @@ module ActiveDryForm
     end
 
     def error_text
-      return unless error?(@method)
+      return unless error?(@field)
 
       obj_error_text =
-        case e = @builder.object.errors[@method]
+        case e = @builder.object.errors[@field]
         when Hash then e.values
         else e
         end
@@ -68,37 +57,8 @@ module ActiveDryForm
       @builder.tag.div obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.error_class
     end
 
-    def error?(method)
-      @builder.object.errors.key?(method)
-    end
-
-    def input_type
-      @input_type ||=
-        case @dry_type
-        when 'date', 'boolean' then @dry_type.to_sym
-        when 'time' then :datetime
-        when 'date-time' then raise 'use :time instead :date_time (does not apply time zone) in params block'
-        when 'integer', 'number' then :number
-        else
-          case @method.to_s
-          when /password/ then :password
-          when /email/    then :email
-          when /phone/    then :telephone
-          when /url/      then :url
-          else :text
-          end
-        end
-    end
-
-    def input_options
-      @input_options ||=
-        begin
-          defaults = ActiveDryForm.config.default_html_options[@method_type]
-          defaults = defaults[input_type] if @method_type == :input
-          defaults.merge(@input_user_options) do |_key, oldval, newval|
-            Array.wrap(oldval) + Array.wrap(newval)
-          end
-        end
+    def error?(field)
+      @builder.object.errors.key?(field)
     end
 
   end

@@ -11,22 +11,19 @@ module ActiveDryForm
   setting :base_errors_class, default: 'form-base-error'
 
   setting :default_html_options do
-    setting :input do
-      setting :date, default: {}
-      setting :datetime, default: {}
-      setting :number, default: {}
-      setting :password, default: {}
-      setting :email, default: {}
-      setting :telephone, default: {}
-      setting :url, default: {}
-      setting :text, default: {}
-      setting :boolean, default: {}
-    end
-    setting :input_select, default: {}
-    setting :input_checkbox_inline, default: {}
-    setting :input_text, default: {}
-    setting :input_text_area, default: {}
+    setting :input_check_box, default: {}
+    setting :input_check_box_inline, default: {}
+    setting :input_date, default: {}
+    setting :input_datetime, default: {}
+    setting :input_email, default: {}
     setting :input_file, default: {}
+    setting :input_number, default: {}
+    setting :input_password, default: {}
+    setting :input_select, default: {}
+    setting :input_telephone, default: {}
+    setting :input_text_area, default: {}
+    setting :input_text, default: {}
+    setting :input_url, default: {}
   end
 
 end

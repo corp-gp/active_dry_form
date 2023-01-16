@@ -6,13 +6,33 @@ module ActiveDryForm
     include ActionView::Helpers::TagHelper
     include ActionView::Context
 
-    %w[date datetime number password email url text file check_box text_area].each do |t|
-      m = %w[check_box text_area].include?(t) ? "#{t}_field" : t
+    def input(field, options = {})
+      case input_type(field)
+      when 'date'              then input_date(field, options)
+      when 'time'              then input_datetime(field, options)
+      when 'date-time'         then raise 'use :time instead :date_time (does not apply time zone) in params block'
+      when 'integer', 'number' then input_number(field, options)
+      when 'boolean'           then input_check_box(field, options)
+      else
+        case field.to_s
+        when /password/ then input_password(field, options)
+        when /email/    then input_email(field, options)
+        when /phone/    then input_telephone(field, options)
+        when /url/      then input_url(field, options)
+        else input_text(field, options)
+        end
+      end
+    end
 
-      instance_eval <<~RUBY
-        def input_#{t} do |method, options = {}|
+    FIELDLESS_INPUT_TYPES = %w[check_box text_area].freeze
+
+    %w[date datetime number password email url text file telephone check_box text_area].each do |input_type|
+      builder_method = FIELDLESS_INPUT_TYPES.include?(input_type) ? input_type : "#{input_type}_field"
+
+      class_eval <<~RUBY, __FILE__, __LINE__ + 1 # rubocop:disable Style/DocumentDynamicEvalDefinition
+        def input_#{input_type}(method, options = {})
           wrap_input(__method__, method, options) do |input_options|
-            #{m}(method, input_options)
+            #{builder_method}(method, input_options)
           end
         end
       RUBY
@@ -74,9 +94,22 @@ module ActiveDryForm
       end
     end
 
+    private def input_type(field)
+      (Array.wrap(object.info(field)[:type]) - %w[null]).first
+    end
+
     private def wrap_input(method_type, method, options, wrapper_options = {})
-      dry_tag = ActiveDryForm::Input.new(self, method_type, method, options)
-      dry_tag.wrap_tag yield(dry_tag.input_options, dry_tag.input_type), **wrapper_options
+      options = {
+        required: object.info(method)[:required],
+      }.merge(options)
+
+      input_options =
+        ActiveDryForm.config.default_html_options[method_type].merge(options) do |_key, oldval, newval|
+          Array.wrap(oldval) + Array.wrap(newval)
+        end
+
+      ActiveDryForm::Input.new(self, method_type, method, options)
+        .wrap_tag(yield(input_options), **wrapper_options)
     end
 
   end
