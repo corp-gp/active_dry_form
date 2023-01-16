@@ -30,28 +30,28 @@ module ActiveDryForm
       builder_method = FIELDLESS_INPUT_TYPES.include?(input_type) ? input_type : "#{input_type}_field"
 
       class_eval <<~RUBY, __FILE__, __LINE__ + 1 # rubocop:disable Style/DocumentDynamicEvalDefinition
-        def input_#{input_type}(method, options = {})
-          wrap_input(__method__, method, options) do |input_options|
-            #{builder_method}(method, input_options)
+        def input_#{input_type}(field, options = {})
+          wrap_input(__method__, field, options) do |input_options|
+            #{builder_method}(field, input_options)
           end
         end
       RUBY
     end
 
-    def input_select(method, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
-      wrap_input(__method__, method, html_options) do |input_options|
-        select(method, collection, options, input_options)
+    def input_select(field, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
+      wrap_input(__method__, field, html_options) do |input_options|
+        select(field, collection, options, input_options)
       end
     end
 
-    def input_checkbox_inline(method, options = {})
-      wrap_input(__method__, method, options, label_last: true) do |input_options|
-        check_box(method, input_options)
+    def input_checkbox_inline(field, options = {})
+      wrap_input(__method__, field, options, label_last: true) do |input_options|
+        check_box(field, input_options)
       end
     end
 
-    def input_hidden(method, options = {})
-      hidden_field(method, options)
+    def input_hidden(field, options = {})
+      hidden_field(field, options)
     end
 
     def show_base_errors
@@ -65,8 +65,8 @@ module ActiveDryForm
       end
     end
 
-    def show_error(method)
-      ActiveDryForm::Input.new(self, __method__, method, {}).error_text
+    def show_error(field)
+      ActiveDryForm::Input.new(self, __method__, field, {}).error_text
     end
 
     def button(value = nil, options = {}, &block) # rubocop:disable Gp/OptArgParameters
@@ -98,15 +98,15 @@ module ActiveDryForm
       (Array.wrap(object.info(field)[:type]) - %w[null]).first
     end
 
-    private def wrap_input(method_type, method, options, wrapper_options = {})
+    private def wrap_input(method_type, field, options, wrapper_options = {})
       options = options.dup
-      options[:required] = object.info(method)[:required] unless options.key?(:required)
+      options[:required] = object.info(field)[:required] unless options.key?(:required)
 
       ActiveDryForm.config.html_options[method_type].each do |key, value|
         options[key] = Array.wrap(value) + Array.wrap(options[key])
       end
 
-      ActiveDryForm::Input.new(self, method_type, method, options)
+      ActiveDryForm::Input.new(self, method_type, field, options)
                           .wrap_tag(yield(options), **wrapper_options)
     end
 
