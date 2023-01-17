@@ -90,8 +90,9 @@ module ActiveDryForm
       end
     end
 
+    ARRAY_NULL = %w[null]
     private def input_type(field)
-      (Array.wrap(object.info(field)[:type]) - %w[null]).first
+      (Array.wrap(object.info(field)[:type]) - ARRAY_NULL).first
     end
 
     private def wrap_input(method_type, field, options, wrapper_options = {})
