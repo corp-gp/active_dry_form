@@ -7,9 +7,11 @@ module ActiveDryForm
 
   setting :strict_param_keys, default: defined?(::Rails) ? (::Rails.env.development? || ::Rails.env.test?) : true
 
-  setting :form_class,        default: 'active-dry-form'
-  setting :error_class,       default: 'form-error'
-  setting :base_errors_class, default: 'form-base-error'
+  setting :css_classes do
+    setting :form,       default: 'active-dry-form'
+    setting :error,      default: 'form-error'
+    setting :base_error, default: 'form-base-error'
+  end
 
   setting :html_options do
     setting :input_check_box,        default: EMPTY_HASH

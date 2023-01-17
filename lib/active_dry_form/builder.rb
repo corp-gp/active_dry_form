@@ -24,40 +24,36 @@ module ActiveDryForm
       end
     end
 
-    FIELDLESS_INPUT_TYPES = %w[check_box text_area].freeze
+    def input_date(field, options = {});      wrap_input(__method__, field, options) { |opts| date_field(field, opts) } end
+    def input_datetime(field, options = {});  wrap_input(__method__, field, options) { |opts| datetime_field(field, opts) } end
+    def input_number(field, options = {});    wrap_input(__method__, field, options) { |opts| number_field(field, opts) } end
+    def input_password(field, options = {});  wrap_input(__method__, field, options) { |opts| password_field(field, opts) } end
+    def input_email(field, options = {});     wrap_input(__method__, field, options) { |opts| email_field(field, opts) } end
+    def input_url(field, options = {});       wrap_input(__method__, field, options) { |opts| url_field(field, opts) } end
+    def input_text(field, options = {});      wrap_input(__method__, field, options) { |opts| text_field(field, opts) } end
+    def input_file(field, options = {});      wrap_input(__method__, field, options) { |opts| file_field(field, opts) } end
+    def input_telephone(field, options = {}); wrap_input(__method__, field, options) { |opts| telephone_field(field, opts) } end
+    def input_text_area(field, options = {}); wrap_input(__method__, field, options) { |opts| text_area(field, opts) } end
+    def input_check_box(field, options = {}); wrap_input(__method__, field, options) { |opts| check_box(field, opts) } end
 
-    %w[date datetime number password email url text file telephone check_box text_area].each do |input_type|
-      builder_method = FIELDLESS_INPUT_TYPES.include?(input_type) ? input_type : "#{input_type}_field"
-
-      class_eval <<~RUBY, __FILE__, __LINE__ + 1 # rubocop:disable Style/DocumentDynamicEvalDefinition
-        def input_#{input_type}(field, options = {})
-          wrap_input(__method__, field, options) do |input_options|
-            #{builder_method}(field, input_options)
-          end
-        end
-      RUBY
-    end
-
-    def input_select(field, collection, options = {}, html_options = {}) # rubocop:disable Gp/OptArgParameters
-      wrap_input(__method__, field, html_options) do |input_options|
-        select(field, collection, options, input_options)
-      end
-    end
+    def input_hidden(field, options = {}); hidden_field(field, options) end
 
     def input_checkbox_inline(field, options = {})
-      wrap_input(__method__, field, options, label_last: true) do |input_options|
-        check_box(field, input_options)
+      wrap_input(__method__, field, options, label_last: true) do |opts|
+        check_box(field, opts)
       end
     end
 
-    def input_hidden(field, options = {})
-      hidden_field(field, options)
+    def input_select(field, collection, options = {}, html_options = {})
+      wrap_input(__method__, field, html_options) do |opts|
+        select(field, collection, options, opts)
+      end
     end
 
     def show_base_errors
       return unless @object.base_errors
 
-      tag.div class: ActiveDryForm.config.base_errors_class do
+      tag.div class: ActiveDryForm.config.css_classes.base_error do
         tag.ul do
           # внутри ошибки может быть html
           @object.base_errors.map { tag.li _1.html_safe }.join.html_safe
@@ -69,7 +65,7 @@ module ActiveDryForm
       ActiveDryForm::Input.new(self, __method__, field, {}).error_text
     end
 
-    def button(value = nil, options = {}, &block) # rubocop:disable Gp/OptArgParameters
+    def button(value = nil, options = {}, &block)
       options[:class] = [options[:class], 'button'].compact
       super(value, options, &block)
     end

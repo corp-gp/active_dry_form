@@ -54,7 +54,7 @@ module ActiveDryForm
         else e
         end
 
-      @builder.tag.div obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.error_class
+      @builder.tag.div obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.css_classes.error
     end
 
     def error?(field)
