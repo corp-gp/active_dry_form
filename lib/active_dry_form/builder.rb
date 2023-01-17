@@ -90,7 +90,7 @@ module ActiveDryForm
       end
     end
 
-    ARRAY_NULL = %w[null]
+    ARRAY_NULL = %w[null].freeze
     private def input_type(field)
       (Array.wrap(object.info(field)[:type]) - ARRAY_NULL).first
     end
