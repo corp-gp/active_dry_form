@@ -42,7 +42,7 @@ module ActiveDryForm
     def hint_text
       return unless @hint_text
 
-      @builder.tag.small @hint_text, class: 'help-text'
+      @builder.tag.small @hint_text, class: ActiveDryForm.config.css_classes.hint
     end
 
     def error_text

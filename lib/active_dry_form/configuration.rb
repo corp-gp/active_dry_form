@@ -11,6 +11,7 @@ module ActiveDryForm
     setting :form,       default: 'active-dry-form'
     setting :error,      default: 'form-error'
     setting :base_error, default: 'form-base-error'
+    setting :hint,       default: 'form-hint'
   end
 
   setting :html_options do
