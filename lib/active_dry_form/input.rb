@@ -17,10 +17,10 @@ module ActiveDryForm
 
     def css_classes
       [
-        'input',
+        ActiveDryForm.config.css_classes.input,
         @builder_method,
-        ('required' if @required),
-        ('error' if error?(@field)),
+        (ActiveDryForm.config.css_classes.input_required if @required),
+        (ActiveDryForm.config.css_classes.input_error if error?(@field)),
       ].compact
     end
 

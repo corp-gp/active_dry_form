@@ -28,6 +28,15 @@ RSpec.describe ActiveDryForm::FormHelper do
 
   let(:user) { User.create!(name: 'Ivan') }
 
+  describe '#active_dry_form_for' do
+    it 'renders html options' do
+      form = UserForm.new
+      html = context.active_dry_form_for(form, html: { class: 'my-form', 'data-test': true }) { |f| f.input :name }
+
+      expect(html).to include_html('<form class="active-dry-form my-form" id="new_user" data-test="true"')
+    end
+  end
+
   context 'when plain form rendered' do
     it 'renders input with additional attributes' do
       form = UserForm.new(record: user)

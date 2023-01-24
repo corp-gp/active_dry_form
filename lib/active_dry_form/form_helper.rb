@@ -4,9 +4,12 @@ module ActiveDryForm
   module FormHelper
 
     def active_dry_form_for(name, options = {}, &block)
+      options = options.dup
       options[:builder] = ActiveDryForm::Builder
       options[:html] ||= {}
-      options[:html][:class] = "#{ActiveDryForm.config.css_classes.form} #{options[:html][:class]}"
+      ActiveDryForm.config.html_options.form.each do |key, value|
+        options[:html][key] = Array.wrap(value) + Array.wrap(options[:html][key])
+      end
 
       # Array.wrap because Hash === name, it breaks polymorphic_path
       # TODO: refactor to options[:url]

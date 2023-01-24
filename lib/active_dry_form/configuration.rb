@@ -8,10 +8,12 @@ module ActiveDryForm
   setting :strict_param_keys, default: defined?(::Rails) ? (::Rails.env.development? || ::Rails.env.test?) : true
 
   setting :css_classes do
-    setting :form,       default: 'active-dry-form'
-    setting :error,      default: 'form-error'
-    setting :base_error, default: 'form-base-error'
-    setting :hint,       default: 'form-hint'
+    setting :error,          default: 'form-error'
+    setting :base_error,     default: 'form-base-error'
+    setting :hint,           default: 'form-hint'
+    setting :input,          default: 'input'
+    setting :input_required, default: 'required'
+    setting :input_error,    default: 'error'
   end
 
   setting :html_options do
@@ -28,6 +30,8 @@ module ActiveDryForm
     setting :input_text_area,        default: EMPTY_HASH
     setting :input_text,             default: EMPTY_HASH
     setting :input_url,              default: EMPTY_HASH
+
+    setting :form,                   default: { class: ['active-dry-form'] }
   end
 
 end
