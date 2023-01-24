@@ -38,7 +38,7 @@ module ActiveDryForm
 
     def input_hidden(field, options = {}); hidden_field(field, options) end
 
-    def input_checkbox_inline(field, options = {})
+    def input_check_box_inline(field, options = {})
       wrap_input(__method__, field, options, label_last: true) do |opts|
         check_box(field, opts)
       end
