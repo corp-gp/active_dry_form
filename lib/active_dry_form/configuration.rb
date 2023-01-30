@@ -6,7 +6,7 @@ module ActiveDryForm
   include Dry::Core::Constants
 
   setting :strict_param_keys, default: defined?(::Rails) ? (::Rails.env.development? || ::Rails.env.test?) : true
-  setting :allow_action_controller_parameters, default: true
+  setting :allow_action_controller_params, default: true
 
   setting :css_classes do
     setting :error,          default: 'form-error'

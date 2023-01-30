@@ -148,7 +148,7 @@ RSpec.describe ActiveDryForm do
     end
 
     context 'when ActionController::Parameters is now allowed' do
-      before(:each) { described_class.config.allow_action_controller_parameters = false }
+      before(:each) { described_class.config.allow_action_controller_params = false }
 
       after(:each) { described_class.reset_config }
 

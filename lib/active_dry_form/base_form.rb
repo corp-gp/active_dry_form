@@ -54,7 +54,7 @@ module ActiveDryForm
 
     def attributes=(attrs)
       if attrs.is_a?(::ActionController::Parameters)
-        unless ActiveDryForm.config.allow_action_controller_parameters
+        unless ActiveDryForm.config.allow_action_controller_params
           message = 'in `params` use `request.parameters` instead of `params` or set `allow_params` to `true` in config'
           raise ParamsNotAllowedError, message
         end
