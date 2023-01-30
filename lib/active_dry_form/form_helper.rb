@@ -16,9 +16,7 @@ module ActiveDryForm
     end
 
     private def html_options(options)
-      return ActiveDryForm.config.html_options.form unless options[:html]
-
-      options[:html].merge(ActiveDryForm.config.html_options.form) do |_key, oldval, newval|
+      (options[:html] || {}).merge(ActiveDryForm.config.html_options.form) do |_key, oldval, newval|
         Array.wrap(newval) + Array.wrap(oldval)
       end
     end
