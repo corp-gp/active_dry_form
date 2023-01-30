@@ -129,6 +129,42 @@ RSpec.describe ActiveDryForm do
         expect(form.favorites[0].kind).to eq 'book'
       end
     end
+
+    context 'when ActionController::Parameters is allowed' do
+      it 'read attribute from params' do
+        user.update!(second_name: 'Sidorov')
+        params = ActionController::Parameters.new(user: { name: 'Ivan', second_name: '' })
+
+        form = UserForm.new(record: user, params: params)
+
+        expect(form.second_name).to be_nil
+      end
+
+      it 'set attributes' do
+        form = UserForm.new
+        form.attributes = ActionController::Parameters.new(name: 'Vasya')
+        expect(form.name).to eq 'Vasya'
+      end
+    end
+
+    context 'when ActionController::Parameters is now allowed' do
+      before(:each) { described_class.config.allow_action_controller_parameters = false }
+
+      after(:each) { described_class.reset_config }
+
+      it 'raises error on initialization' do
+        expect {
+          UserForm.new(params: ActionController::Parameters.new(user: {}))
+        }.to raise_error(ActiveDryForm::ParamsNotAllowedError)
+      end
+
+      it 'raises error on attributes assignment' do
+        form = UserForm.new
+        expect {
+          form.attributes = ActionController::Parameters.new
+        }.to raise_error(ActiveDryForm::ParamsNotAllowedError)
+      end
+    end
   end
 
   context 'when param key is not valid' do

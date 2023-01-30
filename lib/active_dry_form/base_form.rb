@@ -52,8 +52,17 @@ module ActiveDryForm
         end
     end
 
-    def attributes=(hsh)
-      hsh.each do |attr, v|
+    def attributes=(attrs)
+      if attrs.is_a?(::ActionController::Parameters)
+        unless ActiveDryForm.config.allow_action_controller_parameters
+          message = 'in `params` use `request.parameters` instead of `params` or set `allow_params` to `true` in config'
+          raise ParamsNotAllowedError, message
+        end
+
+        attrs = attrs.to_unsafe_h
+      end
+
+      attrs.each do |attr, v|
         next if !ActiveDryForm.config.strict_param_keys && !respond_to?("#{attr}=")
 
         public_send("#{attr}=", v)

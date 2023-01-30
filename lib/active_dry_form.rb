@@ -16,6 +16,8 @@ require_relative 'active_dry_form/input'
 require_relative 'active_dry_form/form_helper'
 
 module ActiveDryForm
+
   class Error < StandardError; end
-  # Your code goes here...
+  class ParamsNotAllowedError < Error; end
+
 end
