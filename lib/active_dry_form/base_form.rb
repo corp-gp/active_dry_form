@@ -136,7 +136,7 @@ module ActiveDryForm
           end
         else
           define_method key do
-            fetch(key, record.try(key))
+            (@data || self).fetch(key) { record.try(key) }
           end
         end
       end

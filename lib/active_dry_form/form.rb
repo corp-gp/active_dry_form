@@ -30,7 +30,7 @@ module ActiveDryForm
           result = __#{method}(...)
 
           unless result.is_a?(::Dry::Monads::Result)
-            raise ResultError, 'method `#{method}` should be returning `monad`'
+            raise ResultError, 'method `#{method}` must return `monad`'
           end
 
           case result
