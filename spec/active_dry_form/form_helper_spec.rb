@@ -282,7 +282,7 @@ RSpec.describe ActiveDryForm::FormHelper do
 
         html =
           context.active_dry_form_for(form) do |f|
-            f.input_select :id, { 'Ivan': 1, 'Boris': 2 }
+            f.input_select :id, { Ivan: 1, Boris: 2 }
           end
 
         expected_html = <<-HTML

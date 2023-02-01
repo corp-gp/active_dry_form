@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
@@ -25,5 +25,5 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
-    - name: Run tests
-      run: bundle exec rspec spec
+    - name: Run the default task
+      run: bundle exec rake
