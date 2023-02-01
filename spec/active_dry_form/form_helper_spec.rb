@@ -8,6 +8,7 @@ require_relative '../app/field_variety_form'
 require_relative '../app/base_validation_form'
 require_relative '../app/nested_has_one_form'
 require_relative '../app/nested_has_many_form'
+require_relative '../app/input_custom'
 I18n.load_path = ["#{__dir__}/../app/en.yml"]
 
 module StubUrlHelpers
@@ -292,6 +293,19 @@ RSpec.describe ActiveDryForm::FormHelper do
               <option selected="selected" value="1">Ivan</option>
               <option value="2">Boris</option>
             </select>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders custom input' do
+        html = context.active_dry_form_for(form) { |f| f.input_custom :name }
+
+        expected_html = <<-HTML
+          <div class="form-input input_custom">
+            <label for="user_name">User Name</label>
+            <input type="text" name="user[name]" id="user_name" />
           </div>
         HTML
 

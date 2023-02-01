@@ -5,6 +5,7 @@ module ActiveDryForm
 
     include ActionView::Helpers::TagHelper
     include ActionView::Context
+    include Dry::Core::Constants
 
     def input(field, options = {})
       case input_type(field)
@@ -96,10 +97,8 @@ module ActiveDryForm
     end
 
     private def wrap_input(method_type, field, options, wrapper_options = {})
-      options =
-        options.merge(ActiveDryForm.config.html_options[method_type]) do |_key, oldval, newval|
-          Array.wrap(newval) + Array.wrap(oldval)
-        end
+      config = ActiveDryForm.config.html_options._settings[method_type] ? ActiveDryForm.config.html_options[method_type] : EMPTY_HASH
+      options = options.merge(config) { |_key, oldval, newval| Array.wrap(newval) + Array.wrap(oldval) }
       options[:required] = object.info(field)[:required] unless options.key?(:required)
 
       Input
