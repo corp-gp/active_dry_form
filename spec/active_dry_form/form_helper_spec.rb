@@ -209,6 +209,21 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
+      it 'renders date input with typecasted value after validation' do
+        form.birthday = '2000-01-02'
+        form.validate
+        html = context.active_dry_form_for(form) { |f| f.input :birthday }
+
+        expected_html = <<-HTML
+        <div class="form-input input_date">
+          <label for="user_birthday">User Birthday</label>
+            <input value="2000-01-02" type="date" name="user[birthday]" id="user_birthday" />
+        </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
       it 'renders time input' do
         html = context.active_dry_form_for(form) { |f| f.input :call_on }
         expected_html = <<-HTML
@@ -221,10 +236,25 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
+      it 'renders time input with typecasted value after validation' do
+        form.call_on = '2000-01-02 12:00:00'
+        form.validate
+        html = context.active_dry_form_for(form) { |f| f.input :call_on }
+
+        expected_html = <<-HTML
+        <div class="form-input input_datetime">
+          <label for="user_call_on">User Call On</label>
+            <input value="2000-01-02T12:00:00" type="datetime-local" name="user[call_on]" id="user_call_on" />
+        </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
       it 'raise exception for date_time input' do
         expect {
           context.active_dry_form_for(form) { |f| f.input :run_at }
-        }.to raise_error(/use :time instead :date_time/)
+        }.to raise_error(ActiveDryForm::DateTimeNotAllowedError, /use :time instead of :date_time/)
       end
 
       it 'renders select' do
@@ -240,6 +270,27 @@ RSpec.describe ActiveDryForm::FormHelper do
               <option value="">A boy has no name</option>
               <option value="Ivan">Ivan</option>
               <option value="Boris">Boris</option>
+            </select>
+          </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders select with selected value' do
+        form.id = 1
+
+        html =
+          context.active_dry_form_for(form) do |f|
+            f.input_select :id, { 'Ivan': 1, 'Boris': 2 }
+          end
+
+        expected_html = <<-HTML
+          <div class="form-input input_select">
+            <label for="user_id">User Id</label>
+            <select name="user[id]" id="user_id">
+              <option selected="selected" value="1">Ivan</option>
+              <option value="2">Boris</option>
             </select>
           </div>
         HTML

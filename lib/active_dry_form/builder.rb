@@ -10,7 +10,7 @@ module ActiveDryForm
       case input_type(field)
       when 'date'              then input_date(field, options)
       when 'time'              then input_datetime(field, options)
-      when 'date-time'         then raise 'use :time instead :date_time (does not apply time zone) in params block'
+      when 'date-time'         then raise DateTimeNotAllowedError, 'use :time instead of :date_time (does not apply timezone) in params block'
       when 'integer', 'number' then input_number(field, options)
       when 'boolean'           then input_check_box(field, options)
       else

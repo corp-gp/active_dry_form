@@ -19,5 +19,6 @@ module ActiveDryForm
 
   class Error < StandardError; end
   class ParamsNotAllowedError < Error; end
+  class DateTimeNotAllowedError < Error; end
 
 end
