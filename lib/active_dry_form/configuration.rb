@@ -24,7 +24,8 @@ module ActiveDryForm
     setting :input_datetime,         default: EMPTY_HASH
     setting :input_email,            default: EMPTY_HASH
     setting :input_file,             default: EMPTY_HASH
-    setting :input_number,           default: EMPTY_HASH
+    setting :input_integer,          default: EMPTY_HASH
+    setting :input_number,           default: { step: 'any' }
     setting :input_password,         default: EMPTY_HASH
     setting :input_select,           default: EMPTY_HASH
     setting :input_telephone,        default: EMPTY_HASH

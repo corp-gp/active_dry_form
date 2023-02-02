@@ -6,6 +6,7 @@ en:
         name: User Name
         second_name: User Second Name
         age: User Age
+        balance: User Balance
         is_retail: User Is Retail
         password: User Password
         email: User Email

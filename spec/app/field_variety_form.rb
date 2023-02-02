@@ -7,6 +7,7 @@ class FieldVarietyForm < ActiveDryForm::Form
       optional(:id).maybe(:integer)
       optional(:name).maybe(:string)
       optional(:age).maybe(:integer)
+      optional(:balance).maybe(:float)
       optional(:is_retail).maybe(:bool)
       optional(:password).maybe(:string)
       optional(:email).maybe(:string)

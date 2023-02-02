@@ -12,7 +12,8 @@ module ActiveDryForm
       when 'date'              then input_date(field, options)
       when 'time'              then input_datetime(field, options)
       when 'date-time'         then raise DateTimeNotAllowedError, 'use :time instead of :date_time (does not apply timezone) in params block'
-      when 'integer', 'number' then input_number(field, options)
+      when 'integer'           then input_integer(field, options)
+      when 'number'            then input_number(field, options)
       when 'boolean'           then input_check_box(field, options)
       else
         case field.to_s
@@ -27,6 +28,7 @@ module ActiveDryForm
 
     def input_date(field, options = {});      wrap_input(__method__, field, options) { |opts| date_field(field, opts) } end
     def input_datetime(field, options = {});  wrap_input(__method__, field, options) { |opts| datetime_field(field, opts) } end
+    def input_integer(field, options = {});   wrap_input(__method__, field, options) { |opts| number_field(field, opts) } end
     def input_number(field, options = {});    wrap_input(__method__, field, options) { |opts| number_field(field, opts) } end
     def input_password(field, options = {});  wrap_input(__method__, field, options) { |opts| password_field(field, opts) } end
     def input_email(field, options = {});     wrap_input(__method__, field, options) { |opts| email_field(field, opts) } end
