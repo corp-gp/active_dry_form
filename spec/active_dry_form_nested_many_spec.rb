@@ -18,6 +18,12 @@ RSpec.describe ActiveDryForm do
         form.update
         expect(form.errors).to eq({ bookmarks: { 0 => { url: ['должно быть заполнено'] }, 1 => { url: ['должно быть заполнено'] } } })
       end
+
+      it 'returns typecasted value after validation' do
+        form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: [{ added_on: Date.current.to_s }] } })
+        form.update
+        expect(form.bookmarks[0].added_on).to eq Date.current
+      end
     end
 
     context 'when form is valid' do

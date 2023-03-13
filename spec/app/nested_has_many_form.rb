@@ -7,6 +7,7 @@ class NestedHasManyForm < ActiveDryForm::Form
       required(:url).filled(:string)
       optional(:id).maybe(:integer)
       optional(:name).maybe(:string)
+      optional(:added_on).maybe(:date)
     end
 
   FAVORITE =

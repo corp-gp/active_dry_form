@@ -14,6 +14,12 @@ RSpec.describe ActiveDryForm do
         form.update
         expect(form.errors).to eq({ personal_info: { age: ['должно быть заполнено'] } })
       end
+
+      it 'returns typecasted value after validation' do
+        form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { date_of_birth: Date.current.to_s } } })
+        form.update
+        expect(form.personal_info.date_of_birth).to eq Date.current
+      end
     end
 
     context 'when form is valid' do
