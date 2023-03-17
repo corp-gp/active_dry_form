@@ -35,6 +35,7 @@ class NestedDryForm < ActiveDryForm::Form
   end
 
   action def update
+    pp data
     bookmarks_data = data.delete(:bookmarks).compact
     personal_info_data = data.delete(:personal_info)
 

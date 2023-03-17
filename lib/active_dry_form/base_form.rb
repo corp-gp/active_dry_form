@@ -128,26 +128,35 @@ module ActiveDryForm
     end
 
     def self.define_methods
+      const_set :NESTED_FORM_KEYS, []
+
       self::FIELDS_INFO[:properties].each do |key, value|
+        nested_from_key = {}
         nested_type =
           if value[:type] == 'object'
             contract.schema.schema_dsl.types[key].type.primitive
           elsif value.dig(:items, :type) == 'object'
+            nested_from_key[:array] = true
             contract.schema.schema_dsl.types[key].type.member.type.primitive
           end
 
         sub_klass =
           if value[:properties] || value.dig(:items, :properties)
+            nested_from_key[:type] = :hash
             Class.new(BaseForm).tap do |klass|
               klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, key.to_s)
               klass.const_set :FIELDS_INFO, value[:items] || value
               klass.define_methods
             end
           elsif nested_type&.< BaseForm
+            nested_from_key[:type] = :instance
             nested_type
           end
 
-        nested_namespace = key if sub_klass
+        if sub_klass
+          self::NESTED_FORM_KEYS << nested_from_key.merge!(namespace: key)
+          nested_namespace = key
+        end
 
         define_method "#{key}=" do |v|
           self[key] = _deep_transform_values_in_params!(v)
@@ -207,38 +216,30 @@ module ActiveDryForm
     end
 
     private def _deep_validate_nested
-      each_key do |key|
-        nested_value = public_send(key)
+      self.class::NESTED_FORM_KEYS.each do |nested_info|
+        namespace   = nested_info[:namespace]
+        nested_data = public_send(namespace)
 
-        case nested_value
-        when BaseForm
-          nested_value.errors = @errors[key] if @errors.key?(key)
-          nested_value.data   = @data[key]
-
-          if nested_value.class.contract?
-            nested_value.validate
-            next if nested_value.valid?
-
-            @errors[key] = nested_value.errors
-            @base_errors += nested_value.base_errors
+        if nested_info[:type] == :hash && nested_info[:array]
+          nested_data.each_with_index do |nested_form, idx|
+            parent_form_errors = @errors.dig(namespace, idx)
+            nested_form.errors = parent_form_errors if parent_form_errors
+            nested_form.data   = @data.dig(namespace, idx)
           end
-        when Array
-          nested_value.each_with_index do |nested_list_value, idx|
-            next unless nested_list_value.is_a?(BaseForm)
-
-            parent_form_errors = @errors.dig(key, idx)
-            nested_list_value.errors = parent_form_errors if parent_form_errors
-            nested_list_value.data   = @data.dig(key, idx)
-
-            next unless nested_list_value.class.contract?
-
-            nested_list_value.validate
-            next if nested_list_value.valid?
-
-            @errors[key] ||= {}
-            @errors[key][idx] = nested_list_value.errors
-            @base_errors += nested_list_value.base_errors
+        elsif nested_info[:type] == :hash
+          nested_data.errors = @errors[namespace] if @errors.key?(namespace)
+          nested_data.data   = @data[namespace]
+        elsif nested_info[:type] == :instance && nested_info[:array]
+          @data[namespace] = []
+          nested_data.each_with_index do |nested_form, idx|
+            nested_form.validate
+            @data[namespace][idx] = nested_form.data
+            @base_errors += nested_form.base_errors
           end
+        else
+          nested_data.validate
+          @data[namespace] = nested_data.data
+          @base_errors += nested_data.base_errors
         end
       end
     end

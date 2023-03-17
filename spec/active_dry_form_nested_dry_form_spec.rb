@@ -40,7 +40,8 @@ RSpec.describe ActiveDryForm do
       form = NestedDryForm.new(record: user)
       form.attributes = { bookmarks: bookmarks_attributes, personal_info: personal_info_attributes }
       form.update
-      expect(form.errors).to eq({ bookmarks: { 0 => { url: ['должно быть заполнено'] } }, personal_info: { age: ['должно быть больше или равным 18'] } })
+      expect(form.personal_info.errors).to eq(age: ['должно быть больше или равным 18'])
+      expect(form.bookmarks[0].errors).to eq(url: ['должно быть заполнено'])
     end
 
     it 'returns typecasted value after validation' do
