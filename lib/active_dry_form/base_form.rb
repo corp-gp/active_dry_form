@@ -3,14 +3,15 @@
 module ActiveDryForm
   class BaseForm < Hash
 
-    attr_accessor :data, :parent_form
+    attr_accessor :data, :parent_form, :errors, :base_errors
     attr_reader :record, :validator
-
-    attr_writer :errors
 
     def initialize(record: nil, params: nil)
       self.params = params if params
       self.record = record if record
+
+      @errors = {}
+      @base_errors = []
     end
 
     def persisted?
@@ -98,14 +99,6 @@ module ActiveDryForm
       _deep_validate_nested
 
       @is_valid = base_errors.empty? && errors.empty?
-    end
-
-    def errors
-      @errors ||= {}
-    end
-
-    def base_errors
-      @base_errors ||= []
     end
 
     def valid?
@@ -219,28 +212,27 @@ module ActiveDryForm
 
         case nested_value
         when BaseForm
-          nested_value.errors = @errors[key]
+          nested_value.errors = @errors[key] if @errors.key?(key)
           nested_value.data   = @data[key]
 
           if nested_value.class.contract?
             nested_value.validate
+            next if nested_value.valid?
 
-            unless nested_value.valid?
-              @errors[key] = nested_value.errors
-              @base_errors += nested_value.base_errors
-            end
+            @errors[key] = nested_value.errors
+            @base_errors += nested_value.base_errors
           end
         when Array
           nested_value.each_with_index do |nested_list_value, idx|
             next unless nested_list_value.is_a?(BaseForm)
 
-            nested_list_value.errors = @errors.dig(key, idx)
+            parent_form_errors = @errors.dig(key, idx)
+            nested_list_value.errors = parent_form_errors if parent_form_errors
             nested_list_value.data   = @data.dig(key, idx)
 
             next unless nested_list_value.class.contract?
 
             nested_list_value.validate
-
             next if nested_list_value.valid?
 
             @errors[key] ||= {}
