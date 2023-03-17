@@ -222,12 +222,11 @@ module ActiveDryForm
 
         if nested_info[:type] == :hash && nested_info[:array]
           nested_data.each_with_index do |nested_form, idx|
-            parent_form_errors = @errors.dig(namespace, idx)
-            nested_form.errors = parent_form_errors if parent_form_errors
+            nested_form.errors = @errors.dig(namespace, idx) || {}
             nested_form.data   = @data.dig(namespace, idx)
           end
         elsif nested_info[:type] == :hash
-          nested_data.errors = @errors[namespace] if @errors.key?(namespace)
+          nested_data.errors = @errors[namespace] || []
           nested_data.data   = @data[namespace]
         elsif nested_info[:type] == :instance && nested_info[:array]
           @data[namespace] = []
