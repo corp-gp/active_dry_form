@@ -105,16 +105,6 @@ module ActiveDryForm
       @is_valid
     end
 
-    def self.contract
-      return unless contract?
-
-      self::CURRENT_CONTRACT
-    end
-
-    def self.contract?
-      const_defined?(:CURRENT_CONTRACT)
-    end
-
     def self.human_attribute_name(field)
       I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
     end
@@ -134,10 +124,10 @@ module ActiveDryForm
         nested_from_key = {}
         nested_type =
           if value[:type] == 'object'
-            contract.schema.schema_dsl.types[key].type.primitive
+            self::CURRENT_CONTRACT.schema.schema_dsl.types[key].type.primitive
           elsif value.dig(:items, :type) == 'object'
-            nested_from_key[:array] = true
-            contract.schema.schema_dsl.types[key].type.member.type.primitive
+            nested_from_key[:is_array] = true
+            self::CURRENT_CONTRACT.schema.schema_dsl.types[key].type.member.type.primitive
           end
 
         sub_klass =
@@ -220,7 +210,7 @@ module ActiveDryForm
         namespace   = nested_info[:namespace]
         nested_data = public_send(namespace)
 
-        if nested_info[:type] == :hash && nested_info[:array]
+        if nested_info[:type] == :hash && nested_info[:is_array]
           nested_data.each_with_index do |nested_form, idx|
             nested_form.errors = @errors.dig(namespace, idx) || {}
             nested_form.data   = @data.dig(namespace, idx)
@@ -228,7 +218,7 @@ module ActiveDryForm
         elsif nested_info[:type] == :hash
           nested_data.errors = @errors[namespace] || []
           nested_data.data   = @data[namespace]
-        elsif nested_info[:type] == :instance && nested_info[:array]
+        elsif nested_info[:type] == :instance && nested_info[:is_array]
           @data[namespace] = []
           nested_data.each_with_index do |nested_form, idx|
             nested_form.validate
