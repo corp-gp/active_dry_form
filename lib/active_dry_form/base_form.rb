@@ -207,18 +207,19 @@ module ActiveDryForm
 
     private def _deep_validate_nested
       self.class::NESTED_FORM_KEYS.each do |nested_info|
-        namespace   = nested_info[:namespace]
+        namespace, type, is_array = nested_info.values_at(:namespace, :type, :is_array)
+
         nested_data = public_send(namespace)
 
-        if nested_info[:type] == :hash && nested_info[:is_array]
+        if type == :hash && is_array
           nested_data.each_with_index do |nested_form, idx|
             nested_form.errors = @errors.dig(namespace, idx) || {}
             nested_form.data   = @data.dig(namespace, idx)
           end
-        elsif nested_info[:type] == :hash
+        elsif type == :hash
           nested_data.errors = @errors[namespace] || []
           nested_data.data   = @data[namespace]
-        elsif nested_info[:type] == :instance && nested_info[:is_array]
+        elsif type == :instance && is_array
           @data[namespace] = []
           nested_data.each_with_index do |nested_form, idx|
             nested_form.validate
