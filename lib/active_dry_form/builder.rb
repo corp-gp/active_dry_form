@@ -54,7 +54,7 @@ module ActiveDryForm
     end
 
     def show_base_errors
-      return unless @object.base_errors
+      return if @object.base_errors.empty?
 
       tag.div class: ActiveDryForm.config.css_classes.base_error do
         tag.ul do
