@@ -21,7 +21,7 @@ RSpec.describe ActiveDryForm do
 
     it 'updates nested model' do
       bookmark = user.bookmarks.create!(url: 'https://google.com')
-      bookmarks_attributes = [ { url: 'https://omniplatform.ru', id: bookmark.id } ]
+      bookmarks_attributes = [{ url: 'https://omniplatform.ru', id: bookmark.id }]
       user.build_personal_info(age: 18)
       user.personal_info.save!
       personal_info_attributes = { age: 25, id: user.personal_info.id }
@@ -35,7 +35,7 @@ RSpec.describe ActiveDryForm do
 
   context 'when form is invalid' do
     it 'returns validation errors' do
-      bookmarks_attributes = [{ url: ''}]
+      bookmarks_attributes = [{ url: '' }]
       personal_info_attributes = { age: 17 }
       form = NestedDryForm.new(record: user)
       form.attributes = { bookmarks: bookmarks_attributes, personal_info: personal_info_attributes }

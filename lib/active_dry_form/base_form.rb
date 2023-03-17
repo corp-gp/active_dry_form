@@ -3,15 +3,14 @@
 module ActiveDryForm
   class BaseForm < Hash
 
-    attr_reader :record, :validator, :data, :base_errors, :errors
+    attr_accessor :data, :parent_form
+    attr_reader :record, :validator
 
     attr_writer :errors
 
     def initialize(record: nil, params: nil)
       self.params = params if params
       self.record = record if record
-      @errors = {}
-      @base_errors = []
     end
 
     def persisted?
@@ -91,46 +90,22 @@ module ActiveDryForm
     end
 
     def validate
-      @errors = {}
-      @base_errors = []
+      @validator   = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
+      @data        = @validator.values.data
+      @errors      = @validator.errors.to_h
+      @base_errors = @validator.errors.filter(:base?).map(&:to_s)
 
-      nested_validate
+      _deep_validate_nested
 
-      @validator = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
-      @data      = @validator.values.data
-
-      @errors.merge!(@validator.errors.to_h)
-
-      if @validator.failure?
-        @base_errors += @validator.errors.filter(:base?).map(&:to_s)
-      end
-
-      @is_valid = @base_errors.empty? && @errors.empty?
+      @is_valid = base_errors.empty? && errors.empty?
     end
 
-    private def nested_validate
-      each_key do |key|
-        nested_value = public_send(key)
+    def errors
+      @errors ||= {}
+    end
 
-        if nested_value.is_a?(BaseForm) && nested_value.class.has_contract?
-          nested_value.validate
-          unless nested_value.valid?
-            @errors[key] = nested_value.errors
-            @base_errors += nested_value.base_errors
-          end
-        elsif nested_value.is_a?(Array)
-          nested_value.each_with_index do |nested_list_value, idx|
-            if nested_list_value.is_a?(BaseForm)&& nested_list_value.class.has_contract?
-              nested_list_value.validate
-              unless nested_list_value.valid?
-                @errors[key] ||= {}
-                @errors[key][idx] = nested_list_value.errors
-                @base_errors += nested_list_value.base_errors
-              end
-            end
-          end
-        end
-      end
+    def base_errors
+      @base_errors ||= []
     end
 
     def valid?
@@ -138,10 +113,12 @@ module ActiveDryForm
     end
 
     def self.contract
+      return unless contract?
+
       self::CURRENT_CONTRACT
     end
 
-    def self.has_contract?
+    def self.contract?
       const_defined?(:CURRENT_CONTRACT)
     end
 
@@ -149,7 +126,6 @@ module ActiveDryForm
       I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
     end
 
-    # @private internal api
     def self.wrap(object)
       return object if object.is_a?(BaseForm)
 
@@ -158,11 +134,8 @@ module ActiveDryForm
       form
     end
 
-    # @private internal api
     def self.define_methods
       self::FIELDS_INFO[:properties].each do |key, value|
-        nested_namespace = key if value[:properties] || value.dig(:items, :properties)
-
         nested_type =
           if value[:type] == 'object'
             contract.schema.schema_dsl.types[key].type.primitive
@@ -170,15 +143,18 @@ module ActiveDryForm
             contract.schema.schema_dsl.types[key].type.member.type.primitive
           end
 
-        if nested_type&.< BaseForm
-          sub_klass = nested_type
-          nested_namespace = key
-        elsif nested_namespace
-          sub_klass = Class.new(BaseForm)
-          sub_klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, nested_namespace.to_s)
-          sub_klass.const_set :FIELDS_INFO, value[:items] || value
-          sub_klass.define_methods
-        end
+        sub_klass =
+          if value[:properties] || value.dig(:items, :properties)
+            Class.new(BaseForm).tap do |klass|
+              klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, key.to_s)
+              klass.const_set :FIELDS_INFO, value[:items] || value
+              klass.define_methods
+            end
+          elsif nested_type&.< BaseForm
+            nested_type
+          end
+
+        nested_namespace = key if sub_klass
 
         define_method "#{key}=" do |v|
           self[key] = _deep_transform_values_in_params!(v)
@@ -186,19 +162,19 @@ module ActiveDryForm
 
         if nested_namespace && value[:type] == 'object'
           define_method nested_namespace do
-            self[nested_namespace] = sub_klass.wrap(@data&.dig(nested_namespace) || self[nested_namespace])
+            self[nested_namespace] = sub_klass.wrap(self[nested_namespace])
             self[nested_namespace].record = record.try(nested_namespace)
-            self[nested_namespace].errors = errors[nested_namespace] if errors.key?(nested_namespace)
+            self[nested_namespace].parent_form = self
             self[nested_namespace]
           end
         elsif nested_namespace && value[:type] == 'array'
           define_method nested_namespace do
             nested_records = record.try(nested_namespace) || []
             if key?(nested_namespace)
-              (@data&.dig(nested_namespace) || self[nested_namespace]).each_with_index do |nested_params, idx|
+              self[nested_namespace].each_with_index do |nested_params, idx|
                 self[nested_namespace][idx] = sub_klass.wrap(nested_params)
                 self[nested_namespace][idx].record = nested_records[idx]
-                self[nested_namespace][idx].errors = errors.dig(nested_namespace, idx) if errors.dig(nested_namespace, idx)
+                self[nested_namespace][idx].parent_form = self
                 self[nested_namespace][idx]
               end
             else
@@ -206,6 +182,7 @@ module ActiveDryForm
                 nested_records.map do |nested_record|
                   nested_form = sub_klass.new
                   nested_form.record = nested_record
+                  nested_form.parent_form = self
                   nested_form
                 end
             end
@@ -233,6 +210,44 @@ module ActiveDryForm
         object
       else
         object
+      end
+    end
+
+    private def _deep_validate_nested
+      each_key do |key|
+        nested_value = public_send(key)
+
+        case nested_value
+        when BaseForm
+          nested_value.errors = @errors[key]
+          nested_value.data   = @data[key]
+
+          if nested_value.class.contract?
+            nested_value.validate
+
+            unless nested_value.valid?
+              @errors[key] = nested_value.errors
+              @base_errors += nested_value.base_errors
+            end
+          end
+        when Array
+          nested_value.each_with_index do |nested_list_value, idx|
+            next unless nested_list_value.is_a?(BaseForm)
+
+            nested_list_value.errors = @errors.dig(key, idx)
+            nested_list_value.data   = @data.dig(key, idx)
+
+            next unless nested_list_value.class.contract?
+
+            nested_list_value.validate
+
+            next if nested_list_value.valid?
+
+            @errors[key] ||= {}
+            @errors[key][idx] = nested_list_value.errors
+            @base_errors += nested_list_value.base_errors
+          end
+        end
       end
     end
 
