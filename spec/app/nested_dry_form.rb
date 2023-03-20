@@ -35,12 +35,12 @@ class NestedDryForm < ActiveDryForm::Form
   end
 
   action def update
-    bookmarks_data = data.delete(:bookmarks).compact
+    bookmarks_data = data.delete(:bookmarks)
     personal_info_data = data.delete(:personal_info)
 
     record.attributes = data
-    record.bookmarks_attributes = bookmarks_data
-    record.personal_info_attributes = personal_info_data
+    record.bookmarks_attributes = bookmarks_data if bookmarks_data
+    record.personal_info_attributes = personal_info_data if personal_info_data
     record.save!
 
     Success(record)

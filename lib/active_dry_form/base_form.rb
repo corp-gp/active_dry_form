@@ -208,6 +208,7 @@ module ActiveDryForm
     private def _deep_validate_nested
       self.class::NESTED_FORM_KEYS.each do |nested_info|
         namespace, type, is_array = nested_info.values_at(:namespace, :type, :is_array)
+        next unless attributes.key?(namespace)
 
         nested_data = public_send(namespace)
 

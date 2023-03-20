@@ -15,6 +15,7 @@ RSpec.describe ActiveDryForm do
       form = NestedDryForm.new(record: user)
       form.attributes = { bookmarks: bookmarks_attributes, personal_info: personal_info_attributes }
       form.update
+      expect(form.valid?).to be(true)
       expect(user.bookmarks[0].url).to eq('https://omniplatform.ru')
       expect(user.personal_info.age).to eq 25
     end
@@ -43,6 +44,12 @@ RSpec.describe ActiveDryForm do
       expect(form.valid?).to be(false)
       expect(form.personal_info.errors).to eq(age: ['должно быть больше или равным 18'])
       expect(form.bookmarks[0].errors).to eq(url: ['должно быть заполнено'])
+    end
+
+    it 'skip validate optional form' do
+      form = NestedDryForm.new(record: user)
+      form.update
+      expect(form.valid?).to be(true)
     end
 
     it 'returns typecasted value after validation' do

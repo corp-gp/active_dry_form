@@ -234,6 +234,7 @@ RSpec.describe ActiveDryForm do
       expect(form.errors).to eq({})
 
       form.update
+      expect(form.valid?).to be(false)
       expect(form.errors).to eq(nil => ['user is read only'])
     end
   end
@@ -252,6 +253,7 @@ RSpec.describe ActiveDryForm do
 
     it 'returns Success with record itself' do
       expect(form.update).to eq Success(user)
+      expect(form.valid?).to be(true)
     end
   end
 

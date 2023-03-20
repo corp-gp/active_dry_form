@@ -28,6 +28,7 @@ RSpec.describe ActiveDryForm do
 
       it 'creates nested model' do
         form.update
+        expect(form.valid?).to be(true)
         expect(user.personal_info.age).to eq 20
       end
 
@@ -53,6 +54,7 @@ RSpec.describe ActiveDryForm do
 
       it 'creates nested model' do
         form.update
+        expect(form.valid?).to be(true)
         expect(user.dimensions).to eq('height' => 180)
       end
 

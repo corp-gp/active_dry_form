@@ -36,6 +36,7 @@ RSpec.describe ActiveDryForm do
           ]
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         form.update
+        expect(form.valid?).to be(true)
         expect(user.bookmarks.pluck(:url)).to eq(%w[/first /second])
       end
 
@@ -74,6 +75,7 @@ RSpec.describe ActiveDryForm do
           ]
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
+        expect(form.valid?).to be(true)
         expect(user.favorites).to eq [{ 'kind' => 'book', 'name' => '1984' }, { 'kind' => 'movie', 'name' => 'Planet of Monkeys' }]
       end
 
