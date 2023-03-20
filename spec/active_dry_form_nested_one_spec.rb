@@ -12,6 +12,7 @@ RSpec.describe ActiveDryForm do
       it 'returns validation errors' do
         form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '' } } })
         form.update
+        expect(form.valid?).to be(false)
         expect(form.errors).to eq({ personal_info: { age: ['должно быть заполнено'] } })
       end
 
@@ -42,6 +43,7 @@ RSpec.describe ActiveDryForm do
       it 'returns validation errors' do
         form = NestedHasOneForm.new(record: user, params: { user: { dimensions: { height: '' } } })
         form.update
+        expect(form.valid?).to be(false)
         expect(form.errors).to eq({ dimensions: { height: ['должно быть заполнено'] } })
       end
     end

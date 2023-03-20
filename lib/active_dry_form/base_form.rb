@@ -3,7 +3,16 @@
 module ActiveDryForm
   class BaseForm < Hash
 
-    attr_reader :record
+    attr_accessor :data, :parent_form, :errors, :base_errors
+    attr_reader :record, :validator
+
+    def initialize(record: nil, params: nil)
+      self.params = params if params
+      self.record = record if record
+
+      @errors = {}
+      @base_errors = []
+    end
 
     def persisted?
       record&.persisted?
@@ -52,6 +61,14 @@ module ActiveDryForm
         end
     end
 
+    def params=(params)
+      param_key = self.class::NAMESPACE.param_key
+      form_params = params[param_key] || params[param_key.to_sym]
+      raise ArgumentError, "key '#{param_key}' not found in params" if form_params.nil?
+
+      self.attributes = form_params
+    end
+
     def attributes=(attrs)
       if attrs.is_a?(::ActionController::Parameters)
         unless ActiveDryForm.config.allow_action_controller_params
@@ -73,34 +90,62 @@ module ActiveDryForm
       self
     end
 
+    def validate
+      @validator   = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
+      @data        = @validator.values.data
+      @errors      = @validator.errors.to_h
+      @base_errors = @validator.errors.filter(:base?).map(&:to_s)
+
+      @is_valid = @base_errors.empty? && @errors.empty?
+
+      _deep_validate_nested
+    end
+
+    def valid?
+      @is_valid
+    end
+
     def self.human_attribute_name(field)
       I18n.t(field, scope: :"activerecord.attributes.#{self::NAMESPACE.i18n_key}")
     end
 
+    def self.wrap(object)
+      return object if object.is_a?(BaseForm)
+
+      form = new
+      form.attributes = object if object
+      form
+    end
+
     def self.define_methods
+      const_set :NESTED_FORM_KEYS, []
+
       self::FIELDS_INFO[:properties].each do |key, value|
-        nested_namespace = key if value[:properties] || value.dig(:items, :properties)
+        nested_from_key = {}
+        nested_type =
+          if value[:type] == 'object'
+            self::CURRENT_CONTRACT.schema.schema_dsl.types[key].type.primitive
+          elsif value.dig(:items, :type) == 'object'
+            nested_from_key[:is_array] = true
+            self::CURRENT_CONTRACT.schema.schema_dsl.types[key].type.member.type.primitive
+          end
 
-        if nested_namespace
-          sub_klass =
-            Class.new(BaseForm) do
-              attr_writer :errors
-
-              def self.wrap(object)
-                return object if object.is_a?(BaseForm)
-
-                form = new
-                form.attributes = object if object
-                form
-              end
-
-              def errors
-                @errors ||= {}
-              end
+        sub_klass =
+          if value[:properties] || value.dig(:items, :properties)
+            nested_from_key[:type] = :hash
+            Class.new(BaseForm).tap do |klass|
+              klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, key.to_s)
+              klass.const_set :FIELDS_INFO, value[:items] || value
+              klass.define_methods
             end
-          sub_klass.const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, nested_namespace.to_s)
-          sub_klass.const_set :FIELDS_INFO, value[:items] || value
-          sub_klass.define_methods
+          elsif nested_type&.< BaseForm
+            nested_from_key[:type] = :instance
+            nested_type
+          end
+
+        if sub_klass
+          self::NESTED_FORM_KEYS << nested_from_key.merge!(namespace: key)
+          nested_namespace = key
         end
 
         define_method "#{key}=" do |v|
@@ -109,19 +154,19 @@ module ActiveDryForm
 
         if nested_namespace && value[:type] == 'object'
           define_method nested_namespace do
-            self[nested_namespace] = sub_klass.wrap(@data&.dig(nested_namespace) || self[nested_namespace])
+            self[nested_namespace] = sub_klass.wrap(self[nested_namespace])
             self[nested_namespace].record = record.try(nested_namespace)
-            self[nested_namespace].errors = errors[nested_namespace]
+            self[nested_namespace].parent_form = self
             self[nested_namespace]
           end
         elsif nested_namespace && value[:type] == 'array'
           define_method nested_namespace do
             nested_records = record.try(nested_namespace) || []
             if key?(nested_namespace)
-              (@data&.dig(nested_namespace) || self[nested_namespace]).each_with_index do |nested_params, idx|
+              self[nested_namespace].each_with_index do |nested_params, idx|
                 self[nested_namespace][idx] = sub_klass.wrap(nested_params)
                 self[nested_namespace][idx].record = nested_records[idx]
-                self[nested_namespace][idx].errors = errors.dig(nested_namespace, idx)
+                self[nested_namespace][idx].parent_form = self
                 self[nested_namespace][idx]
               end
             else
@@ -129,6 +174,7 @@ module ActiveDryForm
                 nested_records.map do |nested_record|
                   nested_form = sub_klass.new
                   nested_form.record = nested_record
+                  nested_form.parent_form = self
                   nested_form
                 end
             end
@@ -156,6 +202,37 @@ module ActiveDryForm
         object
       else
         object
+      end
+    end
+
+    private def _deep_validate_nested
+      self.class::NESTED_FORM_KEYS.each do |nested_info|
+        namespace, type, is_array = nested_info.values_at(:namespace, :type, :is_array)
+
+        nested_data = public_send(namespace)
+
+        if type == :hash && is_array
+          nested_data.each_with_index do |nested_form, idx|
+            nested_form.errors = @errors.dig(namespace, idx) || {}
+            nested_form.data   = @data.dig(namespace, idx)
+          end
+        elsif type == :hash
+          nested_data.errors = @errors[namespace] || {}
+          nested_data.data   = @data[namespace]
+        elsif type == :instance && is_array
+          @data[namespace] = []
+          nested_data.each_with_index do |nested_form, idx|
+            nested_form.validate
+            @data[namespace][idx] = nested_form.data
+            @base_errors += nested_form.base_errors
+            @is_valid &= nested_form.valid?
+          end
+        else
+          nested_data.validate
+          @data[namespace] = nested_data.data
+          @base_errors += nested_data.base_errors
+          @is_valid &= nested_data.valid?
+        end
       end
     end
 

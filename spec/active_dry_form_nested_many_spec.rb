@@ -16,6 +16,7 @@ RSpec.describe ActiveDryForm do
         ]
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         form.update
+        expect(form.valid?).to be(false)
         expect(form.errors).to eq({ bookmarks: { 0 => { url: ['должно быть заполнено'] }, 1 => { url: ['должно быть заполнено'] } } })
       end
 
@@ -59,6 +60,7 @@ RSpec.describe ActiveDryForm do
         ]
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
+        expect(form.valid?).to be(false)
         expect(form.errors).to eq({ favorites: { 0 => { kind: ['должно быть заполнено'] }, 1 => { kind: ['должно быть заполнено'] } } })
       end
     end

@@ -17,8 +17,6 @@ module ActiveDryForm
       define_methods
     end
 
-    attr_reader :validator, :data, :errors, :base_errors
-
     def self.action(method)
       alias_method :"__#{method}", method
 
@@ -42,34 +40,6 @@ module ActiveDryForm
           result
         end
       RUBY
-    end
-
-    def initialize(record: nil, params: nil)
-      if params
-        param_key = self.class::NAMESPACE.param_key
-        form_params = params[param_key] || params[param_key.to_sym]
-        raise ArgumentError, "key '#{param_key}' not found in params" if form_params.nil?
-
-        self.attributes = form_params
-      end
-
-      @errors = {}
-      @record = record
-    end
-
-    def validate
-      @validator = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
-      @data      = @validator.values.data
-      @errors    = @validator.errors.to_h
-      @is_valid  = @validator.success?
-
-      if @validator.failure?
-        @base_errors = @validator.errors.filter(:base?).map(&:to_s).presence
-      end
-    end
-
-    def valid?
-      @is_valid
     end
 
   end
