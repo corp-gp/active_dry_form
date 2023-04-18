@@ -23,18 +23,16 @@ module ActiveDryForm
       class_eval <<~RUBY, __FILE__, __LINE__ + 1 # rubocop:disable Style/DocumentDynamicEvalDefinition
         def #{method}(...)
           validate
-          return Failure(:validate_invalid) unless valid?
+          return Failure(:invalid_form) unless valid?
 
           result = __#{method}(...)
 
-          unless result.is_a?(::Dry::Monads::Result)
-            raise ResultError, 'method `#{method}` must return `monad`'
-          end
-
           case result
-          in Failure[:failure_service, base_errors]
-            @base_errors = base_errors
+          when ::Dry::Monads::Result::Failure
+            @base_errors = Array.wrap(result.failure)
+          when ::Dry::Monads::Result::Success
           else
+            raise ResultError, 'method `#{method}` must return `monad`'
           end
 
           result

@@ -183,7 +183,7 @@ RSpec.describe ActiveDryForm do
     end
 
     it 'returns Failure' do
-      expect(form.update).to eq Failure(:validate_invalid)
+      expect(form.update).to eq Failure(:invalid_form)
     end
 
     it 'returns validation errors' do
