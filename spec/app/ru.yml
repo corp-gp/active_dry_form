@@ -1,0 +1,25 @@
+ru:
+  activerecord:
+    attributes:
+      user:
+        id: Идентификатор
+        name: Имя
+        second_name: Фамилия
+        age: Возраст
+        balance: Баланс
+        is_retail: Розничный покупатель
+        password: Пароль
+        email: Email
+        phone: Телефон
+        url: URL
+        about: Информация о себе
+        birthday: День рождения
+        call_on: Обратный звонок
+      personal_info:
+        age: Возраст
+      bookmarks:
+        url: URL закладок
+      favorites:
+        kind: Тип избранного
+      dimensions:
+        height: Высота измерения

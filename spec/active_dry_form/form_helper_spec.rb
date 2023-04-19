@@ -9,7 +9,7 @@ require_relative '../app/base_validation_form'
 require_relative '../app/nested_has_one_form'
 require_relative '../app/nested_has_many_form'
 require_relative '../app/input_custom'
-I18n.load_path = ["#{__dir__}/../app/en.yml"]
+
 
 module StubUrlHelpers
 

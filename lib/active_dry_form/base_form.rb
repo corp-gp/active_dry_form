@@ -14,6 +14,13 @@ module ActiveDryForm
       @base_errors = []
     end
 
+    def errors_full_messages
+      errors.map do |field, errors|
+        translate = ActionView::Helpers::Tags::Translator.new(self, '', field, scope: 'helpers.label').translate
+        "#{translate}: #{errors.join(',')}"
+      end
+    end
+
     def persisted?
       record&.persisted?
     end

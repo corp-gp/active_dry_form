@@ -191,6 +191,14 @@ RSpec.describe ActiveDryForm do
       expect(form.errors).to eq(name: ['должно быть заполнено'])
     end
 
+    it 'returns validation full messages errors' do
+      form.update
+
+      I18n.with_locale(:ru) do
+        expect(form.errors_full_messages).to eq(['Имя: должно быть заполнено'])
+      end
+    end
+
     context 'when form validating' do
       it 'returns validation errors' do
         form.validate

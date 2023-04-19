@@ -4,3 +4,7 @@ inherit_gem:
 
 Gp/OptArgParameters:
   Enabled: false
+
+Style/SingleLineMethods:
+  Exclude:
+    - lib/active_dry_form/builder.rb
