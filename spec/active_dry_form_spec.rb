@@ -161,8 +161,9 @@ RSpec.describe ActiveDryForm do
       it 'raises error on attributes assignment' do
         form = UserForm.new
         expect {
-          form.attributes = ActionController::Parameters.new
-        }.to raise_error(ActiveDryForm::ParamsNotAllowedError)
+          form.attributes = ActionController::Parameters.new(name: 'Ivan')
+        }.not_to raise_error(ActiveDryForm::ParamsNotAllowedError)
+        expect(form.name).to eq 'Ivan'
       end
     end
   end
