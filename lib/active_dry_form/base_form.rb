@@ -73,19 +73,19 @@ module ActiveDryForm
       form_params = params[param_key] || params[param_key.to_sym]
       raise ArgumentError, "key '#{param_key}' not found in params" if form_params.nil?
 
-      self.attributes = form_params
-    end
-
-    def attributes=(attrs)
-      if attrs.is_a?(::ActionController::Parameters)
+      if form_params.is_a?(::ActionController::Parameters)
         unless ActiveDryForm.config.allow_action_controller_params
           message = 'in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config'
           raise ParamsNotAllowedError, message
         end
 
-        attrs = attrs.to_unsafe_h
+        form_params = form_params.to_unsafe_h
       end
 
+      self.attributes = form_params
+    end
+
+    def attributes=(attrs)
       attrs.each do |attr, v|
         next if !ActiveDryForm.config.strict_param_keys && !respond_to?("#{attr}=")
 
