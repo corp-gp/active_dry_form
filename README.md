@@ -24,8 +24,8 @@ Or install it yourself as:
 
 
 Since under the hood active_dry_form are installed
-dry-validation https://dry-rb.org/gems/dry-validation/1.8/
-and dry-monads https://dry-rb.org/gems/dry-monads/1.3/,
+dry-validation
+and dry-monads ,
 action view, active model and action controller.
 You do not have to worry about validations, error handling, and
 writing complex business logic in models.
@@ -167,9 +167,7 @@ end
 
 Your view will remain the same
 
-## like it, shall we continue?))
-
-### Okay, now let's look at all the inputs we have.
+## Look at all the inputs we have.
 
 ```slim
 - active_dry_form_for @form do |f|
@@ -187,11 +185,22 @@ Your view will remain the same
 
 ```
 
-## Advance Usage
-  to do
+## You can set default values in inputs
+  In your controller
 
-## Best practic
-  to do
+  ```ruby
+  def new
+    @form = ProductForm.new
+    @form.create_default(params[:category_id])
+  end
+  ```
+In your form
+
+```ruby
+  def create_default(category_id)
+    form.category_id = category_id
+  end
+```
 
 ## Development
 
