@@ -24,9 +24,7 @@ Or install it yourself as:
 
 
 Since under the hood active_dry_form are installed
-dry-validation
-and dry-monads ,
-action view, active model and action controller.
+dry-validation, dry-monads, action view, active model and action controller.
 You do not have to worry about validations, error handling, and
 writing complex business logic in models.
 
@@ -42,10 +40,15 @@ class ProductForm < Form
     params do
       required(:title).filled(:string, min_size?: 2)
       required(:price).filled(:integer)
+      optional(:description).maybe(:string)
       optional(:upload_attachments).maybe(:array)
     end
 
     # you can add any rules to validate your fields
+
+    rule(:description) do
+      key.failure('Не может быть меньше 2 слов') if value.split.size < 2
+    end
   end
 end
 ```
@@ -167,40 +170,50 @@ end
 
 Your view will remain the same
 
-## Look at all the inputs we have.
+## You can set default values in inputs
+In your controller
+
+```ruby
+  def new
+    @form = ProductForm.new
+    @form.create_default(params[:category_id])
+  end
+```
+In your form
+
+```ruby
+  def create_default(category_id)
+    self.category_id = category_id
+  end
+```
+
+## Look at the inputs we have.
 
 ```slim
 - active_dry_form_for @form do |f|
-  / input suitable for 'date', 'time', 'date-time', 'integer',
-  /'string', 'boolean'
-  = f.input :title
-  = f.input :price
+  / input suitable for 'date', 'time', 'date-time', 'integer', 'string', 'boolean'
+
+  = f.input :title, # don't forget to add options if you need
+  = f.show_error(:title)
   = f.input_select :category_id, Category.pluck(:name, :id)
+  = f.input_check_box :is_discount
   = f.input_checkbox_inline :is_sale
   = f.input_text :shipper_name
   = f.input_text_area :description
   = f.input_hidden :admin_id
   = f.input_file :upload_attachments, multiple: true, label: false
+  = f.input_date :date
+  = f.input_datetime :date_time
+  = f.input_integer :category_id
+  = f.input_number :number
+  = f.input_password :password
+  = f.input_email :email
+  = f.input_url :url
+  = f.input_telephone :telephone
+
   = f.button 'Сохранить'
-
 ```
 
-## You can set default values in inputs
-  In your controller
-
-  ```ruby
-  def new
-    @form = ProductForm.new
-    @form.create_default(params[:category_id])
-  end
-  ```
-In your form
-
-```ruby
-  def create_default(category_id)
-    form.category_id = category_id
-  end
-```
 
 ## Development
 
