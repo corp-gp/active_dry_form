@@ -1,12 +1,4 @@
 # ActiveDryForm
-
----
-Dear ladies and gentlemen, We present to your attention a beautiful dry wrapper for your rail forms,
-as well as the ability to implement a form object pattern. Have you been waiting for? Now get...)))!!!
-
-<img src="https://media.tenor.com/KjyW-WcPD68AAAAC/the-office-michael-scott.gif" width="800px" alt="Приветствие">
-
----
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -23,16 +15,33 @@ Or install it yourself as:
 
     $ gem install active_dry_form
 ---
+Under the hood ActiveDryForm [dry-validation](https://dry-rb.org/gems/dry-validation)
+, [dry-monads](https://dry-rb.org/gems/dry-monads)
+
 ## Base Usage
+```ruby
+  form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
 
-Since under the hood `active dry form` are installed [dry-validation](https://dry-rb.org/gems/dry-validation)
-, [dry-monads](https://dry-rb.org/gems/dry-monads), action view, active model and action controller.
-You do not have to worry about validations, error handling, and
-writing complex business logic in models.
+  form.validate # => checks field validity
+  form.validator # => #<Dry::Validation::Result{
+                        # :title=>"n",
+                        # :price=>120
+                        # errors={:name=>["minimum length 2"]}
+                        # context={:form=>{:name=>"n", :price=>120},
+                        # :record=>#<Product id: 1, title: 'name', price: 100, description: 'product', }>
+  form.valid? # => false
+  form.errors # => {:name=>["minimum length 2"]}
+  form.base_errors = []
+  form.errors_full_messages # => ['Cannot be less than 2 words']
+  form.record # => #<Product:0x00007f05c27106c8 id: 1, title: 'name', price: 100, description: 'product'>
+  form.data # => {:title=>"n", :price=>120}
+  form.data[:price] # => 120
+  form.price # => '120'
+  form.name # => 'n'
+  form.update # Failure(:invalid_form)
 
-### Let's create a base active dry form!
-
-In your form
+  # when you use form.update or form.create result will return Monad
+```
 
 ```ruby
 # forms/product_form.rb
@@ -49,19 +58,29 @@ class ProductForm < Form
     # you can add any rules to validate your fields
 
     rule(:description) do
-      key.failure('Не может быть меньше 2 слов') if value.split.size < 2
+      key.failure('Cannot be less than 2 words') if value.split.size < 2
     end
   end
+
+  action def update
+    # Here you can implement any business logic
+
+    record.update!(data)
+    Success(record)
+  end
+
 end
 ```
 In your controller
 
 ```ruby
+include Dry::Monads[:result]
+
 def new
   @form = ProductForm.new
 end
 
-def create
+def create # without monads
   @form = ProductForm.new(params: params)
   @form.validate
 
@@ -78,16 +97,14 @@ def edit
   @form = ProductForm.new(record: Product.find(params[:id]))
 end
 
-def update
+def update # with monads
   product = Product.find(params[:id])
 
   @form = ProductForm.new(record: product, params: params)
-  @form.validate
 
-  if @form.valid?
-    product.update!(@form)
-
-    redirect_to products_path
+  case @form.update
+  in Success(product)
+    redirect_to product
   else
     render :edit
   end
@@ -104,105 +121,13 @@ in your view (slim for example)
   = f.input_file :upload_attachments, multiple: true, label: false
   = f.button 'Submit'
 ```
-
-### If you want to use monads try this...
-
-```ruby
-class UserForm < Form
-  fields :user do
-    params do
-      required(:name).filled(:string, min_size?: 2)
-      required(:age).filled(:integer)
-      required(:email).filled(:string)
-      optional(:upload_attachments).maybe(:array)
-    end
-
-    # you can add any rules to validate your fields
-
-    rule(:email) do |context:|
-      next unless value
-
-      if User.where.not(id: context[:record]&.id).exists?(email: value)
-        key.failure(:duplicate)
-      end
-    end
-  end
-
-  action def create
-    # Here you can implement any business logic
-
-    product = User.new
-    product.attributes = data.except(:upload_attachments)
-    product.attachments << data[:upload_attachments]
-    product.save!
-
-    Success(product)
-  end
-
-  action def update
-    # Here you can implement any business logic
-
-    record.update!(data)
-    Success(record)
-  end
-end
-```
-In your controller
-
-```ruby
-include Dry::Monads[:result]
-
-def new
-  @form = UserForm.new
-end
-
-def create
-  @form = UserForm.new(params: params)
-
-  case @form.create
-  in Success(product)
-    redirect_to product
-  else
-    render :new
-  end
-end
-
-def edit
-  @form = UserForm.new(record: User.find(params[:id]))
-end
-
-def update
-  @form = UserForm.new(record: User.find(params[:id]), params: params)
-
-  case @form.update
-  in Success(product)
-    redirect_to product
-  else
-    render :edit
-  end
-end
-```
-
-Your view will remain the same
-
-### What is data in dry form?
-`data` is a Hash with attributes for which type casting
-has been performed
-in the same place in params the initial data of the form
-
-```ruby
-data => {:price=>1120, :title=>"title"}
-data[:price] => 1120
-price => '1120'
-```
-
 ### Form attribute initialization
 In your controller
 ```ruby
 def new
-  @form = UserForm.new(params: { user: { name: 'Kolya' } })
-  @form.attributes = { name: 'Vasya' }
-  @form.name = 'Petya'
+  @form = ProductForm.new(params: { product: { title: 'name', price: 120 } })
+  @form.attributes = { title: 'new name', price: 100}
+  @form.description = 'product description'
 end
 ```
 or like this
@@ -210,14 +135,14 @@ or like this
 ```ruby
 def new
   @form = ProductForm.new
-  @form.create_default(params[:category_id])
+  @form.create_default(params[:title])
 end
 ```
 then in your dry form
 
 ```ruby
-def create_default(category_id)
-  self.category_id = category_id
+def create_default(title)
+  self.title = title
 end
 ```
 
@@ -274,10 +199,12 @@ class NestedDryForm < Form
 
   end
 
-  fields(:user) do
+  fields :product do
     params do
-      optional(:name).maybe(:string)
-      optional(:bookmarks).array(Dry.Types::Instance(BookmarkForm))
+      required(:title).filled(:string, min_size?: 2)
+      required(:price).filled(:integer)
+      optional(:description).maybe(:string)
+      optional(:upload_attachments).maybe(:array)
     end
   end
 
