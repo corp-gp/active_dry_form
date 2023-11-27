@@ -205,6 +205,7 @@ class NestedDryForm < Form
       required(:price).filled(:integer)
       optional(:description).maybe(:string)
       optional(:upload_attachments).maybe(:array)
+      optional(:bookmarks).array(Dry.Types::Instance(BookmarkForm))
     end
   end
 
