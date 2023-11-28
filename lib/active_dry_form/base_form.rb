@@ -32,9 +32,11 @@ module ActiveDryForm
           translate = I18n.t(errors.first, scope: :"activerecord.attributes.#{nested_models_names[index]}", locale: :ru)
           nested_full_messages << "#{translate}: #{errors.second}"
         end
+
+        return full_messages.concat(nested_full_messages)
       end
 
-      Array.wrap(full_messages) + Array.wrap(nested_full_messages)
+      full_messages
     end
 
     private def extract_errors_from_nested_form(errors)
