@@ -19,32 +19,33 @@ Under the hood ActiveDryForm [dry-validation](https://dry-rb.org/gems/dry-valida
 , [dry-monads](https://dry-rb.org/gems/dry-monads)
 
 ## Base Usage
+
 ```ruby
-  form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
+form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
 
-  form.validate # => checks field validity
-  form.validator # => #<Dry::Validation::Result{
-                        # :title=>"n",
-                        # :price=>120
-                        # errors={:name=>["minimum length 2"]}
-                        # context={:form=>{:name=>"n", :price=>120},
-                        # :record=>#<Product id: 1, title: 'name', price: 100, description: 'product', }>
-  form.valid? # => false
-  form.errors # => {:name=>["minimum length 2"]}
-  form.base_errors = []
-  form.errors_full_messages # => ['Cannot be less than 2 words']
-  form.record # => #<Product:0x00007f05c27106c8 id: 1, title: 'name', price: 100, description: 'product'>
-  form.data # => {:title=>"n", :price=>120}
-  form.data[:price] # => 120
-  form.price # => '120'
-  form.name # => 'n'
-  form.update # Failure(:invalid_form)
-
-  # when you use form.update or form.create result will return Monad
+form.validate # => checks field validity
+form.validator # => #<Dry::Validation::Result{
+                      # :title=>"n",
+                      # :price=>120
+                      # errors={:name=>["minimum length 2"]}
+                      # context={:form=>{:name=>"n", :price=>120},
+                      # :record=>#<Product id: 1, title: 'name', price: 100, description: 'product'}>
+form.valid? # => false
+form.errors # => {:name=>["minimum length 2"]}
+form.base_errors = []
+form.errors_full_messages # => ['Cannot be less than 2 words']
+form.record # => #<Product:0x00007f05c27106c8 id: 1, title: 'name', price: 100, description: 'product'>
+form.data # => {:title=>"n", :price=>120}
+form.data[:price] # => 120
+form.price # => '120'
+form.name # => 'n'
+form.update # Failure(:invalid_form)
 ```
 
+Methods `form.update` and `form.create` return [Result monad](https://dry-rb.org/gems/dry-monads/1.3/result/)
+
 ```ruby
-# forms/product_form.rb
+# app/forms/product_form.rb
 
 class ProductForm < Form
   fields :product do
@@ -71,42 +72,45 @@ class ProductForm < Form
 
 end
 ```
+
 In your controller
 
 ```ruby
-include Dry::Monads[:result]
+class ProductsController < ApplicationController
+  include Dry::Monads[:result]
 
-def new
-  @form = ProductForm.new
-end
-
-def create # without monads
-  @form = ProductForm.new(params: params)
-  @form.validate
-
-  if @form.valid?
-    Product.create!(@form)
-
-    redirect_to products_path
-  else
-    render :new
+  def new
+    @form = ProductForm.new
   end
-end
 
-def edit
-  @form = ProductForm.new(record: Product.find(params[:id]))
-end
+  def create # without monads
+    @form = ProductForm.new(params: params)
+    @form.validate
 
-def update # with monads
-  product = Product.find(params[:id])
+    if @form.valid?
+      Product.create!(@form)
 
-  @form = ProductForm.new(record: product, params: params)
+      redirect_to products_path
+    else
+      render :new
+    end
+  end
 
-  case @form.update
-  in Success(product)
-    redirect_to product
-  else
-    render :edit
+  def edit
+    @form = ProductForm.new(record: Product.find(params[:id]))
+  end
+
+  def update # with monads
+    product = Product.find(params[:id])
+
+    @form = ProductForm.new(record: product, params: params)
+
+    case @form.update
+    in Success(product)
+      redirect_to product
+    else
+      render :edit
+    end
   end
 end
 ```
@@ -114,6 +118,8 @@ end
 in your view (slim for example)
 
 ```slim
+/ app/views/products/new.slim
+
 - active_dry_form_for @form do |f|
   = f.input :title
   = f.input :price
@@ -121,8 +127,11 @@ in your view (slim for example)
   = f.input_file :upload_attachments, multiple: true, label: false
   = f.button 'Submit'
 ```
+
 ### Form attribute initialization
+
 In your controller
+
 ```ruby
 def new
   @form = ProductForm.new(params: { product: { title: 'name', price: 120 } })
@@ -130,6 +139,7 @@ def new
   @form.description = 'product description'
 end
 ```
+
 or like this
 
 ```ruby
@@ -138,6 +148,7 @@ def new
   @form.create_default(params[:title])
 end
 ```
+
 then in your dry form
 
 ```ruby
@@ -148,13 +159,16 @@ end
 
 ### Look at the inputs we have (slim for example)
 
-```slim
-- active_dry_form_for @form do |f|
-  / input suitable for 'date', 'time', 'date-time', 'integer', 'string', 'boolean'
+`input` method automatically determines tag type by data type
+(date, time, integer, number, string, boolean, password, email, telephone, url)
 
-  = f.input :title, # don't forget to add options if you need
+```slim
+- active_dry_form_for @form, html: { 'data-controller': 'product'} do |f|
+  = f.input :title, 'data-product-target': 'title', readonly: true,
   = f.show_error(:title)
-  = f.input_select :category_id, Category.pluck(:name, :id)
+  = f.input_select :category_id, Category.pluck(:name, :id),
+    { include_blank: true },
+    { label: false, multiple: true, style: 'max-width:unset;'}
   = f.input_check_box :is_discount
   = f.input_checkbox_inline :is_sale
   = f.input_text :shipper_name
@@ -172,18 +186,25 @@ end
 
   = f.button 'Submit'
 ```
+
 ### You can create your own input
+
 ```ruby
-class Builder
+# lib/acitve_dry_form/builder.rb
 
-  def input_date_native(field, options = {})
-    wrap_input(__method__, field, options) { |opts| date_field(field, opts) }
+module ActiveDryForm
+  class Builder
+
+    def input_date_native(field, options = {})
+      wrap_input(__method__, field, options) { |opts| date_field(field, opts) }
+    end
+
   end
-
 end
 ```
 
-### Nested dry form
+### The form can be nested
+
 ```ruby
 class NestedDryForm < Form
 
@@ -224,7 +245,9 @@ end
 
 As you noticed in the above example, we use the construction `Dry.Types::Instance(BookmarkForm)`,
 what it is `dry types` you can find out [here](https://dry-rb.org/gems/dry-types)
+
 ---
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
@@ -232,11 +255,13 @@ After checking out the repo, run `bin/setup` to install dependencies. Then, run 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ---
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/active_dry_form.
 
 ---
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
