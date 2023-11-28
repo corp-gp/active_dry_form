@@ -15,10 +15,28 @@ module ActiveDryForm
     end
 
     def errors_full_messages
-      errors.map do |field, errors|
-        translate = ActionView::Helpers::Tags::Translator.new(self, '', field, scope: 'helpers.label').translate
-        "#{translate}: #{errors.join(',')}"
+      result_errors = extract_errors_from_nested_form.each_with_index do |value, index|
+        value.unshift(errors.keys[index])
       end
+
+      result_errors.map do |errors|
+        translate = ActionView::Helpers::Tags::Translator.new(self, '', errors.first, scope: 'helpers.label').translate
+        "#{translate}: #{errors.second}"
+      end
+    end
+
+    private def extract_errors_from_nested_form
+      arrays = []
+
+      errors.each do |_key, value|
+        if value.is_a?(Hash)
+          arrays += extract_errors_from_nested_form
+        elsif value.is_a?(Array)
+          arrays << value
+        end
+      end
+
+      arrays
     end
 
     def persisted?
