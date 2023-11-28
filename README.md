@@ -160,8 +160,10 @@ end
 
 ### Look at the inputs we have (slim for example)
 
-`input` method automatically determines tag type by data type
-(date, time, integer, number, string, boolean, password, email, telephone, url)
+[input](https://github.com/corp-gp/active_dry_form/blob/master/lib/active_dry_form/builder.rb#L97) method automatically determines tag type:
+
+- by [dry type predicates](https://dry-rb.org/gems/dry-schema/main/basics/built-in-predicates/) - date, time, integer, number, string, boolean
+- by field name - password, email, telephone, url
 
 ```slim
 - active_dry_form_for @form, html: { 'data-controller': 'product'} do |f|
