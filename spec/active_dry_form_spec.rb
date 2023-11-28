@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'app/user'
+require_relative 'app/bookmark'
 require_relative 'app/user_form'
 require_relative 'app/custom_validation_form'
 require_relative 'app/nested_has_one_form'
@@ -199,6 +200,16 @@ RSpec.describe ActiveDryForm do
         expect(form.errors_full_messages).to eq(['Имя: должно быть заполнено'])
       end
     end
+
+    it 'returns validation full messages errors from nested form' do
+      form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: [{ url: '', name: 'First' }], favorites: [{ kind: '', name: 'First' }] } })
+      form.update
+
+      I18n.with_locale(:ru) do
+        expect(form.errors_full_messages).to eq(['URL закладок: должно быть заполнено', 'Тип избранного: должно быть заполнено'])
+      end
+    end
+
 
     context 'when form validating' do
       it 'returns validation errors' do

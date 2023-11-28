@@ -15,10 +15,25 @@ module ActiveDryForm
     end
 
     def errors_full_messages
-      extract_errors_from_nested_form(errors).map do |errors|
-        translate = ActionView::Helpers::Tags::Translator.new(self, '', errors.first, scope: 'helpers.label').translate
-        "#{translate}: #{errors.second}"
+      return if errors.blank?
+
+      nested_keys = nested_models_keys
+
+      full_messages = errors.except(*nested_keys).map do |field, errors|
+        translate = ActionView::Helpers::Tags::Translator.new(self, '', field, scope: 'helpers.label').translate
+        "#{translate}: #{errors.join(',')}"
       end
+
+      if nested_keys.present?
+        nested_full_messages = []
+
+        extract_errors_from_nested_form(errors.except(*(errors.keys - nested_keys))).each_with_index do |errors, index |
+          translate = I18n.t(errors.first, scope: :"activerecord.attributes.#{nested_models_names[index]}", locale: :ru)
+          nested_full_messages << "#{translate}: #{errors.second}"
+        end
+      end
+
+      Array.wrap(full_messages) + Array.wrap(nested_full_messages)
     end
 
     private def extract_errors_from_nested_form(errors)
@@ -33,6 +48,18 @@ module ActiveDryForm
       end
 
       arrays
+    end
+
+    private def nested_models_keys
+      self.class::NESTED_FORM_KEYS.map do |hash|
+        hash[:namespace]
+      end
+    end
+
+    private def nested_models_names
+      self.class::NESTED_FORM_KEYS.map do |hash|
+        ActiveModel::Name.new(nil, nil, hash[:namespace].to_s)
+      end
     end
 
     def persisted?
