@@ -15,10 +15,10 @@ Or install it yourself as:
 
     $ gem install active_dry_form
 ---
-Under the hood ActiveDryForm [dry-validation](https://dry-rb.org/gems/dry-validation)
-, [dry-monads](https://dry-rb.org/gems/dry-monads)
 
 ## Base Usage
+
+### Under the hood ActiveDryForm [dry-validation](https://dry-rb.org/gems/dry-validation), [dry-monads](https://dry-rb.org/gems/dry-monads)
 
 ```ruby
 form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
