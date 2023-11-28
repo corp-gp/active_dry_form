@@ -15,24 +15,20 @@ module ActiveDryForm
     end
 
     def errors_full_messages
-      result_errors = extract_errors_from_nested_form.each_with_index do |value, index|
-        value.unshift(errors.keys[index])
-      end
-
-      result_errors.map do |errors|
+      extract_errors_from_nested_form(errors).map do |errors|
         translate = ActionView::Helpers::Tags::Translator.new(self, '', errors.first, scope: 'helpers.label').translate
         "#{translate}: #{errors.second}"
       end
     end
 
-    private def extract_errors_from_nested_form
+    private def extract_errors_from_nested_form(errors)
       arrays = []
 
-      errors.each do |_key, value|
+      errors.each do |key, value|
         if value.is_a?(Hash)
-          arrays += extract_errors_from_nested_form
+          arrays += extract_errors_from_nested_form(value)
         elsif value.is_a?(Array)
-          arrays << value
+          arrays << value.unshift(key)
         end
       end
 
