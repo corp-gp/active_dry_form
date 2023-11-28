@@ -31,6 +31,7 @@ form.validator # => #<Dry::Validation::Result{
                       # context={:form=>{:name=>"n", :price=>120},
                       # :record=>#<Product id: 1, title: 'name', price: 100, description: 'product'}>
 form.valid? # => false
+form.persisted? # => true
 form.errors # => {:name=>["minimum length 2"]}
 form.base_errors = []
 form.errors_full_messages # => ['Cannot be less than 2 words']
