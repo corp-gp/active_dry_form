@@ -17,50 +17,27 @@ module ActiveDryForm
     def errors_full_messages
       return if errors.blank?
 
-      nested_keys = nested_models_keys
-
-      full_messages =
-        errors.except(*nested_keys).map do |field, errors|
-          translate = ActionView::Helpers::Tags::Translator.new(self, '', field, scope: 'helpers.label').translate
-          "#{translate}: #{errors.join(',')}"
-        end
-
-      if nested_keys.present?
-        nested_full_messages = []
-
-        extract_errors_from_nested_form(errors.except(*(errors.keys - nested_keys))).each_with_index do |errors, index|
-          translate = I18n.t(errors.first, scope: :"activerecord.attributes.#{nested_models_names[index]}", locale: :ru)
-          nested_full_messages << "#{translate}: #{errors.second}"
-        end
-
-        return full_messages.concat(nested_full_messages)
-      end
-
-      full_messages
-    end
-
-    private def extract_errors_from_nested_form(errors)
-      arrays = []
-
-      errors.each do |key, value|
-        if value.is_a?(Hash)
-          arrays += extract_errors_from_nested_form(value)
-        elsif value.is_a?(Array)
-          arrays << value.unshift(key)
+      errors.flat_map do |field, errors|
+        case errors
+        when Array
+          "#{t(model_name.i18n_key, field)}: #{errors.join(',')}"
+        when Hash
+          errors.map do |k, v|
+            case k
+            when Integer
+              nested_key, nested_errors = v.to_a.first
+              "#{t(field, nested_key)} (#{k + 1}): #{nested_errors.join(',')}"
+            when Symbol
+              "#{t(field, k)}: #{v.join(',')}"
+            end
+          end
         end
       end
-
-      arrays
     end
 
-    private def nested_models_keys
-      self.class::NESTED_FORM_KEYS.pluck(:namespace)
-    end
-
-    private def nested_models_names
-      self.class::NESTED_FORM_KEYS.map do |hash|
-        ActiveModel::Name.new(nil, nil, hash[:namespace].to_s)
-      end
+    def t(*keys)
+      str_keys = keys.join('.')
+      I18n.t("helpers.label.#{str_keys}", default: "activerecord.attributes.#{str_keys}".to_sym)
     end
 
     def persisted?

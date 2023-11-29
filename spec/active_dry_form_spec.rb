@@ -206,10 +206,9 @@ RSpec.describe ActiveDryForm do
       form.update
 
       I18n.with_locale(:ru) do
-        expect(form.errors_full_messages).to eq(['URL закладок: должно быть заполнено', 'Тип избранного: должно быть заполнено'])
+        expect(form.errors_full_messages).to eq(['URL закладок (1): должно быть заполнено', 'Тип избранного (1): должно быть заполнено'])
       end
     end
-
 
     context 'when form validating' do
       it 'returns validation errors' do
