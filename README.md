@@ -6,30 +6,15 @@ Add this line to your application's Gemfile:
 ```ruby
 gem 'active_dry_form'
 ```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install active_dry_form
 ---
 
-## Base Usage
-
-### Under the hood ActiveDryForm [dry-validation](https://dry-rb.org/gems/dry-validation), [dry-monads](https://dry-rb.org/gems/dry-monads)
+### Under the hood ActiveDryForm uses [dry-validation](https://dry-rb.org/gems/dry-validation), [dry-monads](https://dry-rb.org/gems/dry-monads)
 
 ```ruby
 form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
 
 form.validate # => checks field validity
-form.validator # => #<Dry::Validation::Result{
-                      # :title=>"n",
-                      # :price=>120
-                      # errors={:name=>["minimum length 2"]}
-                      # context={:form=>{:name=>"n", :price=>120},
-                      # :record=>#<Product id: 1, title: 'name', price: 100, description: 'product'}>
+form.validator # => #<Dry::Validation::Result{:title=>"n", :price=>120, errors={:name=>["minimum length 2"]}...>
 form.valid? # => false
 form.persisted? # => true
 form.errors # => {:name=>["minimum length 2"]}
@@ -57,15 +42,13 @@ class ProductForm < Form
       optional(:upload_attachments).maybe(:array)
     end
 
-    # you can add any rules to validate your fields
-
     rule(:description) do
       key.failure('Cannot be less than 2 words') if value.split.size < 2
     end
   end
 
   action def update
-    # Here you can implement any business logic
+    # Here you can implement any save logic
 
     record.update!(data)
     Success(record)
@@ -85,7 +68,7 @@ class ProductsController < ApplicationController
   end
 
   def create # without monads
-    @form = ProductForm.new(params: params)
+    @form = ProductForm.new(params:)
     @form.validate
 
     if @form.valid?
@@ -98,13 +81,11 @@ class ProductsController < ApplicationController
   end
 
   def edit
-    @form = ProductForm.new(record: Product.find(params[:id]))
+    @form = ProductForm.new(record:)
   end
 
   def update # with monads
-    product = Product.find(params[:id])
-
-    @form = ProductForm.new(record: product, params: params)
+    @form = ProductForm.new(record:, params:)
 
     case @form.update
     in Success(product)
@@ -113,6 +94,8 @@ class ProductsController < ApplicationController
       render :edit
     end
   end
+
+  private def record = Product.find(params[:id])
 end
 ```
 
@@ -129,14 +112,14 @@ in your view (slim for example)
   = f.button 'Submit'
 ```
 
-### Form attribute initialization
+### Fill attributes init values
 
 In your controller
 
 ```ruby
 def new
   @form = ProductForm.new(params: { product: { title: 'name', price: 120 } })
-  @form.attributes = { title: 'new name', price: 100}
+  @form.attributes = { title: 'new name', price: 100 }
   @form.description = 'product description'
 end
 ```
@@ -147,18 +130,20 @@ or like this
 def new
   @form = ProductForm.new
   @form.create_default(params[:title])
+
+  # class ProductForm < Form
+  #   ...
+  #   def create_default(title)
+  #     self.title = title
+  #   end
+  # end
 end
 ```
 
-then in your dry form
 
-```ruby
-def create_default(title)
-  self.title = title
-end
-```
+### Inputs
 
-### Look at the inputs we have (slim for example)
+`Inputs` under the hood uses [standard rails builder form methods](https://api.rubyonrails.org/classes/ActionView/Helpers/FormBuilder.html#method-i-text_area), and you can use it on form.
 
 [input](https://github.com/corp-gp/active_dry_form/blob/master/lib/active_dry_form/builder.rb#L97) method automatically determines tag type:
 
@@ -187,10 +172,14 @@ end
   = f.input_url :url
   = f.input_telephone :telephone
 
+  // standard rails builder form methods
+  = f.label :name
+  = f.search_field :name
+
   = f.button 'Submit'
 ```
 
-### You can create your own input
+### Create custom `input`
 
 ```ruby
 # lib/acitve_dry_form/builder.rb
@@ -212,7 +201,6 @@ end
 class NestedDryForm < Form
 
   class BookmarkForm < Form
-
     fields(:bookmark) do
       params do
         required(:url).filled(:string)
@@ -220,7 +208,6 @@ class NestedDryForm < Form
         optional(:name).maybe(:string)
       end
     end
-
   end
 
   fields :product do
@@ -248,6 +235,33 @@ end
 
 As you noticed in the above example, we use the construction `Dry.Types::Instance(BookmarkForm)`,
 what it is `dry types` you can find out [here](https://dry-rb.org/gems/dry-types)
+
+
+### Internationalization
+
+Using standard rails i18n path:
+
+[helpers.label](https://api.rubyonrails.org/classes/ActionView/Helpers/FormBuilder.html#method-i-label)
+
+```yml
+ru:
+  helpers:
+    label:
+      user:
+        id: Идентификатор
+        name: Имя
+```
+
+or [translations for your model attribute names](https://api.rubyonrails.org/classes/ActiveModel/Translation.html#method-i-human_attribute_name)
+
+```yml
+ru:
+  activerecord:
+    attributes:
+      user:
+        id: Идентификатор
+        name: Имя
+```
 
 ---
 
