@@ -24,7 +24,7 @@ form.record # => #<Product:0x00007f05c27106c8 id: 1, title: 'name', price: 100, 
 form.data # => {:title=>"n", :price=>120}
 form.data[:price] # => 120
 form.price # => '120'
-form.name # => 'n'
+form.title # => 'n'
 form.update # Failure(:invalid_form)
 ```
 

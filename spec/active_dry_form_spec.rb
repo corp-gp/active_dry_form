@@ -167,6 +167,13 @@ RSpec.describe ActiveDryForm do
         expect(form.name).to eq 'Ivan'
       end
     end
+
+    context 'when attributes are passed during initialization' do
+      it 'sets attributes' do
+        form = UserForm.new(attributes: {name: 'Igor'})
+        expect(form.name).to eq 'Igor'
+      end
+    end
   end
 
   context 'when param key is not valid' do
