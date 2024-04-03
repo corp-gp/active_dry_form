@@ -11,6 +11,7 @@ gem 'active_dry_form'
 ### Under the hood ActiveDryForm uses [dry-validation](https://dry-rb.org/gems/dry-validation), [dry-monads](https://dry-rb.org/gems/dry-monads)
 
 ```ruby
+# params => { product: { title: 'n', price: 120 }
 form = ProductForm.new(record: Product.find(1), params: params)
 
 form.validate # => checks field validity
