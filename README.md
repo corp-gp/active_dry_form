@@ -11,7 +11,7 @@ gem 'active_dry_form'
 ### Under the hood ActiveDryForm uses [dry-validation](https://dry-rb.org/gems/dry-validation), [dry-monads](https://dry-rb.org/gems/dry-monads)
 
 ```ruby
-form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
+form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } , attributes: { category_id: 20 }})
 
 form.validate # => checks field validity
 form.validator # => #<Dry::Validation::Result{:title=>"n", :price=>120, errors={:name=>["minimum length 2"]}...>
@@ -25,6 +25,7 @@ form.data # => {:title=>"n", :price=>120}
 form.data[:price] # => 120
 form.price # => '120'
 form.title # => 'n'
+form.category_id # => 20
 form.update # Failure(:invalid_form)
 ```
 
@@ -139,7 +140,13 @@ def new
   # end
 end
 ```
+or it can be passed during initialization as a parameter
 
+```ruby
+def new
+  @form = ProductForm.new(params: { product: { title: 'name', price: 120 }, attributes: { category_id: 20 } })
+end
+```
 
 ### Inputs
 
