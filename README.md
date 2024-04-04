@@ -144,7 +144,14 @@ or it can be passed during initialization as a parameter
 
 ```ruby
 def new
-  @form = ProductForm.new(params: { product: { title: 'name', price: 120 }, attributes: { category_id: 20 } })
+  @form = ProductForm.new(attributes: { category_id: 20 } )
+end
+```
+attributes have a higher assignment priority than params if assigned like this
+
+```ruby
+def new
+  @form = ProductForm.new(params: { product: { title: 'lower priority' } }, attributes: { title: 'higher priority' } )
 end
 ```
 
