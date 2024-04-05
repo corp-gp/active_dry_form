@@ -7,7 +7,7 @@ module ActiveDryForm
     attr_reader :record, :validator
 
     def initialize(*args, **kwargs)
-      self.record = kwargs.delete(:record)
+      self.record = kwargs[:record] if kwargs[:record]
       params = kwargs
       params.merge!(args.first) if args.first.is_a?(Hash)
       self.params = params
