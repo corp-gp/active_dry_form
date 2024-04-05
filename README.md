@@ -123,6 +123,21 @@ def new
   @form.description = 'product description'
 end
 ```
+as a positional argument
+
+```ruby
+def new
+  params = { title: 'n', price: 120 }
+  @form = ProductForm.new(params)
+end
+```
+as a named argument
+
+```ruby
+def new
+  @form = ProductForm.new(title: 'n', price: 120)
+end
+```
 
 or like this
 
@@ -139,7 +154,6 @@ def new
   # end
 end
 ```
-
 
 ### Inputs
 

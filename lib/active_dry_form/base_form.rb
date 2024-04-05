@@ -6,9 +6,11 @@ module ActiveDryForm
     attr_accessor :data, :parent_form, :errors, :base_errors
     attr_reader :record, :validator
 
-    def initialize(record: nil, params: nil)
-      self.params = params if params
-      self.record = record if record
+    def initialize(*args, **kwargs)
+      self.record = kwargs.delete(:record)
+      params = kwargs
+      params.merge!(args.first) if args.first.is_a?(Hash)
+      self.params = params
 
       @errors = {}
       @base_errors = []

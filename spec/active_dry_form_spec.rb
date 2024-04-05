@@ -54,6 +54,20 @@ RSpec.describe ActiveDryForm do
       expect(form.second_name).to be_nil
     end
 
+    it 'reads attribute form params as args hash' do
+      form = UserForm.new({ user: { name: 'Ivan' }})
+
+      expect(form.name).to eq 'Ivan'
+    end
+
+    it 'reads attribute form params as kwargs' do
+      user.update!(second_name: 'Sidorov')
+      form = UserForm.new(user: { name: 'Ivan' }, record: user)
+
+      expect(form.name).to eq 'Ivan'
+      expect(form.second_name).to eq 'Sidorov'
+    end
+
     it 'process invalid json schema' do
       user_params = {
         personal_info: { email: 'ivan@example.com' },
@@ -172,8 +186,8 @@ RSpec.describe ActiveDryForm do
   context 'when param key is not valid' do
     it 'raises error' do
       expect {
-        UserForm.new(record: user, params: { form: { name: 'Ivan' } })
-      }.to raise_error(NoMethodError, "undefined method `form=' for {}:UserForm")
+        UserForm.new(login: 'undefined')
+      }.to raise_error(NoMethodError, "undefined method `login=' for {}:UserForm")
     end
   end
 
