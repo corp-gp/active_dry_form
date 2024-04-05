@@ -4,7 +4,7 @@ require_relative 'application_record'
 
 class User < ApplicationRecord
 
-  has_one :personal_info
+  has_one :personal_info, class_name: 'PersonalInfo'
   accepts_nested_attributes_for :personal_info
 
   has_many :bookmarks

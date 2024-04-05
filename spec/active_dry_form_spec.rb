@@ -173,7 +173,7 @@ RSpec.describe ActiveDryForm do
     it 'raises error' do
       expect {
         UserForm.new(record: user, params: { form: { name: 'Ivan' } })
-      }.to raise_error(ArgumentError, "key 'user' not found in params")
+      }.to raise_error(NoMethodError, "undefined method `form=' for {}:UserForm")
     end
   end
 
