@@ -62,7 +62,7 @@ RSpec.describe ActiveDryForm do
 
     it 'reads attribute form params as kwargs' do
       user.update!(second_name: 'Sidorov')
-      form = UserForm.new(user: { name: 'Ivan' }, record: user)
+      form = UserForm.new(name: 'Ivan', record: user)
 
       expect(form.name).to eq 'Ivan'
       expect(form.second_name).to eq 'Sidorov'
