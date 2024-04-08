@@ -118,24 +118,9 @@ In your controller
 
 ```ruby
 def new
-  @form = ProductForm.new(params: { product: { title: 'name', price: 120 } })
+  @form = ProductForm.new(params: { title: 'name', price: 120 })
   @form.attributes = { title: 'new name', price: 100 }
   @form.description = 'product description'
-end
-```
-as a positional argument
-
-```ruby
-def new
-  params = { title: 'n', price: 120 }
-  @form = ProductForm.new(params)
-end
-```
-as a named argument
-
-```ruby
-def new
-  @form = ProductForm.new(title: 'n', price: 120)
 end
 ```
 
