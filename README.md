@@ -14,17 +14,17 @@ gem 'active_dry_form'
 form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
 
 form.validate # => checks field validity
-form.validator # => #<Dry::Validation::Result{:title=>"n", :price=>120, errors={:name=>["minimum length 2"]}...>
+form.validator # => #<Dry::Validation::Result{:title=>"n", :price=>120, errors={:title=>["minimum length 2"]}...>
 form.valid? # => false
 form.persisted? # => true
-form.errors # => {:name=>["minimum length 2"]}
+form.errors # => {:title=>["minimum length 2"]}
 form.base_errors = []
 form.errors_full_messages # => ['Cannot be less than 2 words']
 form.record # => #<Product:0x00007f05c27106c8 id: 1, title: 'name', price: 100, description: 'product'>
 form.data # => {:title=>"n", :price=>120}
 form.data[:price] # => 120
 form.price # => '120'
-form.name # => 'n'
+form.title # => 'n'
 form.update # Failure(:invalid_form)
 ```
 

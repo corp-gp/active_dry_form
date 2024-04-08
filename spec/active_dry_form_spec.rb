@@ -172,7 +172,7 @@ RSpec.describe ActiveDryForm do
   context 'when param key is not valid' do
     it 'raises error' do
       expect {
-        UserForm.new(params: { login: 'undefined' })
+        UserForm.new(params: { login: 'unique_login' })
       }.to raise_error(NoMethodError, "undefined method `login=' for {}:UserForm")
     end
   end
