@@ -89,8 +89,7 @@ module ActiveDryForm
 
     def params=(params)
       param_key = self.class::NAMESPACE.param_key
-      form_params = params[param_key] || params[param_key.to_sym]
-      raise ArgumentError, "key '#{param_key}' not found in params" if form_params.nil?
+      form_params = params[param_key] || params[param_key.to_sym] || params
 
       if form_params.is_a?(::ActionController::Parameters)
         unless ActiveDryForm.config.allow_action_controller_params

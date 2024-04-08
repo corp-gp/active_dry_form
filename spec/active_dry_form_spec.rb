@@ -172,8 +172,8 @@ RSpec.describe ActiveDryForm do
   context 'when param key is not valid' do
     it 'raises error' do
       expect {
-        UserForm.new(record: user, params: { form: { name: 'Ivan' } })
-      }.to raise_error(ArgumentError, "key 'user' not found in params")
+        UserForm.new(params: { login: 'unique_login' })
+      }.to raise_error(NoMethodError, "undefined method `login=' for {}:UserForm")
     end
   end
 
