@@ -157,7 +157,7 @@ end
     { include_blank: true },
     { label: false, multiple: true, style: 'max-width:unset;'}
   = f.input_check_box :is_discount
-  = f.input_checkbox_inline :is_sale
+  = f.input_check_box_inline :is_sale
   = f.input_text :shipper_name
   = f.input_text_area :description
   = f.input_hidden :admin_id
