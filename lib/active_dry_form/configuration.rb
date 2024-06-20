@@ -15,8 +15,7 @@ module ActiveDryForm
     setting :input,          default: 'form-input'
     setting :input_required, default: 'form-input-required'
     setting :input_error,    default: 'form-input-error'
-
-    setting :form,           default: { class: ['active-dry-form'] }
+    setting :form,           default: ['active-dry-form']
   end
 
   setting :html_options do
@@ -28,7 +27,7 @@ module ActiveDryForm
     setting :input_file,             default: EMPTY_HASH
     setting :input_integer,          default: EMPTY_HASH
 
-    # если без any, то теряется дробная часть числа, при step = целое число (1 по умолчанию)
+    # If without 'any', the fractional part of the number is lost when step is an integer (1 by default)
     setting :input_number,           default: { step: 'any' }
     setting :input_password,         default: EMPTY_HASH
     setting :input_select,           default: EMPTY_HASH

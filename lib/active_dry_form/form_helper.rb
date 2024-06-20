@@ -16,7 +16,9 @@ module ActiveDryForm
     end
 
     private def html_options(options)
-      (options[:html] || {}).merge(ActiveDryForm.config.css_classes.form, ActiveDryForm.config.html_options.form) do |_key, oldval, newval|
+      classes = { class: ActiveDryForm.config.css_classes.form }
+
+      (options[:html] || {}).merge(ActiveDryForm.config.html_options.form, classes) do |_key, oldval, newval|
         Array.wrap(newval) + Array.wrap(oldval)
       end
     end
