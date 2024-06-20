@@ -100,7 +100,7 @@ module ActiveDryForm
 
     private def wrap_input(method_type, field, options, wrapper_options = {})
       config = ActiveDryForm.config.html_options._settings[method_type] ? ActiveDryForm.config.html_options[method_type] : EMPTY_HASH
-      options = options.merge(config) { |_key, oldval, newval| Array.wrap(newval) + Array.wrap(oldval) }
+      options = config.merge(options)
       options[:required] = object.info(field)[:required] unless options.key?(:required)
 
       Input

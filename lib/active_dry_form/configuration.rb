@@ -15,6 +15,8 @@ module ActiveDryForm
     setting :input,          default: 'form-input'
     setting :input_required, default: 'form-input-required'
     setting :input_error,    default: 'form-input-error'
+
+    setting :form,           default: { class: ['active-dry-form'] }
   end
 
   setting :html_options do
@@ -25,6 +27,8 @@ module ActiveDryForm
     setting :input_email,            default: EMPTY_HASH
     setting :input_file,             default: EMPTY_HASH
     setting :input_integer,          default: EMPTY_HASH
+
+    # если без any, то теряется дробная часть числа, при step = целое число (1 по умолчанию)
     setting :input_number,           default: { step: 'any' }
     setting :input_password,         default: EMPTY_HASH
     setting :input_select,           default: EMPTY_HASH
@@ -33,7 +37,7 @@ module ActiveDryForm
     setting :input_text,             default: EMPTY_HASH
     setting :input_url,              default: EMPTY_HASH
 
-    setting :form,                   default: { class: ['active-dry-form'] }
+    setting :form,                   default: EMPTY_HASH
   end
 
 end
