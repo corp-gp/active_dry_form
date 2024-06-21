@@ -382,7 +382,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expected_html = <<-HTML
           <div class="form-input input_text form-input-required">
             <label for="user_name">User Name</label>
-            <input class="class-2" data-test="true" required="required" type="text" value="Ivan" name="user[name]" id="user_name" />
+            <input class="class-1 class-2" data-test="true" required="required" type="text" value="Ivan" name="user[name]" id="user_name" />
           </div>
         HTML
 
