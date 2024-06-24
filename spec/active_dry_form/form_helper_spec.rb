@@ -125,12 +125,24 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders float input' do
+      it 'renders float input default step' do
         html = context.active_dry_form_for(form) { |f| f.input :balance }
         expected_html = <<-HTML
         <div class="form-input input_number">
           <label for="user_balance">User Balance</label>
           <input step="any" type="number" name="user[balance]" id="user_balance" />
+        </div>
+        HTML
+
+        expect(html).to include_html(expected_html)
+      end
+
+      it 'renders float input with step option' do
+        html = context.active_dry_form_for(form) { |f| f.input :balance, { step: 0.1 } }
+        expected_html = <<-HTML
+        <div class="form-input input_number">
+          <label for="user_balance">User Balance</label>
+          <input step="0.1" type="number" name="user[balance]" id="user_balance" />
         </div>
         HTML
 
