@@ -8,3 +8,10 @@ Gp/OptArgParameters:
 Style/SingleLineMethods:
   Exclude:
     - lib/active_dry_form/builder.rb
+
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.7
