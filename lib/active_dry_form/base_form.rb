@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 module ActiveDryForm
-  class BaseForm < Hash
+  class BaseForm
 
     attr_accessor :data, :parent_form, :errors, :base_errors
-    attr_reader :record, :validator
+    attr_reader :record, :validator, :attributes
 
     def initialize(record: nil, params: nil)
+      @attributes = {}
+
       self.params = params if params
       self.record = record if record
 
@@ -36,7 +38,7 @@ module ActiveDryForm
     end
 
     def t(*keys)
-      str_keys = keys.join('.')
+      str_keys = keys.join(".")
       I18n.t("helpers.label.#{str_keys}", default: "activerecord.attributes.#{str_keys}".to_sym)
     end
 
@@ -93,7 +95,7 @@ module ActiveDryForm
 
       if form_params.is_a?(::ActionController::Parameters)
         unless ActiveDryForm.config.allow_action_controller_params
-          message = 'in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config'
+          message = "in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config"
           raise ParamsNotAllowedError, message
         end
 
@@ -105,14 +107,10 @@ module ActiveDryForm
 
     def attributes=(attrs)
       attrs.each do |attr, v|
-        next if !ActiveDryForm.config.strict_param_keys && !respond_to?("#{attr}=")
+        next if !ActiveDryForm.config.strict_param_keys && !respond_to?(:"#{attr}=")
 
-        public_send("#{attr}=", v)
+        public_send(:"#{attr}=", v)
       end
-    end
-
-    def attributes
-      self
     end
 
     def validate
@@ -148,9 +146,9 @@ module ActiveDryForm
       self::FIELDS_INFO[:properties].each do |key, value|
         nested_from_key = {}
         nested_type =
-          if value[:type] == 'object'
+          if value[:type] == "object"
             self::CURRENT_CONTRACT.schema.schema_dsl.types[key].type.primitive
-          elsif value.dig(:items, :type) == 'object'
+          elsif value.dig(:items, :type) == "object"
             nested_from_key[:is_array] = true
             self::CURRENT_CONTRACT.schema.schema_dsl.types[key].type.member.type.primitive
           end
@@ -173,29 +171,33 @@ module ActiveDryForm
           nested_namespace = key
         end
 
-        define_method "#{key}=" do |v|
-          self[key] = _deep_transform_values_in_params!(v)
+        define_method :"#{key}=" do |v|
+          attributes[key] = _deep_transform_values_in_params!(v)
         end
 
-        if nested_namespace && value[:type] == 'object'
+        define_method :"[]=" do |key, v|
+          attributes[key] = _deep_transform_values_in_params!(v)
+        end
+
+        if nested_namespace && value[:type] == "object"
           define_method nested_namespace do
-            self[nested_namespace] = sub_klass.wrap(self[nested_namespace])
-            self[nested_namespace].record = record.try(nested_namespace)
-            self[nested_namespace].parent_form = self
-            self[nested_namespace]
+            attributes[nested_namespace] = sub_klass.wrap(attributes[nested_namespace])
+            attributes[nested_namespace].record = record.try(nested_namespace)
+            attributes[nested_namespace].parent_form = self
+            attributes[nested_namespace]
           end
-        elsif nested_namespace && value[:type] == 'array'
+        elsif nested_namespace && value[:type] == "array"
           define_method nested_namespace do
             nested_records = record.try(nested_namespace) || []
-            if key?(nested_namespace)
-              self[nested_namespace].each_with_index do |nested_params, idx|
-                self[nested_namespace][idx] = sub_klass.wrap(nested_params)
-                self[nested_namespace][idx].record = nested_records[idx]
-                self[nested_namespace][idx].parent_form = self
-                self[nested_namespace][idx]
+            if attributes.key?(nested_namespace)
+              attributes[nested_namespace].each_with_index do |nested_params, idx|
+                attributes[nested_namespace][idx] = sub_klass.wrap(nested_params)
+                attributes[nested_namespace][idx].record = nested_records[idx]
+                attributes[nested_namespace][idx].parent_form = self
+                attributes[nested_namespace][idx]
               end
             else
-              self[nested_namespace] =
+              attributes[nested_namespace] =
                 nested_records.map do |nested_record|
                   nested_form = sub_klass.new
                   nested_form.record = nested_record
@@ -203,11 +205,11 @@ module ActiveDryForm
                   nested_form
                 end
             end
-            self[nested_namespace]
+            attributes[nested_namespace]
           end
         else
           define_method key do
-            (@data || self).fetch(key) { record.try(key) }
+            (@data || attributes).fetch(key) { record.try(key) }
           end
         end
       end
@@ -269,7 +271,7 @@ module ActiveDryForm
       end
 
       def id
-        self[:id] || self['id']
+        self[:id] || self["id"]
       end
 
       def define_methods
