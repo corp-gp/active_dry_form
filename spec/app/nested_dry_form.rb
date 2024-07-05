@@ -29,8 +29,8 @@ class NestedDryForm < ActiveDryForm::Form
   fields(:user) do
     params do
       optional(:name).maybe(:string)
-      optional(:bookmarks).array(BookmarkForm::CURRENT_CONTRACT.schema)
-      optional(:personal_info).value(PersonalInfoForm::CURRENT_CONTRACT.schema)
+      optional(:bookmarks).array(Dry.Types.Constructor(BookmarkForm) { |params| BookmarkForm.new(params: params) })
+      optional(:personal_info).value(Dry.Types.Constructor(PersonalInfoForm) { |params| PersonalInfoForm.new(params: params) })
     end
   end
 
