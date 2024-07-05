@@ -148,8 +148,8 @@ module ActiveDryForm
           attributes[key] = _deep_transform_values_in_params!(v)
         end
 
-        define_method :'[]=' do |key, v|
-          attributes[key] = _deep_transform_values_in_params!(v)
+        define_method :'[]=' do |k, v|
+          attributes[k] = _deep_transform_values_in_params!(v)
         end
 
         sub_klass =
