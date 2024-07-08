@@ -22,6 +22,14 @@ class NestedDryForm < ActiveDryForm::Form
         optional(:id).maybe(:integer)
         optional(:name).maybe(:string)
       end
+
+      rule(:url) do
+        key.failure('url is not https') unless value.start_with?('https')
+      end
+    end
+
+    def omniplatform?
+      url.include?('omniplatform.ru')
     end
 
   end

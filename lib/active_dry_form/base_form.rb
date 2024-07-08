@@ -16,6 +16,42 @@ module ActiveDryForm
       @base_errors = []
     end
 
+    def record=(value)
+      @record =
+        if value.is_a?(Hash)
+          hr = HashRecord.new
+          hr.replace(value)
+          hr.define_methods
+          hr
+        else
+          value
+        end
+    end
+
+    def params=(params)
+      param_key = self.class::NAMESPACE.param_key
+      form_params = params[param_key] || params[param_key.to_sym] || params
+
+      if form_params.is_a?(::ActionController::Parameters)
+        unless ActiveDryForm.config.allow_action_controller_params
+          message = 'in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config'
+          raise ParamsNotAllowedError, message
+        end
+
+        form_params = form_params.to_unsafe_h
+      end
+
+      self.attributes = form_params
+    end
+
+    def attributes=(attrs)
+      attrs.each do |attr, v|
+        next if !ActiveDryForm.config.strict_param_keys && !respond_to?(:"#{attr}=")
+
+        public_send(:"#{attr}=", v)
+      end
+    end
+
     def errors_full_messages
       return if errors.blank?
 
@@ -75,42 +111,6 @@ module ActiveDryForm
     # используется при генерации URL, когда record.persisted?
     def to_param
       id.to_s
-    end
-
-    def record=(value)
-      @record =
-        if value.is_a?(Hash)
-          hr = HashRecord.new
-          hr.replace(value)
-          hr.define_methods
-          hr
-        else
-          value
-        end
-    end
-
-    def params=(params)
-      param_key = self.class::NAMESPACE.param_key
-      form_params = params[param_key] || params[param_key.to_sym] || params
-
-      if form_params.is_a?(::ActionController::Parameters)
-        unless ActiveDryForm.config.allow_action_controller_params
-          message = 'in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config'
-          raise ParamsNotAllowedError, message
-        end
-
-        form_params = form_params.to_unsafe_h
-      end
-
-      self.attributes = form_params
-    end
-
-    def attributes=(attrs)
-      attrs.each do |attr, v|
-        next if !ActiveDryForm.config.strict_param_keys && !respond_to?(:"#{attr}=")
-
-        public_send(:"#{attr}=", v)
-      end
     end
 
     def validate

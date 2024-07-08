@@ -36,14 +36,18 @@ RSpec.describe ActiveDryForm do
 
   context 'when form is invalid' do
     it 'returns validation errors' do
-      bookmarks_attributes = [{ url: '' }]
-      personal_info_attributes = { age: 17 }
-      form = NestedDryForm.new(record: user)
-      form.attributes = { bookmarks: bookmarks_attributes, personal_info: personal_info_attributes }
+      form = NestedDryForm.new(record: user, params: { bookmarks: [{ url: '' }], personal_info: { age: 17 } })
       form.update
       expect(form.valid?).to be(false)
       expect(form.personal_info.errors).to eq(age: ['должно быть больше или равным 18'])
       expect(form.bookmarks[0].errors).to eq(url: ['должно быть заполнено'])
+    end
+
+    it 'returns validation errors nested form' do
+      form = NestedDryForm.new(params: { bookmarks: [{ url: 'http://omniplatform.ru' }] })
+      form.update
+      expect(form.bookmarks[0].omniplatform?).to be(true)
+      expect(form.bookmarks[0].errors).to eq(url: ['url is not https'])
     end
 
     it 'skip validate optional form' do
