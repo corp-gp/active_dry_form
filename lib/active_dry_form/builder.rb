@@ -70,7 +70,7 @@ module ActiveDryForm
 
     def button(value = nil, options = {}, &block)
       options[:class] = [options[:class], 'button'].compact
-      super(value, options, &block)
+      super
     end
 
     def fields_for(association_name, fields_options = {}, &block)

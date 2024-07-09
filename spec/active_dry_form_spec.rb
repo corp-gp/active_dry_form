@@ -163,7 +163,7 @@ RSpec.describe ActiveDryForm do
         form = UserForm.new
         expect {
           form.attributes = ActionController::Parameters.new(name: 'Ivan')
-        }.not_to raise_error(ActiveDryForm::ParamsNotAllowedError)
+        }.not_to raise_error
         expect(form.name).to eq 'Ivan'
       end
     end
@@ -173,7 +173,7 @@ RSpec.describe ActiveDryForm do
     it 'raises error' do
       expect {
         UserForm.new(params: { login: 'unique_login' })
-      }.to raise_error(NoMethodError, "undefined method `login=' for {}:UserForm")
+      }.to raise_error(NoMethodError, /undefined method `login=' for/)
     end
   end
 

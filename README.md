@@ -215,7 +215,7 @@ class NestedDryForm < Form
       required(:price).filled(:integer)
       optional(:description).maybe(:string)
       optional(:upload_attachments).maybe(:array)
-      optional(:bookmarks).array(Dry.Types::Instance(BookmarkForm))
+      optional(:bookmarks).array(Dry.Types.Constructor(BookmarkForm) { |params| BookmarkForm.new(params: params) })
     end
   end
 
@@ -232,7 +232,7 @@ class NestedDryForm < Form
 end
 ```
 
-As you noticed in the above example, we use the construction `Dry.Types::Instance(BookmarkForm)`,
+As you noticed in the above example, we use the construction `Dry.Types.Constructor(BookmarkForm) { |params| BookmarkForm.new(params: params) }`,
 what it is `dry types` you can find out [here](https://dry-rb.org/gems/dry-types)
 
 
