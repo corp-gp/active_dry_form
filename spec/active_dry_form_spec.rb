@@ -29,6 +29,13 @@ RSpec.describe ActiveDryForm do
       expect(form.name).to eq 'Vasya'
     end
 
+    it 'attribute accessors' do
+      form = UserForm.new(params: { name: 'Vasya' })
+      expect(form[:name]).to eq 'Vasya'
+      expect { form[:second_name] = 'Petrov' }.to change(form, :second_name).to('Petrov')
+      expect(form[:second_name]).to eq 'Petrov'
+    end
+
     it 'set hash with unknown key' do
       described_class.config.strict_param_keys = false
 
@@ -44,6 +51,8 @@ RSpec.describe ActiveDryForm do
     it 'read attribute form record' do
       form = UserForm.new(record: user)
       expect(form.name).to eq 'Ivan'
+      expect(form[:name]).to eq 'Ivan'
+      expect { form[:name] = 'Petrov' }.to change(form, :name).to('Petrov')
     end
 
     it 'read attribute form params' do

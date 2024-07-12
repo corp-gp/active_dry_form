@@ -140,16 +140,20 @@ module ActiveDryForm
       form
     end
 
+    def [](key)
+      public_send(key)
+    end
+
+    def []=(key, value)
+      public_send(:"#{key}=", value)
+    end
+
     def self.define_methods
       const_set :NESTED_FORM_KEYS, []
 
       self::FIELDS_INFO[:properties].each do |key, value|
         define_method :"#{key}=" do |v|
           attributes[key] = _deep_transform_values_in_params!(v)
-        end
-
-        define_method :'[]=' do |k, v|
-          attributes[k] = _deep_transform_values_in_params!(v)
         end
 
         sub_klass =

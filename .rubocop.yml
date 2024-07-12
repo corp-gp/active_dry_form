@@ -12,6 +12,9 @@ Style/SingleLineMethods:
 Style/StringLiterals:
   EnforcedStyle: single_quotes
 
+Rails/Delegate:
+  Enabled: false
+
 AllCops:
   NewCops: enable
   TargetRubyVersion: 2.7
