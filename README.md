@@ -253,6 +253,7 @@ what it is `dry types` you can find out [here](https://dry-rb.org/gems/dry-types
 
 
 ### Internationalization
+By default, uses `i18n_key` from `fields(:user)`, but you can set a custom key using `fields(:profile, i18n_key: :user)`.
 
 Using standard rails i18n path:
 

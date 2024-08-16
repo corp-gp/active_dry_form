@@ -219,6 +219,20 @@ RSpec.describe ActiveDryForm do
       end
     end
 
+    it 'set custom i18n key' do
+      form_klass =
+        Class.new(ActiveDryForm::Form) do
+          fields(:profile, i18n_key: :user) { params { required(:name).filled(:string) } }
+        end
+
+      form = form_klass.new
+      form.validate
+
+      I18n.with_locale(:ru) do
+        expect(form.errors_full_messages).to eq(['Имя: отсутствует'])
+      end
+    end
+
     context 'when form validating' do
       it 'returns validation errors' do
         form.validate

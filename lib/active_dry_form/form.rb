@@ -9,10 +9,12 @@ module ActiveDryForm
 
     cattr_accessor :contract_klass, instance_accessor: false, default: ::ActiveDryForm::BaseContract
 
-    def self.fields(namespace, &block)
-      const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, namespace.name.capitalize)
+    def self.fields(namespace, i18n_key: nil, &block)
       const_set :CURRENT_CONTRACT, Class.new(contract_klass, &block).new
       const_set :FIELDS_INFO, self::CURRENT_CONTRACT.schema.json_schema(loose: true)
+
+      const_set :NAMESPACE, ActiveModel::Name.new(nil, nil, namespace.name.capitalize)
+      const_get(:NAMESPACE).i18n_key = i18n_key if i18n_key
 
       define_methods
     end
