@@ -7,9 +7,7 @@ module ActiveDryForm
       options[:builder] = ActiveDryForm::Builder
       options[:html] = html_options(options)
 
-      # Array.wrap because Hash === name, it breaks polymorphic_path
-      # TODO: refactor to options[:url]
-      form_for(Array.wrap(name), options) do |f|
+      form_for(name, options) do |f|
         concat f.show_base_errors
         instance_exec(f, &block)
       end
