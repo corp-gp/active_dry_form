@@ -114,7 +114,7 @@ module ActiveDryForm
     end
 
     def validate
-      @validator   = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: record })
+      @validator   = self.class::CURRENT_CONTRACT.call(attributes, { form: self, record: })
       @data        = @validator.values.data
       @errors      = @validator.errors.to_h
       @base_errors = @validator.errors.filter(:base?).map(&:to_s)

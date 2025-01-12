@@ -66,7 +66,7 @@ module ActiveDryForm
       ActiveDryForm::Input.new(self, nil, field, {}).error_text
     end
 
-    def button(value = nil, options = {}, &block)
+    def button(value = nil, options = {}, &)
       options[:class] = [options[:class], 'button'].compact
       super
     end

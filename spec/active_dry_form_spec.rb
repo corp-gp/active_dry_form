@@ -145,7 +145,7 @@ RSpec.describe ActiveDryForm do
         user.update!(second_name: 'Sidorov')
         params = ActionController::Parameters.new(user: { name: 'Ivan', second_name: '' })
 
-        form = UserForm.new(record: user, params: params)
+        form = UserForm.new(record: user, params:)
 
         expect(form.second_name).to be_nil
       end
