@@ -325,4 +325,18 @@ RSpec.describe ActiveDryForm do
       )
     end
   end
+
+  it 'immutable params' do
+    require_relative 'app/personal_info'
+    require_relative 'app/nested_dry_form'
+
+    params = { name: 'Petr', bookmarks: [{ url: 'https://omniplatform.ru' }], personal_info: { age: '25' } }
+    params_json = JSON.dump(params)
+    form = NestedDryForm.new(record: user, params:)
+    form.name.upcase!
+    form.bookmarks << { url: 'https://ya.ru' }
+    form.update
+    expect(form.valid?).to be(true)
+    expect(JSON.dump(params)).to eq(params_json)
+  end
 end

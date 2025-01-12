@@ -223,9 +223,7 @@ module ActiveDryForm
       when Hash
         object.transform_values! { |value| _deep_transform_values_in_params!(value) }
       when Array
-        object.map! { |e| _deep_transform_values_in_params!(e) }
-        object.compact!
-        object
+        object.filter_map { |e| _deep_transform_values_in_params!(e) }
       else
         object
       end
