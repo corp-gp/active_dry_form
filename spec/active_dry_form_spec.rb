@@ -333,6 +333,7 @@ RSpec.describe ActiveDryForm do
     params = { name: 'Petr', bookmarks: [{ url: 'https://omniplatform.ru' }], personal_info: { age: '25' } }
     params_json = JSON.dump(params)
     form = NestedDryForm.new(record: user, params:)
+    form.attributes[:personal_info][:age] = 26
     form.name.upcase!
     form.bookmarks << { url: 'https://ya.ru' }
     form.update

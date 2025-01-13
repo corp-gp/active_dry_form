@@ -221,7 +221,7 @@ module ActiveDryForm
       when String
         object.strip.presence
       when Hash
-        object.transform_values! { |value| _deep_transform_values_in_params!(value) }
+        object.transform_values { |value| _deep_transform_values_in_params!(value) }
       when Array
         object.filter_map { |e| _deep_transform_values_in_params!(e) }
       else
