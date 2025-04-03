@@ -3,7 +3,7 @@
 require 'bundler'
 Bundler.require :default
 
-Dir["#{File.dirname(__FILE__)}/support/*.rb"].sort.each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/*.rb"].each { |f| require f }
 
 I18n.load_path = Dir.glob("#{__dir__}/app/*.yml")
 I18n.available_locales = %i[ru en]

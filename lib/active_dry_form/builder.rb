@@ -3,8 +3,6 @@
 module ActiveDryForm
   class Builder < ActionView::Helpers::FormBuilder
 
-    include ActionView::Helpers::TagHelper
-    include ActionView::Context
     include Dry::Core::Constants
 
     def input(field, options = {})
@@ -56,21 +54,21 @@ module ActiveDryForm
     def show_base_errors
       return if @object.base_errors.empty?
 
-      tag.div class: ActiveDryForm.config.css_classes.base_error do
-        tag.ul do
+      @template.content_tag(:div, class: ActiveDryForm.config.css_classes.base_error) do
+        @template.content_tag(:ul) do
           # внутри ошибки может быть html
-          @object.base_errors.map { tag.li _1.html_safe }.join.html_safe
+          @object.base_errors.map { @template.content_tag(:li, _1.html_safe) }.join.html_safe
         end
       end
     end
 
     def show_error(field)
-      ActiveDryForm::Input.new(self, __method__, field, {}).error_text
+      ActiveDryForm::Input.new(self, nil, field, {}).error_text
     end
 
-    def button(value = nil, options = {}, &block)
+    def button(value = nil, options = {}, &)
       options[:class] = [options[:class], 'button'].compact
-      super(value, options, &block)
+      super
     end
 
     def fields_for(association_name, fields_options = {}, &block)

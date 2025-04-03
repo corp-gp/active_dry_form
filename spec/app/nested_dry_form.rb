@@ -22,6 +22,14 @@ class NestedDryForm < ActiveDryForm::Form
         optional(:id).maybe(:integer)
         optional(:name).maybe(:string)
       end
+
+      rule(:url) do
+        key.failure('url is not https') unless value.start_with?('https')
+      end
+    end
+
+    def omniplatform?
+      url.include?('omniplatform.ru')
     end
 
   end
@@ -29,8 +37,8 @@ class NestedDryForm < ActiveDryForm::Form
   fields(:user) do
     params do
       optional(:name).maybe(:string)
-      optional(:bookmarks).array(Dry.Types::Instance(BookmarkForm))
-      optional(:personal_info).value(Dry.Types::Instance(PersonalInfoForm))
+      optional(:bookmarks).array(Dry.Types.Constructor(BookmarkForm) { |params| BookmarkForm.new(params:) })
+      optional(:personal_info).value(Dry.Types.Constructor(PersonalInfoForm) { |params| PersonalInfoForm.new(params:) })
     end
   end
 

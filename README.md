@@ -10,9 +10,24 @@ gem 'active_dry_form'
 
 ### Under the hood ActiveDryForm uses [dry-validation](https://dry-rb.org/gems/dry-validation), [dry-monads](https://dry-rb.org/gems/dry-monads)
 
+#### Initialize form
 ```ruby
-form = ProductForm.new(record: Product.find(1), params: { product: { title: 'n', price: 120 } })
+ProductForm.new(params: { title: 'n', price: '120' })
+ProductForm.new(params: { product: { title: 'n', price: '120' } })
+ProductForm.new(record: Product.find(params[:id]), params:)
+```
 
+#### Attribute accessors
+```ruby
+form.title # => 'n'
+form.price # => '120'
+form.price = '119' # => '119'
+form[:price] # => '119'
+form[:price] = '121' # => '121'
+```
+
+#### Methods
+```ruby
 form.validate # => checks field validity
 form.validator # => #<Dry::Validation::Result{:title=>"n", :price=>120, errors={:title=>["minimum length 2"]}...>
 form.valid? # => false
@@ -21,12 +36,13 @@ form.errors # => {:title=>["minimum length 2"]}
 form.base_errors = []
 form.errors_full_messages # => ['Cannot be less than 2 words']
 form.record # => #<Product:0x00007f05c27106c8 id: 1, title: 'name', price: 100, description: 'product'>
+# form.data - is hash, casted to types, after validate
 form.data # => {:title=>"n", :price=>120}
 form.data[:price] # => 120
-form.price # => '120'
-form.title # => 'n'
 form.update # Failure(:invalid_form)
 ```
+
+
 
 Methods `form.update` and `form.create` return [Result monad](https://dry-rb.org/gems/dry-monads/1.3/result/)
 
@@ -215,7 +231,7 @@ class NestedDryForm < Form
       required(:price).filled(:integer)
       optional(:description).maybe(:string)
       optional(:upload_attachments).maybe(:array)
-      optional(:bookmarks).array(Dry.Types::Instance(BookmarkForm))
+      optional(:bookmarks).array(Dry.Types.Constructor(BookmarkForm) { |params| BookmarkForm.new(params: params) })
     end
   end
 
@@ -232,11 +248,12 @@ class NestedDryForm < Form
 end
 ```
 
-As you noticed in the above example, we use the construction `Dry.Types::Instance(BookmarkForm)`,
+As you noticed in the above example, we use the construction `Dry.Types.Constructor(BookmarkForm) { |params| BookmarkForm.new(params: params) }`,
 what it is `dry types` you can find out [here](https://dry-rb.org/gems/dry-types)
 
 
 ### Internationalization
+By default, uses `i18n_key` from `fields(:user)`, but you can set a custom key using `fields(:profile, i18n_key: :user)`.
 
 Using standard rails i18n path:
 

@@ -29,6 +29,13 @@ RSpec.describe ActiveDryForm do
       expect(form.name).to eq 'Vasya'
     end
 
+    it 'attribute accessors' do
+      form = UserForm.new(params: { name: 'Vasya' })
+      expect(form[:name]).to eq 'Vasya'
+      expect { form[:second_name] = 'Petrov' }.to change(form, :second_name).to('Petrov')
+      expect(form[:second_name]).to eq 'Petrov'
+    end
+
     it 'set hash with unknown key' do
       described_class.config.strict_param_keys = false
 
@@ -44,6 +51,8 @@ RSpec.describe ActiveDryForm do
     it 'read attribute form record' do
       form = UserForm.new(record: user)
       expect(form.name).to eq 'Ivan'
+      expect(form[:name]).to eq 'Ivan'
+      expect { form[:name] = 'Petrov' }.to change(form, :name).to('Petrov')
     end
 
     it 'read attribute form params' do
@@ -136,7 +145,7 @@ RSpec.describe ActiveDryForm do
         user.update!(second_name: 'Sidorov')
         params = ActionController::Parameters.new(user: { name: 'Ivan', second_name: '' })
 
-        form = UserForm.new(record: user, params: params)
+        form = UserForm.new(record: user, params:)
 
         expect(form.second_name).to be_nil
       end
@@ -163,7 +172,7 @@ RSpec.describe ActiveDryForm do
         form = UserForm.new
         expect {
           form.attributes = ActionController::Parameters.new(name: 'Ivan')
-        }.not_to raise_error(ActiveDryForm::ParamsNotAllowedError)
+        }.not_to raise_error
         expect(form.name).to eq 'Ivan'
       end
     end
@@ -173,7 +182,7 @@ RSpec.describe ActiveDryForm do
     it 'raises error' do
       expect {
         UserForm.new(params: { login: 'unique_login' })
-      }.to raise_error(NoMethodError, "undefined method `login=' for {}:UserForm")
+      }.to raise_error(NoMethodError, /undefined method `login=' for/)
     end
   end
 
@@ -207,6 +216,20 @@ RSpec.describe ActiveDryForm do
 
       I18n.with_locale(:ru) do
         expect(form.errors_full_messages).to eq(['URL закладок (1): должно быть заполнено', 'Тип избранного (1): должно быть заполнено'])
+      end
+    end
+
+    it 'set custom i18n key' do
+      form_klass =
+        Class.new(ActiveDryForm::Form) do
+          fields(:profile, i18n_key: :user) { params { required(:name).filled(:string) } }
+        end
+
+      form = form_klass.new
+      form.validate
+
+      I18n.with_locale(:ru) do
+        expect(form.errors_full_messages).to eq(['Имя: отсутствует'])
       end
     end
 
@@ -301,5 +324,20 @@ RSpec.describe ActiveDryForm do
         nested_many: [{ ids: ['6'] }],
       )
     end
+  end
+
+  it 'immutable params' do
+    require_relative 'app/personal_info'
+    require_relative 'app/nested_dry_form'
+
+    params = { name: 'Petr', bookmarks: [{ url: 'https://omniplatform.ru' }], personal_info: { age: '25' } }
+    params_json = JSON.dump(params)
+    form = NestedDryForm.new(record: user, params:)
+    form.attributes[:personal_info][:age] = 26
+    form.name.upcase!
+    form.bookmarks << { url: 'https://ya.ru' }
+    form.update
+    expect(form.valid?).to be(true)
+    expect(JSON.dump(params)).to eq(params_json)
   end
 end

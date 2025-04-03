@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = 'Form validation for Rails with Dry-Validation'
   spec.homepage = 'https://github.com/corp-gp/active_dry_form'
   spec.license = 'MIT'
-  spec.required_ruby_version = '>= 2.5.0'
+  spec.required_ruby_version = '>= 3.1.0'
 
   spec.metadata['allowed_push_host'] = 'https://rubygems.org'
 
@@ -43,7 +43,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-configurable'
   spec.add_dependency 'dry-monads'
   spec.add_dependency 'dry-validation'
-  spec.metadata = {
-    'rubygems_mfa_required' => 'true',
-  }
+
+  spec.metadata['rubygems_mfa_required'] = 'true'
 end

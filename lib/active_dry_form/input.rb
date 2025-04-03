@@ -5,6 +5,9 @@ module ActiveDryForm
 
     def initialize(builder, builder_method, field, options)
       @builder = builder
+      @form_object = builder.object
+      @template = builder.instance_variable_get(:@template)
+
       @builder_method = builder_method
       @field = field
 
@@ -25,7 +28,7 @@ module ActiveDryForm
     end
 
     def wrap_tag(input, label_last: nil)
-      @builder.tag.div class: css_classes do
+      @template.content_tag(:div, class: css_classes) do
         [
           label_last ? input : label,
           label_last ? label : input,
@@ -42,23 +45,23 @@ module ActiveDryForm
     def hint_text
       return unless @hint_text
 
-      @builder.tag.small @hint_text, class: ActiveDryForm.config.css_classes.hint
+      @template.content_tag(:small, @hint_text, class: ActiveDryForm.config.css_classes.hint)
     end
 
     def error_text
       return unless error?(@field)
 
       obj_error_text =
-        case e = @builder.object.errors[@field]
+        case e = @form_object.errors[@field]
         when Hash then e.values
         else e
         end
 
-      @builder.tag.div obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.css_classes.error
+      @template.content_tag(:div, obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.css_classes.error)
     end
 
     def error?(field)
-      @builder.object.errors.key?(field)
+      @form_object.errors.key?(field)
     end
 
   end
