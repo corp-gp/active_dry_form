@@ -102,7 +102,7 @@ module ActiveDryForm
 
     # используется при генерации URL, когда record.persisted?
     def to_param
-      id ? record.to_param : id.to_s
+      record.is_a?(Hash) ? '' : record.to_param
     end
 
     def validate

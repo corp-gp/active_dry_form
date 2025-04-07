@@ -27,7 +27,6 @@ RSpec.configure do |config|
       create_table(:product_users, id: false, force: true) do |t|
         t.bigint :product_id
         t.bigint :user_id
-        t.string :state
         t.timestamps
       end
     end

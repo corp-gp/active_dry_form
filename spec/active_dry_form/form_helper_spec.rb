@@ -566,7 +566,7 @@ RSpec.describe ActiveDryForm::FormHelper do
 
     context 'when record with composite primary key' do
       it 'generate form id with composite key' do
-        form = CompositePrimaryKeyForm.new(record: ProductUser.new(product_id: 1, user_id: 1, state: 'pending'))
+        form = CompositePrimaryKeyForm.new(record: ProductUser.new(product_id: 1, user_id: 1))
         html = context.active_dry_form_for(form) { |f| f.input(:state) }
         expect(html).to include_html(<<~HTML)
           <form class="active-dry-form" id="new_product_user_1_1" action="https://example.com" accept-charset="UTF-8" method="post">
