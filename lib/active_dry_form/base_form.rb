@@ -102,6 +102,7 @@ module ActiveDryForm
 
     # используется при генерации URL, когда record.persisted?
     def to_param
+      # подмодель может быть Hash, например сохраняется в json атрибут
       record.is_a?(Hash) ? '' : record.to_param
     end
 
