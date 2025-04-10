@@ -24,6 +24,11 @@ RSpec.configure do |config|
         t.integer :age
         t.date :date_of_birth
       end
+      create_table(:product_users, id: false, force: true) do |t|
+        t.bigint :product_id
+        t.bigint :user_id
+        t.timestamps
+      end
     end
   end
 

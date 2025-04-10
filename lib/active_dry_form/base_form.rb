@@ -98,19 +98,12 @@ module ActiveDryForm
       self
     end
 
-    def to_key
-      key = id
-      [key] if key
-    end
-
-    # hidden field for nested association
-    def id
-      record&.id
-    end
+    delegate :to_key, :id, to: :record, allow_nil: true
 
     # используется при генерации URL, когда record.persisted?
     def to_param
-      id.to_s
+      # подмодель может быть Hash, например сохраняется в json атрибут
+      record.is_a?(Hash) ? '' : record.to_param
     end
 
     def validate

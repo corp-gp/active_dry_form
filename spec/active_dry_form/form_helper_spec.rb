@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../app/user'
+require_relative '../app/product_user'
 require_relative '../app/personal_info'
 require_relative '../app/bookmark'
 require_relative '../app/user_form'
@@ -8,6 +9,7 @@ require_relative '../app/field_variety_form'
 require_relative '../app/base_validation_form'
 require_relative '../app/nested_has_one_form'
 require_relative '../app/nested_has_many_form'
+require_relative '../app/composite_primary_key_form'
 require_relative '../app/input_custom'
 
 
@@ -559,6 +561,16 @@ RSpec.describe ActiveDryForm::FormHelper do
         HTML
 
         expect(html).to include_html(expected_html)
+      end
+    end
+
+    context 'when record with composite primary key' do
+      it 'generate form id with composite key' do
+        form = CompositePrimaryKeyForm.new(record: ProductUser.new(product_id: 1, user_id: 1))
+        html = context.active_dry_form_for(form) {} # rubocop:disable Lint/EmptyBlock
+        expect(html).to include_html(<<~HTML)
+          <form class="active-dry-form" id="new_product_user_1_1" action="https://example.com" accept-charset="UTF-8" method="post">
+        HTML
       end
     end
   end
