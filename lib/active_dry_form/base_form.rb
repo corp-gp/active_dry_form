@@ -48,6 +48,10 @@ module ActiveDryForm
       attrs.each do |attr, v|
         next if !ActiveDryForm.config.strict_param_keys && !respond_to?(:"#{attr}=")
 
+        # Params for nested forms comes as a hash from frontend
+        # { '0' => { url: 'https://omniplatform.ru' }, '1' => { url: 'https://google.com' } }
+        v = v.values if v.is_a?(Hash) && self.class::NESTED_FORM_ARRAYS.include?(attr.to_sym)
+
         public_send(:"#{attr}=", v)
       end
     end
@@ -143,6 +147,7 @@ module ActiveDryForm
 
     def self.define_methods
       const_set :NESTED_FORM_KEYS, []
+      const_set :NESTED_FORM_ARRAYS, Set.new
 
       self::FIELDS_INFO[:properties].each do |key, value|
         define_method :"#{key}=" do |v|
@@ -168,6 +173,9 @@ module ActiveDryForm
             namespace: key,
             is_array:  value[:type] == 'array',
           }
+          if value[:type] == 'array'
+            self::NESTED_FORM_ARRAYS << key.to_sym
+          end
           nested_key = key
         end
 

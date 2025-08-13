@@ -81,13 +81,9 @@ module ActiveDryForm
       if association.is_a?(BaseForm)
         fields_for_nested_model("#{@object_name}[#{association_name}]", association, fields_options, block)
       elsif association.respond_to?(:to_ary)
-        field_name_regexp = Regexp.new(Regexp.escape("#{@object_name}[#{association_name}][") << '\d+\]') # хак для замены хеша на массив
-        output = ActiveSupport::SafeBuffer.new
-        Array.wrap(association).each do |child|
-          output << fields_for_nested_model("#{@object_name}[#{association_name}][]", child, fields_options, block)
-            .gsub(field_name_regexp, "#{@object_name}[#{association_name}][]").html_safe
+        Array.wrap(association).each_with_index.reduce(ActiveSupport::SafeBuffer.new) do |output, (child, i)|
+          output << fields_for_nested_model("#{@object_name}[#{association_name}][#{i}]", child, fields_options, block)
         end
-        output
       end
     end
 
