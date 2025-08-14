@@ -488,8 +488,8 @@ RSpec.describe ActiveDryForm::FormHelper do
 
         expected_html = <<-HTML
           <div class="form-input input_url form-input-required">
-            <label for="user_bookmarks__url">Bookmarks URL</label>
-            <input required="required" type="url" value="https://example.com" name="user[bookmarks][][url]" id="user_bookmarks__url" />
+            <label for="user_bookmarks_0_url">Bookmarks URL</label>
+            <input required="required" type="url" value="https://example.com" name="user[bookmarks][0][url]" id="user_bookmarks_0_url" />
           </div>
         HTML
 
@@ -509,8 +509,8 @@ RSpec.describe ActiveDryForm::FormHelper do
 
         expected_html = <<-HTML
           <div class="form-input input_url form-input-required form-input-error">
-            <label for="user_bookmarks__url">Bookmarks URL</label>
-            <input required="required" type="url" name="user[bookmarks][][url]" id="user_bookmarks__url" />
+            <label for="user_bookmarks_0_url">Bookmarks URL</label>
+            <input required="required" type="url" name="user[bookmarks][0][url]" id="user_bookmarks_0_url" />
             <div class="form-error">должно быть заполнено</div>
           </div>
         HTML
@@ -533,8 +533,8 @@ RSpec.describe ActiveDryForm::FormHelper do
 
         expected_html = <<-HTML
           <div class="form-input input_text form-input-required">
-            <label for="user_favorites__kind">Favorites Kind</label>
-            <input required="required" type="text" value="book" name="user[favorites][][kind]" id="user_favorites__kind" />
+            <label for="user_favorites_0_kind">Favorites Kind</label>
+            <input required="required" type="text" value="book" name="user[favorites][0][kind]" id="user_favorites_0_kind" />
           </div>
         HTML
 
@@ -554,8 +554,8 @@ RSpec.describe ActiveDryForm::FormHelper do
 
         expected_html = <<-HTML
           <div class="form-input input_text form-input-required form-input-error">
-            <label for="user_favorites__kind">Favorites Kind</label>
-            <input required="required" type="text" name="user[favorites][][kind]" id="user_favorites__kind" />
+            <label for="user_favorites_0_kind">Favorites Kind</label>
+            <input required="required" type="text" name="user[favorites][0][kind]" id="user_favorites_0_kind" />
             <div class="form-error">должно быть заполнено</div>
           </div>
         HTML

@@ -27,7 +27,7 @@ GIT
 PATH
   remote: .
   specs:
-    active_dry_form (1.2.1)
+    active_dry_form (1.4.0)
       actionpack
       activerecord
       dry-configurable
@@ -198,6 +198,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-21
+  arm64-darwin-24
   x86_64-linux
 
 DEPENDENCIES

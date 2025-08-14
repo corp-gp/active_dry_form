@@ -10,10 +10,10 @@ RSpec.describe ActiveDryForm do
   context 'when nested record is an association' do
     context 'when form is invalid' do
       it 'returns validation errors' do
-        bookmarks_attributes = [
-          { url: '', name: 'First' },
-          { url: '', name: 'Second' },
-        ]
+        bookmarks_attributes = {
+          0 => { url: '', name: 'First' },
+          1 => { url: '', name: 'Second' },
+        }
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         form.update
         expect(form.valid?).to be(false)
@@ -21,7 +21,7 @@ RSpec.describe ActiveDryForm do
       end
 
       it 'returns typecasted value after validation' do
-        form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: [{ added_on: Date.current.to_s }] } })
+        form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: { 0 => { added_on: Date.current.to_s } } } })
         form.update
         expect(form.bookmarks[0].added_on).to eq Date.current
       end
@@ -42,9 +42,9 @@ RSpec.describe ActiveDryForm do
 
       it 'updates nested model' do
         bookmark = user.bookmarks.create!(url: '/first')
-        bookmarks_attributes = [
-          { url: '/second', id: bookmark.id },
-        ]
+        bookmarks_attributes = {
+          0 => { url: '/second', id: bookmark.id },
+        }
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         expect { form.update }.not_to change(Bookmark, :count)
         expect(bookmark.url).to eq('/second')
@@ -55,10 +55,10 @@ RSpec.describe ActiveDryForm do
   context 'when nested record is a hash' do
     context 'when form is invalid' do
       it 'returns validation errors' do
-        favorites_attributes = [
-          { kind: '', name: 'First' },
-          { kind: '', name: 'Second' },
-        ]
+        favorites_attributes = {
+          0 => { kind: '', name: 'First' },
+          1 => { kind: '', name: 'Second' },
+        }
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
         expect(form.valid?).to be(false)
@@ -69,10 +69,10 @@ RSpec.describe ActiveDryForm do
     context 'when form is valid' do
       it 'creates nested model' do
         favorites_attributes =
-          [
-            { kind: 'book', name: '1984' },
-            { kind: 'movie', name: 'Planet of Monkeys' },
-          ]
+          {
+            0 => { kind: 'book', name: '1984' },
+            1 => { kind: 'movie', name: 'Planet of Monkeys' },
+          }
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
         expect(form.valid?).to be(true)

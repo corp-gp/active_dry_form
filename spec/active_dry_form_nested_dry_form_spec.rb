@@ -9,20 +9,22 @@ RSpec.describe ActiveDryForm do
   let(:user) { User.create!(name: 'Ivan') }
 
   context 'when form is valid' do
-    it 'creates nested model' do
-      bookmarks_attributes = [{ url: 'https://omniplatform.ru' }]
+    it 'creates nested models' do
+      bookmarks_attributes = { 0 => { url: 'https://omniplatform.ru' }, 1 => { url: 'https://google.com' } }
       personal_info_attributes = { age: 25 }
       form = NestedDryForm.new(record: user)
-      form.attributes = { bookmarks: bookmarks_attributes, personal_info: personal_info_attributes }
+      form.attributes = { 'bookmarks' => bookmarks_attributes, 'personal_info' => personal_info_attributes }
       form.update
       expect(form.valid?).to be(true)
+      expect(user.bookmarks.length).to eq(2)
       expect(user.bookmarks[0].url).to eq('https://omniplatform.ru')
+      expect(user.bookmarks[1].url).to eq('https://google.com')
       expect(user.personal_info.age).to eq 25
     end
 
     it 'updates nested model' do
       bookmark = user.bookmarks.create!(url: 'https://google.com')
-      bookmarks_attributes = [{ url: 'https://omniplatform.ru', id: bookmark.id }]
+      bookmarks_attributes = { 0 => { url: 'https://omniplatform.ru', id: bookmark.id } }
       user.build_personal_info(age: 18)
       user.personal_info.save!
       personal_info_attributes = { age: 25, id: user.personal_info.id }
@@ -36,7 +38,7 @@ RSpec.describe ActiveDryForm do
 
   context 'when form is invalid' do
     it 'returns validation errors' do
-      form = NestedDryForm.new(record: user, params: { bookmarks: [{ url: '' }], personal_info: { age: 17 } })
+      form = NestedDryForm.new(record: user, params: { bookmarks: { 0 => { url: '' } }, personal_info: { age: 17 } })
       form.update
       expect(form.valid?).to be(false)
       expect(form.personal_info.errors).to eq(age: ['должно быть больше или равным 18'])
@@ -44,7 +46,7 @@ RSpec.describe ActiveDryForm do
     end
 
     it 'returns validation errors nested form' do
-      form = NestedDryForm.new(params: { bookmarks: [{ url: 'http://omniplatform.ru' }] })
+      form = NestedDryForm.new(params: { bookmarks: { 0 => { url: 'http://omniplatform.ru' } } })
       form.update
       expect(form.bookmarks[0].omniplatform?).to be(true)
       expect(form.bookmarks[0].errors).to eq(url: ['url is not https'])
