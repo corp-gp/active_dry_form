@@ -48,8 +48,8 @@ module ActiveDryForm
       attrs.each do |attr, v|
         next if !ActiveDryForm.config.strict_param_keys && !respond_to?(:"#{attr}=")
 
-        # Params for nested forms comes as a hash from frontend
-        # { '0' => { url: 'https://omniplatform.ru' }, '1' => { url: 'https://google.com' } }
+        # Params for nested forms comes as a hash from frontend, convert them to array
+        # { '0' => { url: 'https://omniplatform.ru' }, '1' => { url: 'https://google.com' } } => [{ ... }, { ... }]
         v = v.values if v.is_a?(Hash) && self.class::NESTED_FORM_ARRAYS.include?(attr.to_sym)
 
         public_send(:"#{attr}=", v)
