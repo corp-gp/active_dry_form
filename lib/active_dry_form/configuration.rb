@@ -15,6 +15,7 @@ module ActiveDryForm
     setting :input,          default: 'form-input'
     setting :input_required, default: 'form-input-required'
     setting :input_error,    default: 'form-input-error'
+    setting :button,         default: 'button'
     setting :form,           default: ['active-dry-form']
   end
 

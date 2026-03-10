@@ -67,7 +67,7 @@ module ActiveDryForm
     end
 
     def button(value = nil, options = {}, &)
-      options[:class] = [options[:class], 'button'].compact
+      options[:class] = [ActiveDryForm.config.css_classes.button, options[:class]].compact
       super
     end
 

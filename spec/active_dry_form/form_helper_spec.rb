@@ -375,6 +375,25 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
     end
 
+    describe 'button' do
+      it 'renders button with default css class' do
+        form = UserForm.new(record: user)
+        html = context.active_dry_form_for(form) { |f| f.button 'Save', class: 'button-rounded' }
+
+        expect(html).to include_html('<button name="button" type="submit" class="button button-rounded">Save</button>')
+      end
+
+      context 'when css class set in config' do
+        it 'renders button with given css class' do
+          form = UserForm.new(record: user)
+          ActiveDryForm.config.css_classes.button = 'btn btn-primary'
+          html = context.active_dry_form_for(form) { |f| f.button 'Save' }
+
+          expect(html).to include_html('<button name="button" type="submit" class="btn btn-primary">Save</button>')
+        end
+      end
+    end
+
     context 'when html input options set in config' do
       it 'renders text input with additional attributes' do
         form = UserForm.new(record: user)
