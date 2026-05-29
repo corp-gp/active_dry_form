@@ -66,6 +66,11 @@ module ActiveDryForm
       ActiveDryForm::Input.new(self, nil, field, {}).error_text
     end
 
+    def submit(value = nil, options = {}, &)
+      options[:class] = [ActiveDryForm.config.css_classes.submit, options[:class]].compact
+      super
+    end
+
     def button(value = nil, options = {}, &)
       options[:class] = [ActiveDryForm.config.css_classes.button, options[:class]].compact
       super
