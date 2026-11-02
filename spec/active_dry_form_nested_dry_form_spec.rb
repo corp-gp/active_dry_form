@@ -1,64 +1,64 @@
 # frozen_string_literal: true
 
-require_relative 'app/user'
-require_relative 'app/bookmark'
-require_relative 'app/personal_info'
-require_relative 'app/nested_dry_form'
+require_relative "app/user"
+require_relative "app/bookmark"
+require_relative "app/personal_info"
+require_relative "app/nested_dry_form"
 
 RSpec.describe ActiveDryForm do
-  let(:user) { User.create!(name: 'Ivan') }
+  let(:user) { User.create!(name: "Ivan") }
 
-  context 'when form is valid' do
-    it 'creates nested models' do
-      bookmarks_attributes = { 0 => { url: 'https://omniplatform.ru' }, 1 => { url: 'https://google.com' } }
+  context "when form is valid" do
+    it "creates nested models" do
+      bookmarks_attributes = { 0 => { url: "https://omniplatform.ru" }, 1 => { url: "https://google.com" } }
       personal_info_attributes = { age: 25 }
       form = NestedDryForm.new(record: user)
-      form.attributes = { 'bookmarks' => bookmarks_attributes, 'personal_info' => personal_info_attributes }
+      form.attributes = { "bookmarks" => bookmarks_attributes, "personal_info" => personal_info_attributes }
       form.update
       expect(form.valid?).to be(true)
       expect(user.bookmarks.length).to eq(2)
-      expect(user.bookmarks[0].url).to eq('https://omniplatform.ru')
-      expect(user.bookmarks[1].url).to eq('https://google.com')
+      expect(user.bookmarks[0].url).to eq("https://omniplatform.ru")
+      expect(user.bookmarks[1].url).to eq("https://google.com")
       expect(user.personal_info.age).to eq 25
     end
 
-    it 'updates nested model' do
-      bookmark = user.bookmarks.create!(url: 'https://google.com')
-      bookmarks_attributes = { 0 => { url: 'https://omniplatform.ru', id: bookmark.id } }
+    it "updates nested model" do
+      bookmark = user.bookmarks.create!(url: "https://google.com")
+      bookmarks_attributes = { 0 => { url: "https://omniplatform.ru", id: bookmark.id } }
       user.build_personal_info(age: 18)
       user.personal_info.save!
       personal_info_attributes = { age: 25, id: user.personal_info.id }
       form = NestedDryForm.new(record: user)
       form.attributes = { bookmarks: bookmarks_attributes, personal_info: personal_info_attributes }
       expect { form.update }.not_to change { [Bookmark.count, PersonalInfo.count] }
-      expect(user.bookmarks[0].url).to eq('https://omniplatform.ru')
+      expect(user.bookmarks[0].url).to eq("https://omniplatform.ru")
       expect(user.personal_info.age).to eq 25
     end
   end
 
-  context 'when form is invalid' do
-    it 'returns validation errors' do
-      form = NestedDryForm.new(record: user, params: { bookmarks: { 0 => { url: '' } }, personal_info: { age: 17 } })
+  context "when form is invalid" do
+    it "returns validation errors" do
+      form = NestedDryForm.new(record: user, params: { bookmarks: { 0 => { url: "" } }, personal_info: { age: 17 } })
       form.update
       expect(form.valid?).to be(false)
-      expect(form.personal_info.errors).to eq(age: ['должно быть больше или равным 18'])
-      expect(form.bookmarks[0].errors).to eq(url: ['должно быть заполнено'])
+      expect(form.personal_info.errors).to eq(age: ["должно быть больше или равным 18"])
+      expect(form.bookmarks[0].errors).to eq(url: ["должно быть заполнено"])
     end
 
-    it 'returns validation errors nested form' do
-      form = NestedDryForm.new(params: { bookmarks: { 0 => { url: 'http://omniplatform.ru' } } })
+    it "returns validation errors nested form" do
+      form = NestedDryForm.new(params: { bookmarks: { 0 => { url: "http://omniplatform.ru" } } })
       form.update
       expect(form.bookmarks[0].omniplatform?).to be(true)
-      expect(form.bookmarks[0].errors).to eq(url: ['url is not https'])
+      expect(form.bookmarks[0].errors).to eq(url: ["url is not https"])
     end
 
-    it 'skip validate optional form' do
+    it "skip validate optional form" do
       form = NestedDryForm.new(record: user)
       form.update
       expect(form.valid?).to be(true)
     end
 
-    it 'returns typecasted value after validation' do
+    it "returns typecasted value after validation" do
       form = NestedDryForm.new(record: user, params: { user: { personal_info: { date_of_birth: Date.current.to_s } } })
       form.update
       expect(form.personal_info.date_of_birth).to eq Date.current

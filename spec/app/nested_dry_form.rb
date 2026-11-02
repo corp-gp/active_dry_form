@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 class NestedDryForm < ActiveDryForm::Form
-
   class PersonalInfoForm < ActiveDryForm::Form
-
     fields(:personal_info) do
       params do
         required(:age).filled(:integer, gteq?: 18)
@@ -11,11 +9,9 @@ class NestedDryForm < ActiveDryForm::Form
         optional(:date_of_birth).maybe(:date, gt?: Date.new(1950), lt?: Date.new(2010))
       end
     end
-
   end
 
   class BookmarkForm < ActiveDryForm::Form
-
     fields(:bookmark) do
       params do
         required(:url).filled(:string)
@@ -24,14 +20,13 @@ class NestedDryForm < ActiveDryForm::Form
       end
 
       rule(:url) do
-        key.failure('url is not https') unless value.start_with?('https')
+        key.failure("url is not https") unless value.start_with?("https")
       end
     end
 
     def omniplatform?
-      url.include?('omniplatform.ru')
+      url.include?("omniplatform.ru")
     end
-
   end
 
   fields(:user) do
@@ -53,5 +48,4 @@ class NestedDryForm < ActiveDryForm::Form
 
     Success(record)
   end
-
 end

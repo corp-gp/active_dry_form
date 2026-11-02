@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class LooseJsonSchemaForm < ActiveDryForm::Form
-
   BOOKMARK =
     Dry::Schema.Params do
       required(:url).filled(:string, format?: /^https?:/)
@@ -13,8 +12,7 @@ class LooseJsonSchemaForm < ActiveDryForm::Form
         required(:email).value(:string, format?: /@/)
       end
       required(:bookmarks).array(BOOKMARK)
-      required(:settings).value(Dry::Types['strict.hash'].constructor(&:compact))
+      required(:settings).value(Dry::Types["strict.hash"].constructor(&:compact))
     end
   end
-
 end

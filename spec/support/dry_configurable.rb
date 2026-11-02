@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'dry/configurable/test_interface'
+require "dry/configurable/test_interface"
 
 module ActiveDryForm
-
   enable_test_interface
-
 end
 
 

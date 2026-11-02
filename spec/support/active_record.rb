@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require 'active_record'
+require "active_record"
 
 RSpec.configure do |config|
   config.before(:all) do
-    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+    ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
     ActiveRecord::Migration.verbose = false
 
     ActiveRecord::Schema.define do

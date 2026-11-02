@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module ActiveDryForm
-
   extend Dry::Configurable
   include Dry::Core::Constants
 
@@ -9,15 +8,15 @@ module ActiveDryForm
   setting :allow_action_controller_params, default: true
 
   setting :css_classes do
-    setting :error,          default: 'form-error'
-    setting :base_error,     default: 'form-base-error'
-    setting :hint,           default: 'form-hint'
-    setting :input,          default: 'form-input'
-    setting :input_required, default: 'form-input-required'
-    setting :input_error,    default: 'form-input-error'
-    setting :submit,         default: 'submit'
-    setting :button,         default: 'button'
-    setting :form,           default: ['active-dry-form']
+    setting :error,          default: "form-error"
+    setting :base_error,     default: "form-base-error"
+    setting :hint,           default: "form-hint"
+    setting :input,          default: "form-input"
+    setting :input_required, default: "form-input-required"
+    setting :input_error,    default: "form-input-error"
+    setting :submit,         default: "submit"
+    setting :button,         default: "button"
+    setting :form,           default: ["active-dry-form"]
   end
 
   setting :html_options do
@@ -30,7 +29,7 @@ module ActiveDryForm
     setting :input_integer,          default: EMPTY_HASH
 
     # If without 'any', the fractional part of the number is lost when step is an integer (1 by default)
-    setting :input_number,           default: { step: 'any' }
+    setting :input_number,           default: { step: "any" }
     setting :input_password,         default: EMPTY_HASH
     setting :input_select,           default: EMPTY_HASH
     setting :input_telephone,        default: EMPTY_HASH
@@ -40,7 +39,6 @@ module ActiveDryForm
 
     setting :form,                   default: EMPTY_HASH
   end
-
 end
 
 ActiveSupport::Reloader.to_prepare do

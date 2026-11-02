@@ -2,7 +2,6 @@
 
 module ActiveDryForm
   class BaseForm
-
     attr_accessor :data, :parent_form, :errors
     attr_reader :record, :validator, :attributes, :base_errors
 
@@ -38,7 +37,7 @@ module ActiveDryForm
 
       if form_params.is_a?(::ActionController::Parameters)
         unless ActiveDryForm.config.allow_action_controller_params
-          message = 'in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config'
+          message = "in `params` use `request.parameters` instead of `params` or set `allow_action_controller_params` to `true` in config"
           raise ParamsNotAllowedError, message
         end
 
@@ -82,7 +81,7 @@ module ActiveDryForm
     end
 
     def t(*keys)
-      str_keys = keys.join('.')
+      str_keys = keys.join(".")
       I18n.t("helpers.label.#{str_keys}", default: :"activerecord.attributes.#{str_keys}")
     end
 
@@ -111,7 +110,7 @@ module ActiveDryForm
     # используется при генерации URL, когда record.persisted?
     def to_param
       # подмодель может быть Hash, например сохраняется в json атрибут
-      record.is_a?(Hash) ? '' : record.to_param
+      record.is_a?(Hash) ? "" : record.to_param
     end
 
     def validate
@@ -175,15 +174,15 @@ module ActiveDryForm
           self::NESTED_FORM_KEYS << {
             type:      sub_klass.const_defined?(:CURRENT_CONTRACT) ? :instance : :hash,
             namespace: key,
-            is_array:  value[:type] == 'array',
+            is_array:  value[:type] == "array",
           }
-          if value[:type] == 'array'
+          if value[:type] == "array"
             self::NESTED_FORM_ARRAYS << key.to_sym
           end
           nested_key = key
         end
 
-        if nested_key && value[:type] == 'array'
+        if nested_key && value[:type] == "array"
           define_method nested_key do
             nested_records = record.try(nested_key) || []
             if attributes.key?(nested_key)
@@ -267,13 +266,12 @@ module ActiveDryForm
     end
 
     class HashRecord < Hash
-
       def persisted?
         false
       end
 
       def id
-        self[:id] || self['id']
+        self[:id] || self["id"]
       end
 
       def define_methods
@@ -281,8 +279,6 @@ module ActiveDryForm
           define_singleton_method(key) { fetch(key) }
         end
       end
-
     end
-
   end
 end

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class FilterBlankForm < ActiveDryForm::Form
-
   NESTED_FIELDS =
     Dry::Schema.Params do
       required(:ids).array(:integer)
@@ -16,5 +15,4 @@ class FilterBlankForm < ActiveDryForm::Form
       required(:nested_many).array(NESTED_FIELDS)
     end
   end
-
 end

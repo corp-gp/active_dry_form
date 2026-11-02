@@ -2,10 +2,11 @@
 
 module ActiveDryForm
   class Form < BaseForm
-
     include Dry::Monads[:result]
+
     Dry::Schema.load_extensions(:json_schema)
-    ResultError = Class.new(StandardError)
+    class ResultError < StandardError
+    end
 
     cattr_accessor :contract_klass, instance_accessor: false, default: ::ActiveDryForm::BaseContract
 
@@ -48,6 +49,5 @@ module ActiveDryForm
         end
       RUBY
     end
-
   end
 end

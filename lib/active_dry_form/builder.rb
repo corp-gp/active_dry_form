@@ -2,17 +2,16 @@
 
 module ActiveDryForm
   class Builder < ActionView::Helpers::FormBuilder
-
     include Dry::Core::Constants
 
     def input(field, options = {})
       case input_type(field)
-      when 'date'              then input_date(field, options)
-      when 'time'              then input_datetime(field, options)
-      when 'date-time'         then raise DateTimeNotAllowedError, 'use :time instead of :date_time (does not apply timezone) in params block'
-      when 'integer'           then input_integer(field, options)
-      when 'number'            then input_number(field, options)
-      when 'boolean'           then input_check_box(field, options)
+      when "date"              then input_date(field, options)
+      when "time"              then input_datetime(field, options)
+      when "date-time"         then raise DateTimeNotAllowedError, "use :time instead of :date_time (does not apply timezone) in params block"
+      when "integer"           then input_integer(field, options)
+      when "number"            then input_number(field, options)
+      when "boolean"           then input_check_box(field, options)
       else
         case field.to_s
         when /password/ then input_password(field, options)
@@ -108,6 +107,5 @@ module ActiveDryForm
         .new(self, method_type, field, options)
         .wrap_tag(yield(options), **wrapper_options)
     end
-
   end
 end

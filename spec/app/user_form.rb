@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class UserForm < ActiveDryForm::Form
-
   fields(:user) do
     params do
       required(:name).filled(:string)
@@ -18,5 +17,4 @@ class UserForm < ActiveDryForm::Form
     record.update!(data)
     Success(record)
   end
-
 end

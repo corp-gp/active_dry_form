@@ -1,47 +1,45 @@
 # frozen_string_literal: true
 
-require_relative '../app/user'
-require_relative '../app/product_user'
-require_relative '../app/personal_info'
-require_relative '../app/bookmark'
-require_relative '../app/user_form'
-require_relative '../app/field_variety_form'
-require_relative '../app/base_validation_form'
-require_relative '../app/nested_has_one_form'
-require_relative '../app/nested_has_many_form'
-require_relative '../app/composite_primary_key_form'
-require_relative '../app/input_custom'
+require_relative "../app/user"
+require_relative "../app/product_user"
+require_relative "../app/personal_info"
+require_relative "../app/bookmark"
+require_relative "../app/user_form"
+require_relative "../app/field_variety_form"
+require_relative "../app/base_validation_form"
+require_relative "../app/nested_has_one_form"
+require_relative "../app/nested_has_many_form"
+require_relative "../app/composite_primary_key_form"
+require_relative "../app/input_custom"
 
 
 module StubUrlHelpers
-
   def url_for(*)
-    'https://example.com'
+    "https://example.com"
   end
 
   def polymorphic_path(*)
-    '/'
+    "/"
   end
-
 end
 
 RSpec.describe ActiveDryForm::FormHelper do
   let(:controller) { ActionView::TestCase::TestController.new }
   let(:context) { controller.view_context.extend(StubUrlHelpers) }
 
-  let(:user) { User.create!(name: 'Ivan') }
+  let(:user) { User.create!(name: "Ivan") }
 
-  describe '#active_dry_form_for' do
-    it 'renders html options' do
+  describe "#active_dry_form_for" do
+    it "renders html options" do
       form = UserForm.new
-      html = context.active_dry_form_for(form, html: { class: 'my-form', 'data-test': true }) { |f| f.input :name }
+      html = context.active_dry_form_for(form, html: { class: "my-form", "data-test": true }) { |f| f.input :name }
 
       expect(html).to include_html('<form class="active-dry-form my-form" id="new_user" data-test="true"')
     end
   end
 
-  context 'when plain form rendered' do
-    it 'renders input with additional attributes' do
+  context "when plain form rendered" do
+    it "renders input with additional attributes" do
       form = UserForm.new(record: user)
       html = context.active_dry_form_for(form) { |f| f.input :name, readonly: true }
 
@@ -55,8 +53,8 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include_html(expected_html)
     end
 
-    it 'renders input with validation errors' do
-      form = UserForm.new(record: user, params: { user: { name: '' } })
+    it "renders input with validation errors" do
+      form = UserForm.new(record: user, params: { user: { name: "" } })
       form.update
 
       html = context.active_dry_form_for(form) { |f| f.input :name }
@@ -72,8 +70,8 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include_html(expected_html)
     end
 
-    it 'renders base validation errors' do
-      form = BaseValidationForm.new(record: user, params: { user: { name: 'Maria' } })
+    it "renders base validation errors" do
+      form = BaseValidationForm.new(record: user, params: { user: { name: "Maria" } })
       form.update
 
       html = context.active_dry_form_for(form) { |f| concat f.input :name }
@@ -91,8 +89,8 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include_html(expected_html)
     end
 
-    it 'renders base errors when base_errors contains a symbol' do
-      form = BaseValidationForm.new(record: user, params: { user: { name: 'Maria' } })
+    it "renders base errors when base_errors contains a symbol" do
+      form = BaseValidationForm.new(record: user, params: { user: { name: "Maria" } })
       form.base_errors = [:some_base_error]
 
       html = context.active_dry_form_for(form) { |f| concat f.input :name }
@@ -110,10 +108,10 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include_html(expected_html)
     end
 
-    describe 'various input types' do
+    describe "various input types" do
       let(:form) { FieldVarietyForm.new }
 
-      it 'renders text input' do
+      it "renders text input" do
         html = context.active_dry_form_for(form) { |f| f.input :name }
         expected_html = <<-HTML
           <div class="form-input input_text">
@@ -125,7 +123,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders hidden input' do
+      it "renders hidden input" do
         html = context.active_dry_form_for(form) { |f| f.input_hidden :id }
         expected_html = <<-HTML
         <input autocomplete="off" type="hidden" name="user[id]" id="user_id" />
@@ -134,7 +132,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders integer input' do
+      it "renders integer input" do
         html = context.active_dry_form_for(form) { |f| f.input :age }
         expected_html = <<-HTML
         <div class="form-input input_integer">
@@ -146,7 +144,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders float input default step' do
+      it "renders float input default step" do
         html = context.active_dry_form_for(form) { |f| f.input :balance }
         expected_html = <<-HTML
         <div class="form-input input_number">
@@ -158,7 +156,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders float input with step option' do
+      it "renders float input with step option" do
         html = context.active_dry_form_for(form) { |f| f.input :balance, { step: 0.1 } }
         expected_html = <<-HTML
         <div class="form-input input_number">
@@ -170,7 +168,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders boolean checkbox' do
+      it "renders boolean checkbox" do
         html = context.active_dry_form_for(form) { |f| f.input :is_retail }
         expected_html = <<-HTML
         <div class="form-input input_check_box">
@@ -183,7 +181,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders password input' do
+      it "renders password input" do
         html = context.active_dry_form_for(form) { |f| f.input :password }
         expected_html = <<-HTML
         <div class="form-input input_password">
@@ -195,7 +193,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders email input' do
+      it "renders email input" do
         html = context.active_dry_form_for(form) { |f| f.input :email }
         expected_html = <<-HTML
         <div class="form-input input_email">
@@ -207,7 +205,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders tel input' do
+      it "renders tel input" do
         html = context.active_dry_form_for(form) { |f| f.input :phone }
         expected_html = <<-HTML
         <div class="form-input input_telephone">
@@ -219,7 +217,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders url input' do
+      it "renders url input" do
         html = context.active_dry_form_for(form) { |f| f.input :url }
         expected_html = <<-HTML
         <div class="form-input input_url">
@@ -231,7 +229,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders textarea' do
+      it "renders textarea" do
         html = context.active_dry_form_for(form) { |f| f.input_text_area :about }
         expected_html = <<-HTML
         <div class="form-input input_text_area">
@@ -243,7 +241,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders date input' do
+      it "renders date input" do
         html = context.active_dry_form_for(form) { |f| f.input :birthday }
         expected_html = <<-HTML
         <div class="form-input input_date">
@@ -255,8 +253,8 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders date input with typecasted value after validation' do
-        form.birthday = '2000-01-02'
+      it "renders date input with typecasted value after validation" do
+        form.birthday = "2000-01-02"
         form.validate
         html = context.active_dry_form_for(form) { |f| f.input :birthday }
 
@@ -270,7 +268,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders time input' do
+      it "renders time input" do
         html = context.active_dry_form_for(form) { |f| f.input :call_on }
         expected_html = <<-HTML
         <div class="form-input input_datetime">
@@ -282,8 +280,8 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders time input with typecasted value after validation' do
-        form.call_on = '2000-01-02 12:00:00'
+      it "renders time input with typecasted value after validation" do
+        form.call_on = "2000-01-02 12:00:00"
         form.validate
         html = context.active_dry_form_for(form) { |f| f.input :call_on }
 
@@ -297,16 +295,16 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'raise exception for date_time input' do
+      it "raise exception for date_time input" do
         expect {
           context.active_dry_form_for(form) { |f| f.input :run_at }
         }.to raise_error(ActiveDryForm::DateTimeNotAllowedError, /use :time instead of :date_time/)
       end
 
-      it 'renders select' do
+      it "renders select" do
         html =
           context.active_dry_form_for(form) do |f|
-            f.input_select :name, %w[Ivan Boris], { include_blank: 'A boy has no name' }
+            f.input_select :name, %w[Ivan Boris], { include_blank: "A boy has no name" }
           end
 
         expected_html = <<-HTML
@@ -323,7 +321,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders select with selected value' do
+      it "renders select with selected value" do
         form.id = 1
 
         html =
@@ -344,7 +342,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders custom input' do
+      it "renders custom input" do
         html = context.active_dry_form_for(form) { |f| f.input_custom :name }
 
         expected_html = <<-HTML
@@ -358,8 +356,8 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
     end
 
-    context 'when required explicitly enabled for optional field' do
-      it 'renders select with required attribute and wrapper class' do
+    context "when required explicitly enabled for optional field" do
+      it "renders select with required attribute and wrapper class" do
         form = UserForm.new(record: user)
         html =
           context.active_dry_form_for(form) do |f|
@@ -378,7 +376,7 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders text input with required attribute and wrapper class' do
+      it "renders text input with required attribute and wrapper class" do
         form = UserForm.new(record: user)
         html = context.active_dry_form_for(form) { |f| f.input :second_name, required: true }
 
@@ -394,30 +392,30 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
     end
 
-    describe 'button' do
-      it 'renders button with default css class' do
+    describe "button" do
+      it "renders button with default css class" do
         form = UserForm.new(record: user)
-        html = context.active_dry_form_for(form) { |f| f.button 'Save', class: 'button-rounded' }
+        html = context.active_dry_form_for(form) { |f| f.button "Save", class: "button-rounded" }
 
         expect(html).to include_html('<button name="button" type="submit" class="button button-rounded">Save</button>')
       end
 
-      context 'when css class set in config' do
-        it 'renders button with given css class' do
+      context "when css class set in config" do
+        it "renders button with given css class" do
           form = UserForm.new(record: user)
-          ActiveDryForm.config.css_classes.button = 'btn btn-primary'
-          html = context.active_dry_form_for(form) { |f| f.button 'Save' }
+          ActiveDryForm.config.css_classes.button = "btn btn-primary"
+          html = context.active_dry_form_for(form) { |f| f.button "Save" }
 
           expect(html).to include_html('<button name="button" type="submit" class="btn btn-primary">Save</button>')
         end
       end
     end
 
-    context 'when html input options set in config' do
-      it 'renders text input with additional attributes' do
+    context "when html input options set in config" do
+      it "renders text input with additional attributes" do
         form = UserForm.new(record: user)
-        ActiveDryForm.config.html_options.input_text = { class: 'class-1', 'data-test': true }
-        html = context.active_dry_form_for(form) { |f| f.input :name, class: 'class-2' }
+        ActiveDryForm.config.html_options.input_text = { class: "class-1", "data-test": true }
+        html = context.active_dry_form_for(form) { |f| f.input :name, class: "class-2" }
 
         expected_html = <<-HTML
           <div class="form-input input_text form-input-required">
@@ -431,11 +429,11 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
   end
 
-  context 'when single nested form rendered' do
-    context 'when nested record is an association' do
+  context "when single nested form rendered" do
+    context "when nested record is an association" do
       before(:each) { user.build_personal_info(age: 18) }
 
-      it 'renders input' do
+      it "renders input" do
         form = NestedHasOneForm.new(record: user)
         html =
           context.active_dry_form_for(form) do |f|
@@ -452,8 +450,8 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders input with errors' do
-        form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: '' } } })
+      it "renders input with errors" do
+        form = NestedHasOneForm.new(record: user, params: { user: { personal_info: { age: "" } } })
         form.update
         html =
           context.active_dry_form_for(form) do |f|
@@ -472,10 +470,10 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
     end
 
-    context 'when nested record is a hash' do
+    context "when nested record is a hash" do
       before(:each) { user.dimensions = { height: 180 } }
 
-      it 'renders input' do
+      it "renders input" do
         form = NestedHasOneForm.new(record: user)
         html =
           context.active_dry_form_for(form) do |f|
@@ -492,8 +490,8 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders input with errors' do
-        form = NestedHasOneForm.new(record: user, params: { user: { dimensions: { height: '' } } })
+      it "renders input with errors" do
+        form = NestedHasOneForm.new(record: user, params: { user: { dimensions: { height: "" } } })
         form.update
         html =
           context.active_dry_form_for(form) do |f|
@@ -513,11 +511,11 @@ RSpec.describe ActiveDryForm::FormHelper do
     end
   end
 
-  context 'when multiple nested form rendered' do
-    context 'when nested record is an association' do
-      before(:each) { user.bookmarks.build(url: 'https://example.com') }
+  context "when multiple nested form rendered" do
+    context "when nested record is an association" do
+      before(:each) { user.bookmarks.build(url: "https://example.com") }
 
-      it 'renders input' do
+      it "renders input" do
         form = NestedHasManyForm.new(record: user)
         html =
           context.active_dry_form_for(form) do |f|
@@ -534,9 +532,9 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders input with errors' do
+      it "renders input with errors" do
         bookmarks_attributes = [
-          { url: '' },
+          { url: "" },
         ]
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         form.update
@@ -557,10 +555,10 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
     end
 
-    context 'when nested record is a hash' do
-      before(:each) { user.favorites = [{ kind: 'book' }] }
+    context "when nested record is a hash" do
+      before(:each) { user.favorites = [{ kind: "book" }] }
 
-      it 'renders input' do
+      it "renders input" do
         form = NestedHasManyForm.new(record: user)
         html =
           context.active_dry_form_for(form) do |f|
@@ -579,9 +577,9 @@ RSpec.describe ActiveDryForm::FormHelper do
         expect(html).to include_html(expected_html)
       end
 
-      it 'renders input with errors' do
+      it "renders input with errors" do
         favorites_attributes = [
-          { kind: '' },
+          { kind: "" },
         ]
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
@@ -602,8 +600,8 @@ RSpec.describe ActiveDryForm::FormHelper do
       end
     end
 
-    context 'when record with composite primary key' do
-      it 'generate form id with composite key' do
+    context "when record with composite primary key" do
+      it "generate form id with composite key" do
         form = CompositePrimaryKeyForm.new(record: ProductUser.new(product_id: 1, user_id: 1))
         html = context.active_dry_form_for(form) {} # rubocop:disable Lint/EmptyBlock
         expect(html).to include_html(<<~HTML)

@@ -10,7 +10,8 @@ Style/SingleLineMethods:
     - lib/active_dry_form/builder.rb
 
 Style/StringLiterals:
-  EnforcedStyle: single_quotes
+  Enabled: true
+  EnforcedStyle: double_quotes
 
 Rails/Delegate:
   Enabled: false

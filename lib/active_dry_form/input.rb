@@ -2,7 +2,6 @@
 
 module ActiveDryForm
   class Input
-
     def initialize(builder, builder_method, field, options)
       @builder = builder
       @form_object = builder.object
@@ -57,12 +56,11 @@ module ActiveDryForm
         else e
         end
 
-      @template.content_tag(:div, obj_error_text.join('<br />').html_safe, class: ActiveDryForm.config.css_classes.error)
+      @template.content_tag(:div, obj_error_text.join("<br />").html_safe, class: ActiveDryForm.config.css_classes.error)
     end
 
     def error?(field)
       @form_object.errors.key?(field)
     end
-
   end
 end

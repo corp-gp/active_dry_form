@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class NestedHasOneForm < ActiveDryForm::Form
-
   fields(:user) do
     params do
       optional(:name).maybe(:string)
@@ -24,5 +23,4 @@ class NestedHasOneForm < ActiveDryForm::Form
     record.save!
     Success(record)
   end
-
 end

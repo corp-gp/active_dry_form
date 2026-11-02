@@ -1,38 +1,38 @@
 # frozen_string_literal: true
 
-require_relative 'app/user'
-require_relative 'app/bookmark'
-require_relative 'app/nested_has_many_form'
+require_relative "app/user"
+require_relative "app/bookmark"
+require_relative "app/nested_has_many_form"
 
 RSpec.describe ActiveDryForm do
-  let(:user) { User.create!(name: 'Ivan') }
+  let(:user) { User.create!(name: "Ivan") }
 
-  context 'when nested record is an association' do
-    context 'when form is invalid' do
-      it 'returns validation errors' do
+  context "when nested record is an association" do
+    context "when form is invalid" do
+      it "returns validation errors" do
         bookmarks_attributes = {
-          0 => { url: '', name: 'First' },
-          1 => { url: '', name: 'Second' },
+          0 => { url: "", name: "First" },
+          1 => { url: "", name: "Second" },
         }
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         form.update
         expect(form.valid?).to be(false)
-        expect(form.errors).to eq({ bookmarks: { 0 => { url: ['должно быть заполнено'] }, 1 => { url: ['должно быть заполнено'] } } })
+        expect(form.errors).to eq({ bookmarks: { 0 => { url: ["должно быть заполнено"] }, 1 => { url: ["должно быть заполнено"] } } })
       end
 
-      it 'returns typecasted value after validation' do
+      it "returns typecasted value after validation" do
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: { 0 => { added_on: Date.current.to_s } } } })
         form.update
         expect(form.bookmarks[0].added_on).to eq Date.current
       end
     end
 
-    context 'when form is valid' do
-      it 'creates nested model' do
+    context "when form is valid" do
+      it "creates nested model" do
         bookmarks_attributes =
           [
-            { url: '/first' },
-            { url: '/second' },
+            { url: "/first" },
+            { url: "/second" },
           ]
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         form.update
@@ -40,53 +40,53 @@ RSpec.describe ActiveDryForm do
         expect(user.bookmarks.pluck(:url)).to eq(%w[/first /second])
       end
 
-      it 'updates nested model' do
-        bookmark = user.bookmarks.create!(url: '/first')
+      it "updates nested model" do
+        bookmark = user.bookmarks.create!(url: "/first")
         bookmarks_attributes = {
-          0 => { url: '/second', id: bookmark.id },
+          0 => { url: "/second", id: bookmark.id },
         }
         form = NestedHasManyForm.new(record: user, params: { user: { bookmarks: bookmarks_attributes } })
         expect { form.update }.not_to change(Bookmark, :count)
-        expect(bookmark.url).to eq('/second')
+        expect(bookmark.url).to eq("/second")
       end
     end
   end
 
-  context 'when nested record is a hash' do
-    context 'when form is invalid' do
-      it 'returns validation errors' do
+  context "when nested record is a hash" do
+    context "when form is invalid" do
+      it "returns validation errors" do
         favorites_attributes = {
-          0 => { kind: '', name: 'First' },
-          1 => { kind: '', name: 'Second' },
+          0 => { kind: "", name: "First" },
+          1 => { kind: "", name: "Second" },
         }
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
         expect(form.valid?).to be(false)
-        expect(form.errors).to eq({ favorites: { 0 => { kind: ['должно быть заполнено'] }, 1 => { kind: ['должно быть заполнено'] } } })
+        expect(form.errors).to eq({ favorites: { 0 => { kind: ["должно быть заполнено"] }, 1 => { kind: ["должно быть заполнено"] } } })
       end
     end
 
-    context 'when form is valid' do
-      it 'creates nested model' do
+    context "when form is valid" do
+      it "creates nested model" do
         favorites_attributes =
           {
-            0 => { kind: 'book', name: '1984' },
-            1 => { kind: 'movie', name: 'Planet of Monkeys' },
+            0 => { kind: "book", name: "1984" },
+            1 => { kind: "movie", name: "Planet of Monkeys" },
           }
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
         expect(form.valid?).to be(true)
-        expect(user.favorites).to eq [{ 'kind' => 'book', 'name' => '1984' }, { 'kind' => 'movie', 'name' => 'Planet of Monkeys' }]
+        expect(user.favorites).to eq [{ "kind" => "book", "name" => "1984" }, { "kind" => "movie", "name" => "Planet of Monkeys" }]
       end
 
-      it 'updates nested model' do
-        user.update!(favorites: [{ kind: 'book', name: '1984' }])
+      it "updates nested model" do
+        user.update!(favorites: [{ kind: "book", name: "1984" }])
         favorites_attributes = [
-          { kind: 'movie', name: 'Planet of Monkeys' },
+          { kind: "movie", name: "Planet of Monkeys" },
         ]
         form = NestedHasManyForm.new(record: user, params: { user: { favorites: favorites_attributes } })
         form.update
-        expect(user.favorites).to eq [{ 'kind' => 'movie', 'name' => 'Planet of Monkeys' }]
+        expect(user.favorites).to eq [{ "kind" => "movie", "name" => "Planet of Monkeys" }]
       end
     end
   end

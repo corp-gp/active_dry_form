@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class FieldVarietyForm < ActiveDryForm::Form
-
   fields(:user) do
     params do
       optional(:id).maybe(:integer)
@@ -19,5 +18,4 @@ class FieldVarietyForm < ActiveDryForm::Form
       optional(:run_at).maybe(:date_time)
     end
   end
-
 end

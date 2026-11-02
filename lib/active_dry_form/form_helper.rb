@@ -2,7 +2,6 @@
 
 module ActiveDryForm
   module FormHelper
-
     def active_dry_form_for(name, options = {}, &block)
       options[:builder] = ActiveDryForm::Builder
       options[:html] = html_options(options)
@@ -20,7 +19,6 @@ module ActiveDryForm
         Array.wrap(newval) + Array.wrap(oldval)
       end
     end
-
   end
 end
 

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class NestedHasManyForm < ActiveDryForm::Form
-
   BOOKMARK =
     Dry::Schema.Params do
       required(:url).filled(:string)
@@ -30,5 +29,4 @@ class NestedHasManyForm < ActiveDryForm::Form
     record.save!
     Success(record)
   end
-
 end

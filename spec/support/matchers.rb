@@ -2,7 +2,7 @@
 
 RSpec::Matchers.define :include_html do |expected|
   def clean_html(html)
-    html.gsub(/>\s+</, '><').strip
+    html.gsub(/>\s+</, "><").strip
   end
 
   match do |actual|
