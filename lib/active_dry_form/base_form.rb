@@ -3,8 +3,12 @@
 module ActiveDryForm
   class BaseForm
 
-    attr_accessor :data, :parent_form, :errors, :base_errors
-    attr_reader :record, :validator, :attributes
+    attr_accessor :data, :parent_form, :errors
+    attr_reader :record, :validator, :attributes, :base_errors
+
+    def base_errors=(errors)
+      @base_errors = Array.wrap(errors).map(&:to_s)
+    end
 
     def initialize(record: nil, params: nil)
       @attributes = {}

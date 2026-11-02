@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe ActiveDryForm::Form do
-  include Dry::Monads[:result]
+  include Dry::Monads[:result, :maybe]
 
   let(:form_class) do
     Class.new(described_class) do
@@ -57,6 +57,10 @@ RSpec.describe ActiveDryForm::Form do
     allow(service).to receive(:value!).and_raise(RuntimeError, 'Service crashed')
 
     expect { form.submit(result: service) }.to raise_error(RuntimeError, 'Service crashed')
+  end
+
+  it 'propagates UnwrapError when unwrapping a non-Result monad' do
+    expect { form.submit(result: None()) }.to raise_error(Dry::Monads::UnwrapError)
   end
 
   it 'handles an explicitly returned Failure in the same way' do

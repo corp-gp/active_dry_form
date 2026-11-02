@@ -31,12 +31,14 @@ module ActiveDryForm
             begin
               __#{method}(...)
             rescue ::Dry::Monads::UnwrapError => e
+              raise unless e.receiver.is_a?(::Dry::Monads::Result::Failure)
+
               e.receiver
             end
 
           case result
           when ::Dry::Monads::Result::Failure
-            @base_errors = Array.wrap(result.failure).map(&:to_s)
+            self.base_errors = result.failure
           when ::Dry::Monads::Result::Success
           else
             raise ResultError, 'method `#{method}` must return `monad`'

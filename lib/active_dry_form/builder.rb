@@ -57,7 +57,7 @@ module ActiveDryForm
       @template.content_tag(:div, class: ActiveDryForm.config.css_classes.base_error) do
         @template.content_tag(:ul) do
           # внутри ошибки может быть html
-          @object.base_errors.map { @template.content_tag(:li, _1.to_s.html_safe) }.join.html_safe
+          @object.base_errors.map { @template.content_tag(:li, _1.html_safe) }.join.html_safe
         end
       end
     end
