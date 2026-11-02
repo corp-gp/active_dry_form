@@ -27,11 +27,16 @@ module ActiveDryForm
           validate
           return Failure(:invalid_form) unless valid?
 
-          result = __#{method}(...)
+          result =
+            begin
+              __#{method}(...)
+            rescue ::Dry::Monads::UnwrapError => e
+              e.receiver
+            end
 
           case result
           when ::Dry::Monads::Result::Failure
-            @base_errors = Array.wrap(result.failure)
+            @base_errors = Array.wrap(result.failure).map(&:to_s)
           when ::Dry::Monads::Result::Success
           else
             raise ResultError, 'method `#{method}` must return `monad`'

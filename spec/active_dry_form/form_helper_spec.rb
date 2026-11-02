@@ -91,6 +91,25 @@ RSpec.describe ActiveDryForm::FormHelper do
       expect(html).to include_html(expected_html)
     end
 
+    it 'renders base errors when base_errors contains a symbol' do
+      form = BaseValidationForm.new(record: user, params: { user: { name: 'Maria' } })
+      form.base_errors = [:some_base_error]
+
+      html = context.active_dry_form_for(form) { |f| concat f.input :name }
+
+      expected_html = <<-HTML
+        <div class="form-base-error">
+          <ul><li>some_base_error</li></ul>
+        </div>
+        <div class="form-input input_text">
+          <label for="user_name">User Name</label>
+          <input type="text" value="Maria" name="user[name]" id="user_name" />
+        </div>
+      HTML
+
+      expect(html).to include_html(expected_html)
+    end
+
     describe 'various input types' do
       let(:form) { FieldVarietyForm.new }
 

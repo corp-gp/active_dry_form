@@ -44,7 +44,7 @@ form.update # Failure(:invalid_form)
 
 
 
-Methods `form.update` and `form.create` return [Result monad](https://dry-rb.org/gems/dry-monads/1.3/result/)
+Methods `form.update` and `form.create` return [Result monad](https://dry-rb.org/gems/dry-monads/1.3/result/). Actions must explicitly return `Success` or `Failure`; any other return value raises `ActiveDryForm::Form::ResultError`.
 
 ```ruby
 # app/forms/product_form.rb
@@ -70,6 +70,46 @@ class ProductForm < Form
     Success(record)
   end
 
+end
+```
+
+Actions also handle `Dry::Monads::UnwrapError` raised by `value!` (including service methods such as `call!`). The action returns the original `Failure` and sets `form.base_errors` to `Array.wrap(result.failure).map(&:to_s)`. Other exceptions propagate normally.
+
+```ruby
+class CaptchaValidateService
+  extend Dry::Monads[:result]
+
+  def self.call(token:, ip:, hostname:)
+    return Failure('Captcha token is missing') if token.blank?
+
+    verified = CaptchaClient.verify(token:, ip:, hostname:)
+    return Failure('Invalid captcha') unless verified
+
+    Success()
+  end
+
+  def self.call!(**params)
+    # value! unwraps Success and returns its value.
+    # For Failure, it raises Dry::Monads::UnwrapError with the original monad in receiver.
+    call(**params).value!
+  end
+end
+
+class UserForm < Form
+  fields :user do
+    params do
+      required(:email).filled(:string)
+    end
+  end
+
+  action def create(token:, ip:, hostname:)
+    # If verification returns Failure('Invalid captcha'), call! raises Dry::Monads::UnwrapError.
+    # The action wrapper catches it, returns the original Failure, and sets
+    # form.base_errors to ['Invalid captcha'], skipping user creation.
+    # Other exceptions, including those from CaptchaClient.verify, propagate to the caller.
+    CaptchaValidateService.call!(token:, ip:, hostname:)
+    Success(User.create!(data))
+  end
 end
 ```
 
